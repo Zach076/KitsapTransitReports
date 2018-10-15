@@ -2,18 +2,18 @@
 \subsection{Background}
 % What is the business context for the project?
 % What does the reader need to know about the customer's industry?
-Kitsap Transit is responsible for providing public transportation to Kitsap County, Washington. They facilitate convenient transportation through their bus routes, ferries, ACCESS and VanLink programs, and more. The business
+Kitsap Transit is responsible for providing public transportation to Kitsap County, Washington. They facilitate convenient transportation through their bus routes, ferries, ACCESS and VanLink programs, and more. On their buses, they have installed infrared cameras which detect when and where a passenger boards and departs. They also collect data on ride usage by various pass owners.
 \raggedbottom
 \subsection{Business Opportunity}
 % What is the customer's need?
 % How does this need fit in the industrial context?
-On a regular basis, Kitsap Transit needs to create reports on the usage of their bus stops and routes. They rely on.
+Every quarter, Kitsap Transit needs a way to view conclusions and create reports from the data they have collected in a simple manner. to create reports on the ridership for their numerous bus stops and routes. Currently, the software used to create such reports are exceedingly complicated. Kitsap Transit needs an easier way of viewing relevant statistics about the data they've collected in a user-friendly manner.
 \raggedbottom
 \subsection{Business Objectives and Success Criteria}
 % Why does the customer need this product?
 % How will the customer know that the product is a success?
 %   You must be very specific here.  What experiment can we do to verify success?
-n
+Kitsap Transit needs this product because other software solutions, such as Crystal Reports, are tedious and complicated to use. They also need to 
 \raggedbottom
 \subsection{Customer and Market Needs}
 % Connect the objectives and success criteria back to the customer's business.
@@ -23,5 +23,20 @@ b
 \subsection{Business Risks}
 % This is a hazard assessment.  What could go wrong?  How bad would it be if it
 % did?  How likely is it?  What steps can we take to protect against the hazard? 
-m
+\begin{enumerate}
+	\item The format of the data Kitsap Transit collects on ridership changes. \\
+	If there exists data that isn't formatted in the way our software expects, then it will tell the user where it encountered an error and direct the user to documentation about what the program expects.
+	 
+	\item The operating system that Kitsap Transit uses changes/becomes incompatible with our software. \\
+	We will write our software in Java, which is the most popular programming language and known for compatibility with the most operating systems (e.g. ). If a new operating system comes out and Java can run on it, our program will always be able to run (Java is backwards compatible with programs compiled for older versions of Java).
+
+	\item Invalid data is given to our software to process (such as an invalid drop off location or time). \\
+	Invalid data will be ignored for the primary calculation, but a warning will be displayed to the user about the data which is incompatible (x out of n data points valid).
+
+
+	\item The bus routes stored in our software become out of date (changes to )\\
+	Our progr
+	\item 
+
+\end{enumerate}
 \raggedbottom
