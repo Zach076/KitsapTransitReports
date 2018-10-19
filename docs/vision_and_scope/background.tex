@@ -1,22 +1,45 @@
 \section{Business Requirements}
+
 \subsection{Background}
 % What is the business context for the project?
 % What does the reader need to know about the customer's industry?
+Kitsap Transit is responsible for providing public transportation services to Kitsap County, Washington. They facilitate convenient transportation through their bus routes, ferries, ACCESS and VanLink programs, and more. In order to track the success of their programs, Kitsap Transit collects data regarding transit usage. For example, they have installed infrared cameras in their buses which detect when and where passengers board and depart. In addition, they track ride activity for electronic pass owners.
 
 \subsection{Business Opportunity}
 % What is the customer's need?
 % How does this need fit in the industrial context?
+Every month, Kitsap Transit needs a way to view summaries and create reports from their collected data in a simple manner. Currently, the process to create such reports is exceedingly complicated. Existing software solutions do not simplify this process. Kitsap Transit needs an easier way of viewing relevant statistics about the data they've collected in a user-friendly manner.
 
 \subsection{Business Objectives and Success Criteria}
 % Why does the customer need this product?
 % How will the customer know that the product is a success?
 %   You must be very specific here.  What experiment can we do to verify success?
+Our product, KT Reports, is needed in order to save time creating reports, which, in turn, increases productivity. Our software must produce reports which match the specifications required by Kitsap Transit, as well as improve the user experience. The success of our program can be verified by running our software on past data and producing reports which can be compared to existing reports. If reports created by our software match existing reports, while taking less time to create, then our product is a success.
 
 \subsection{Customer and Market Needs}
 % Connect the objectives and success criteria back to the customer's business.
 % That is, why does the industry require the customer to have this solution? 
+Kitsap Transit needs the ability to create reports easily so they can analyze the success of their routes, as well as their services as a whole. Producing this information will help Kitsap Transit make decisions which can improve to their current business model.\\ \\
+This product will also help give transparency to the public regarding the operation of Kitsap Transit. Kitsap Transit is funded primarily through local sales tax and passenger fares. Reports can give the public insight on how well their transit system is operating.\\ \\
+Other transit systems in Washington State also need to use reporting software to summarize ridership statistics. Our software may be able to be used by other transit systems in the industry. 
 
 \subsection{Business Risks}
 % This is a hazard assessment.  What could go wrong?  How bad would it be if it
 % did?  How likely is it?  What steps can we take to protect against the hazard? 
+\begin{enumerate}
+	\item There is a change in the format of the data Kitsap Transit collects. \\ \\
+	Although unlikely to occur, this would result in a critical error. If there exists data that isn't formatted in the way our software expects, then it will display a message to the user where it has encountered an error and direct the user to documentation about what format the program expects.
+	
+	\item Route information stored for use in our software become out of date (e.g. a route is added or removed). \\ \\
+	Route changes are seldom, but would result in a critical error if not handled properly. Our software will allow a user to add or remove a route information from the software to match current conditions.
+	 
+	\item The operating system that Kitsap Transit uses is, or becomes, incompatible with our software. \\ \\
+	This is a moderate issue that is unlikely to occur, since we plan to write our software in Java---one of the most widely used programming languages for businesses. Known for its compatibility with all of the major operating systems (Windows, Mac, Linux), a Java program will be able to run on almost anything and will be compatible with all future versions of Java. 
 
+	\item Invalid ridership data is given to our software to process. \\ \\
+	This may be a seldom occurrence, dependent on the software Kitsap Transit uses to collect their data. It is a moderate issue. Invalid data will be ignored, but a warning will be displayed to the user about the incompatible data. A summary of the data points processed successfully versus unsuccessfully will be shown at the end of report compilation.
+	
+	\item The user tries to create a report without supplying any data. \\ \\
+	This could be an occasional mistake, which would result in a negligible error. The user would simply be prompted to add the necessary data forms to the program so that a report can be created successfully.
+
+\end{enumerate}
