@@ -9,7 +9,7 @@
 \subsection{File Import}
 \subsubsection{Description}
 % Describe the feature and how it fits into the overall product.  
-We will be able to parse data from .xls, .xlsx, and .csv files to use in reports.
+We will be able to parse data from .xls, .xlsx, and .csv files and input the data to an SQLite database to use in reports.
 
 \subsubsection{Priority}
 % Describe the relative importance of this feature. 
@@ -18,13 +18,13 @@ If we cannot parse data from the file types Kitsap Transit is providing, we will
 \subsubsection{Stimulus and Response}
 % What event will trigger the feature and how should the system respond.  This
 % is probably an excerpt of a use case. 
-Reading a file will occur when the user selects to import data. The system will then parse the data and store it temporarily in the program.
+Reading a file will occur when the user selects to import data. The system will then parse the data and store it in an SQLite database.
 
 \subsubsection{Functional Requirements}
 % Formally state the functional requirement.
 % The low-level format command shall require authorization by two
 % system-administrators before beginning the low-level format operation.
-Importing data from a file shall require the user to select a file from which to import data. 
+The program shall parse data from files input by the user and determine the nature of the database well as store the data in an SQLite database.
 
 
 \subsection{Create Reports}
@@ -103,4 +103,30 @@ The system shall display route information to the user.\\
 The system shall allow the user to update route information from the graphic user interface or select an option to add a new route. \\
 
 Clicking an option to save changes shall update the system's database to reflect the user's changes.
+
+
+\subsection{Graphical User Interface}
+
+\subsubsection{Description}
+% Describe the feature and how it fits into the overall product.  
+
+The graphical user interface is what the user will see after they input their data. It will be in addtion to our main feature of creating reports of the inputed data.
+
+\subsubsection{Priority}
+% Describe the relative importance of this feature. 
+
+This feature is important to have since it is what the customer requested, but is not the most important feature fo the software becasue there are other ways to display the collected data.
+
+\subsubsection{Stimulus and Response}
+% What event will trigger the feature and how should the system respond.  This
+% is probably an excerpt of a use case. 
+
+The user will provide their data as input to our software. Then our software will create reports with that data. After that the graphical user interface will be created, so that the user can access and interact with the data. 
+
+\subsubsection{Functional Requirements}
+% Formally state the functional requirement.
+% The low-level format command shall require authorization by two
+% system-administrators before beginning the low-level format operation.
+
+The software shall require data to be provided as input in order for the graphical user interface to be generated.
 
