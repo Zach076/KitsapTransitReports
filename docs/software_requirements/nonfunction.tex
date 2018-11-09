@@ -12,10 +12,16 @@
 % to wait for the different features to execute?   For example, the software
 % shall authenticate authorized users withing 250ms.   
 
+The software shall import data within 250ms.
+The software shall create reports and graphs within 250ms.
+The software shall generate the graphical user interface within 300ms.
+
 \subsection{Safety Requirements}
 % It is unlikely that your project will have any safety requirements.  This
 % section would be used for software that controls a physical device that could
 % potentially cause harm.  
+
+The software shall not corrupt the data that is provided as input to it.
 
 \subsection{Security Requirements}
 % Do not overlook this section.  Consider the three primary topics of computer
@@ -28,4 +34,4 @@
 % must be written in a meaningful and testable way.  For example, All functions
 % within the software shall have a cyclomatic number less than 10.  
 
-
+All functions within the software shall have a cyclomatic number less than 6.
