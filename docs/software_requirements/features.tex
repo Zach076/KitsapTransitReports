@@ -6,19 +6,22 @@
 
 
 % [For Each Feature]
-\subsection{Name of feature}
+\subsection{File Import}
 \subsubsection{Description}
 % Describe the feature and how it fits into the overall product.  
+We will be able to parse data from .xls, .xlsx, and .csv files to use in reports.
 
 \subsubsection{Priority}
 % Describe the relative importance of this feature. 
+If we cannot parse data from the file types Kitsap Transit is providing, we will need to reassess how we will import data. This feature is important but isn't likely to be an issue.
 
 \subsubsection{Stimulus and Response}
 % What event will trigger the feature and how should the system respond.  This
 % is probably an excerpt of a use case. 
+Reading a file will occur when the user selects to import data. The system will then parse the data and store it temporarily in the program.
 
 \subsubsection{Functional Requirements}
 % Formally state the functional requirement.
 % The low-level format command shall require authorization by two
 % system-administrators before beginning the low-level format operation.
-
+Importing data from a file shall require the user to select a file from which to import data. 
