@@ -6,14 +6,14 @@
 
 
 % [For Each Feature]
-\subsection{File Import}
+\subsection{Import Files}
 \subsubsection{Description}
 % Describe the feature and how it fits into the overall product.  
-We will be able to parse data from .xls, .xlsx, and .csv files and input the data to a SQLite database to use in reports.
+We will be able to parse data from user-selected .xls, .xlsx, and .csv files and input the data to a SQLite database that will be used to create reports.
 
 \subsubsection{Priority}
 % Describe the relative importance of this feature. 
-If we cannot parse data from the file types Kitsap Transit is providing, we will need to reassess how we will import data. This feature is important but isn't likely to be an issue.
+If we cannot parse data from the file types Kitsap Transit is providing, we will need to reassess how we will import data. Importing data from files is an important feature that is a relatively high priority.
 
 \subsubsection{Stimulus and Response}
 % What event will trigger the feature and how should the system respond.  This
@@ -27,7 +27,7 @@ Reading a file will occur when the user selects to import data. The system will 
 The program shall parse data from files input by the user and determine the nature of the data as well as store the data in a SQLite database.
 
 
-\subsection{Create Reports}
+\subsection{Report Creation}
 \subsubsection{Description}
 % Describe the feature and how it fits into the overall product.  
 Using the data imported into the program, the user will be able to select report customization options and create reports in an Excel file format. The main function of this product is to compile transit usage data into reports.
@@ -62,7 +62,7 @@ The user will be able to view visualizations of the data that they have imported
 
 \subsubsection{Priority}
 % Describe the relative importance of this feature. 
-This feature is relatively low priority compared to importing data and report creation. The software can function without this feature, but would be an improved user experience with data visualization included.
+This feature is low priority compared to all other features. This feature is not a requirement for Kitsap Transit. The software can function without this feature, but would be an improved user experience with data visualization included.
 
 \subsubsection{Stimulus and Response}
 % What event will trigger the feature and how should the system respond.  This
@@ -104,28 +104,29 @@ The system shall allow the user to update route information from the graphic use
 
 Clicking an option to save changes shall update the system's database to reflect the user's changes.
 
+
 \subsection{Graphical User Interface}
 
 \subsubsection{Description}
 % Describe the feature and how it fits into the overall product.  
-
-The graphical user interface is what the user will see after they input their data. It will be in addtion to our main feature of creating reports of the inputed data.
+The graphical user interface is what the user will both see and interact with when using this software. It will aid users in the process of creating custom reports from the data they import into the program.
 
 \subsubsection{Priority}
 % Describe the relative importance of this feature. 
-
-This feature is important to have since it is what the customer requested, but is not the most important feature fo the software becasue there are other ways to display the collected data.
+Although there are other ways to display information to the user and get user input, a graphical user interface is relatively important to have since it will make creating reports easier for users and it is what the customer requested.
 
 \subsubsection{Stimulus and Response}
 % What event will trigger the feature and how should the system respond.  This
 % is probably an excerpt of a use case. 
-
-The user will provide their data as input to our software. Then our software will create reports with that data. After that the graphical user interface will be created, so that the user can access and interact with the data. 
+The graphical user interface will launch immediately when the user starts up the program. Buttons and text input within the graphical user interface will call functions within the system that will handle the user's requests. When the system is ready to display results to the user, the graphical user interface will update to show the user relevant information.
 
 \subsubsection{Functional Requirements}
 % Formally state the functional requirement.
 % The low-level format command shall require authorization by two
 % system-administrators before beginning the low-level format operation.
+The system shall display a graphical user interface upon starting the application.\\
 
-The software shall require data to be provided as input in order for the graphical user interface to be generated.
+The system shall listen for user input within the graphical user interface and call relevant functions upon user request.\\
+
+The system shall update the graphical user interface based on what the user has requested to see.
 
