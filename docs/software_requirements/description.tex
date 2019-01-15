@@ -8,29 +8,40 @@
 % How does the product fit in the business larger processes.  How is the user
 % intended to fit the software into their business activities?   Consider
 % including a figure that illustrates these relationships. 
-
+In order to track the success of their programs, Kitsap Transit collects data regarding transit usage. Every month, Kitsap Transit needs a simple way to view summaries and create reports from the data that they have gathered. \textit{Kitsap Transit Reports} will allow Kitsap Transit to import their collected data into our software and create the reports they need in a clear and efficient manner.
 \subsection{Product Features}
 % This is a list of high-level description of the functional behavior of the
 % product.  This should give the reader a better understanding of how the formal
 % requirements fit together. 
+\begin{itemize}
+	\item Import Files: In order to create reports, the user must import the data that our software can use to create reports and data visualizations. The user will be able to select files from a file browser and import the data within those files for use in our software.
+	\item Create Reports: Using the imported data, the user will be able to create reports, in an Excel file format, which match the specifications set by the user. 
+	\item Visualize Data: The user will be able to view visualizations of the data that they import. Visualizations include charts such as the activity for a route over a period of time or comparisons of different route usages.
+	\item Update Route Information: The compilation of imported data and creation of reports requires our software to know up-to-date information on the current bus routes (e.g., the route ID's for each route, the region associated with each route, what stops are contained in each route). The user will be able to update route/stop information included in our system. 
+	\item Graphical User Interface: To provide a user-friendly experience, our software will possess an easy-to-use interface for interacting with each of the other product features.
+\end{itemize}
 
 \subsection{User Classes and Characteristics}
 % Describe the different rolls or classes of users.  For each user class,
 % describe the user class's principal characteristics.  For example, unix
 % systems have at least two classes of users: system administrators and
 % operators.  
+There is only one user class for our product whose only purpose is to load data files into the program and use the output of reports. 
 
 \subsection{Operating Environment}
 % What is the expected environment?  For example, the product could be a desktop
 % application with users who work in a formal office environment.  Contrast this
 % with a mobile application for mountain biking that keeps track of GPS locations.
+Our product is a C\# desktop application that will run on Windows, within an office environment. We will develop our software in Visual Studio.
 
 \subsection{Design and Implementation Constraints}
 % List an constraints that are part of the project.  For example, health
-% services applications must implement HIPAA regulations.  
+% services applications must implement HIPAA regulations. 
+From our current understanding, our only implementation constraint is that we must be able to read and parse data from .xls, .xlsx, and .csv files. 
 
 \subsection{Assumptions and Dependencies}
 % List assumptions and dependencies that are not formal constraints.  Items in
 % this list will, if changed, will cause a change in the formal requirements in
 % the next section.
-%
+Our team expects to be using .xls, .xlsx, and .csv files as input for our program, we expect a C\# based program to be acceptable to our client, and we expect that all requirements for the product are outlined in the 'Product Features' section.
+
