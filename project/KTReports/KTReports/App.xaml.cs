@@ -13,5 +13,12 @@ namespace KTReports
     /// </summary>
     public partial class App : Application
     {
+        public DatabaseManager databaseManager;
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            databaseManager = new DatabaseManager();
+        }
+
     }
 }
