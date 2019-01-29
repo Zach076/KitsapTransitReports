@@ -174,6 +174,41 @@ namespace KTReports
             return true;
         }
 
+        public enum FileType {NFC, FC, RSD};
+        public Boolean InsertNewFile(string fileName, string fileLocation, FileType fileType, string[] dateRange)
+        {
+            try
+            {
+                using (SQLiteCommand command = new SQLiteCommand())
+                {
+                    string insertSQL = @"INSERT INTO ImportedFiles 
+                    (name, dir_location, file_type, start_date, end_date) 
+                    VALUES (@fileName, @fileLocation, @fileType, @startDate, @endDate)";
+
+                    command.CommandText = insertSQL;
+                    command.Parameters.Add(new SQLiteParameter("@fileName", fileName));
+                    command.Parameters.Add(new SQLiteParameter("@fileLocation", fileLocation));
+                    command.Parameters.Add(new SQLiteParameter("@fileType", fileType.ToString()));
+                    command.Parameters.Add(new SQLiteParameter("@startDate", dateRange[0]));
+                    command.Parameters.Add(new SQLiteParameter("@endDate", dateRange[1]));
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (SQLiteException sqle)
+            {
+                Console.WriteLine(sqle.StackTrace);
+                return false;
+            } catch (IndexOutOfRangeException ie)
+            {
+                Console.WriteLine(ie.StackTrace);
+                return false;
+            } finally
+            {
+
+            }
+            return true;
+        }
+
         public Boolean Query(string[] selection, string[] tables, string expressions, string[] values)
         {
             try
@@ -199,4 +234,6 @@ namespace KTReports
             return true;
         }
     }
+
+    // Write tests for insertion and queries
 }
