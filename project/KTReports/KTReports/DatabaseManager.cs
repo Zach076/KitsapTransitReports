@@ -360,7 +360,7 @@ namespace KTReports
                     @"INSERT INTO Routes 
                         (master_route_id, assigned_route_id, start_date, end_date, route_name, district, distance, num_trips_week, 
                         num_trips_sat, num_trips_hol, weekday_hours, saturday_hours, holiday_hours) 
-                    VALUES (@master_route_id, @assigned_route_id, @start_date, @end_date, @route_name, @district, @distance, @num_trips_week
+                    VALUES (@master_route_id, @assigned_route_id, @start_date, @end_date, @route_name, @district, @distance, @num_trips_week,
                          @num_trips_sat, @num_trips_hol, @weekday_hours, @saturday_hours, @holiday_hours)";
                 using (SQLiteCommand command = new SQLiteCommand())
                 {
@@ -369,12 +369,14 @@ namespace KTReports
                     command.Parameters.Add(new SQLiteParameter("@master_route_id", keyValuePairs["master_route_id"]));
                     command.Parameters.Add(new SQLiteParameter("@assigned_route_id", keyValuePairs["assigned_route_id"]));
                     command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
-                    command.Parameters.Add(new SQLiteParameter("@end_date", keyValuePairs["end_date"]));
+                    keyValuePairs.TryGetValue("end_date", out string end_date);
+                    command.Parameters.Add(new SQLiteParameter("@end_date", end_date));
                     command.Parameters.Add(new SQLiteParameter("@route_name", keyValuePairs["route_name"]));
                     command.Parameters.Add(new SQLiteParameter("@district", keyValuePairs["district"]));
                     command.Parameters.Add(new SQLiteParameter("@distance", keyValuePairs["distance"]));
                     command.Parameters.Add(new SQLiteParameter("@num_trips_week", keyValuePairs["num_trips_week"]));
                     command.Parameters.Add(new SQLiteParameter("@num_trips_sat", keyValuePairs["num_trips_sat"]));
+                    command.Parameters.Add(new SQLiteParameter("@num_trips_hol", keyValuePairs["num_trips_hol"]));
                     command.Parameters.Add(new SQLiteParameter("@weekday_hours", keyValuePairs["weekday_hours"]));
                     command.Parameters.Add(new SQLiteParameter("@saturday_hours", keyValuePairs["saturday_hours"]));
                     command.Parameters.Add(new SQLiteParameter("@holiday_hours", keyValuePairs["holiday_hours"]));
@@ -384,6 +386,7 @@ namespace KTReports
             catch (SQLiteException sqle)
             {
                 Console.WriteLine(sqle.StackTrace);
+                throw sqle;
                 return false;
             }
             return true;
@@ -423,15 +426,32 @@ namespace KTReports
         public Boolean InsertNewRoute(Dictionary<string, string> keyValuePairs)
         {
             // TODO
-            string addToMaster = "INSERT INTO MasterRoutes (master_route_id) VALUES (null)";
-            SQLiteCommand command = new SQLiteCommand(addToMaster, sqliteConnection);
-            command.ExecuteNonQuery();
+            try
+            {
+                // Make this all atomic by using Transaction
+                string addToMaster = "INSERT INTO MasterRoutes (master_route_id) VALUES (null)";
+                using (SQLiteCommand masterCommand = new SQLiteCommand(addToMaster, sqliteConnection))
+                {
+                    masterCommand.ExecuteNonQuery();
+                }
+            }
+            catch (SQLiteException sqle)
+            {
+                Console.WriteLine(sqle.StackTrace);
+                return false;
+            }
+            long master_route_id = sqliteConnection.LastInsertRowId;
+            keyValuePairs.Add("master_route_id", master_route_id.ToString());
+            InsertRoutes(keyValuePairs);
             return true;
         }
 
         public Boolean InsertNewRouteStop(Dictionary<string, string> keyValuePairs)
         {
             // TODO
+            string addToMaster = "INSERT INTO MasterRouteStops (master_rs_id) VALUES (null)";
+            SQLiteCommand command = new SQLiteCommand(addToMaster, sqliteConnection);
+            command.ExecuteNonQuery();
             return true;
         }
 
@@ -529,11 +549,8 @@ namespace KTReports
             };
             InsertFCD(fcd3);
 
-            InsertNewRoute(fcd3);
-
-            /*var route90 = new Dictionary<string, string>
+            var route90 = new Dictionary<string, string>
             {
-                { "master_route_id", master_route_id },
                 { "assigned_route_id", 90.ToString() },
                 { "start_date", "1975-01-01" },
                 // Leave out end_date
@@ -547,11 +564,10 @@ namespace KTReports
                 { "saturday_hours", 2.5.ToString() },
                 { "holiday_hours", 0.ToString() }
             };
-            InsertRoutes(route90);
+            InsertNewRoute(route90);
 
             var route50 = new Dictionary<string, string>
             {
-                { "master_route_id", master_route_id },
                 { "assigned_route_id", 50.ToString() },
                 { "start_date", "1975-01-01" },
                 // Leave out end_date
@@ -565,7 +581,7 @@ namespace KTReports
                 { "saturday_hours", 3.5.ToString() },
                 { "holiday_hours", 3.ToString() }
             };
-            InsertRoutes(route50); */
+            InsertNewRoute(route50); 
         }
 
         public void TestQueries()
