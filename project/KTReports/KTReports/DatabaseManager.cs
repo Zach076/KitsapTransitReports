@@ -164,9 +164,12 @@ namespace KTReports
                     string.Join(", ", keys) + 
                     ") VALUES (" + 
                     string.Join(", ", values) + ")";
-                SQLiteCommand command = new SQLiteCommand(insertSQL, sqliteConnection);
-                command.ExecuteNonQuery();
-            } catch (SQLiteException sqle)
+                using (SQLiteCommand command = new SQLiteCommand(insertSQL, sqliteConnection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (SQLiteException sqle)
             {
                 Console.WriteLine(sqle.StackTrace);
                 return false;
@@ -179,12 +182,12 @@ namespace KTReports
         {
             try
             {
-                using (SQLiteCommand command = new SQLiteCommand())
-                {
-                    string insertSQL = @"INSERT INTO ImportedFiles 
+               
+                string insertSQL = @"INSERT INTO ImportedFiles 
                     (name, dir_location, file_type, start_date, end_date) 
                     VALUES (@fileName, @fileLocation, @fileType, @startDate, @endDate)";
-
+                using (SQLiteCommand command = new SQLiteCommand())
+                {
                     command.CommandText = insertSQL;
                     command.Parameters.Add(new SQLiteParameter("@fileName", fileName));
                     command.Parameters.Add(new SQLiteParameter("@fileLocation", fileLocation));
@@ -198,38 +201,42 @@ namespace KTReports
             {
                 Console.WriteLine(sqle.StackTrace);
                 return false;
-            } catch (IndexOutOfRangeException ie)
+            }
+            catch (IndexOutOfRangeException ie)
             {
                 Console.WriteLine(ie.StackTrace);
                 return false;
-            } finally
-            {
-
             }
             return true;
         }
 
         public Boolean Query(string[] selection, string[] tables, string expressions, string[] values)
         {
+            SQLiteCommand command = null;
             try
             {
                 string query = "SELECT " + string.Join(", ", selection) + "FROM " + string.Join(", ", tables) + " " + expressions;
-                SQLiteCommand command = new SQLiteCommand(query, sqliteConnection);
-                SQLiteDataReader reader = command.ExecuteReader();
-                while (reader.Read())
+                command = new SQLiteCommand(query, sqliteConnection);
+                using (SQLiteDataReader reader = command.ExecuteReader())
                 {
-                    Console.WriteLine(reader.GetValues());
+                    while (reader.Read())
+                    {
+                        Console.WriteLine(reader.GetValues());
+                    }
                 }
                 command.Dispose();
-                reader.Dispose();
             }
             catch (SQLiteException sqle)
             {
                 Console.WriteLine(sqle.StackTrace);
                 return false;
-            } finally
+            }
+            finally
             {
-
+                if (command != null)
+                {
+                    command.Dispose();
+                }
             }
             return true;
         }
