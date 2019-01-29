@@ -28,6 +28,8 @@ namespace KTReports
             }
             sqliteConnection.Open();
             CreateTables();
+            TestInsertions();
+            TestQueries();
 
         }
 
@@ -134,11 +136,11 @@ namespace KTReports
                 )";
                 commands.Add(masterRoutes);
                 string masterRouteStops = @"CREATE TABLE IF NOT EXISTS MasterRouteStops (
-	                master_stop_id integer
+	                master_stop_id integer PRIMARY KEY AUTOINCREMENT
                 )";
                 commands.Add(masterRouteStops);
                 string importedFiles = @"CREATE TABLE IF NOT EXISTS ImportedFiles (
-	                file_id integer,
+	                file_id integer PRIMARY KEY AUTOINCREMENT,
 	                name text,
 	                dir_location text,
 	                file_type text,
@@ -189,6 +191,7 @@ namespace KTReports
                 using (SQLiteCommand command = new SQLiteCommand())
                 {
                     command.CommandText = insertSQL;
+                    command.Connection = sqliteConnection;
                     command.Parameters.Add(new SQLiteParameter("@fileName", fileName));
                     command.Parameters.Add(new SQLiteParameter("@fileLocation", fileLocation));
                     command.Parameters.Add(new SQLiteParameter("@fileType", fileType.ToString()));
@@ -210,18 +213,23 @@ namespace KTReports
             return true;
         }
 
-        public Boolean Query(string[] selection, string[] tables, string expressions, string[] values)
+        public Boolean Query(string[] selection, string[] tables, string expressions)
         {
             SQLiteCommand command = null;
             try
             {
-                string query = "SELECT " + string.Join(", ", selection) + "FROM " + string.Join(", ", tables) + " " + expressions;
+                string query = "SELECT " + string.Join(", ", selection) + "FROM " + string.Join(", ", tables) + " WHERE " + expressions;
                 command = new SQLiteCommand(query, sqliteConnection);
                 using (SQLiteDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        Console.WriteLine(reader.GetValues());
+                        var result = reader.GetValues();
+                        foreach (string col in result.AllKeys)
+                        {
+                            Console.Write(col + " ");
+                            Console.WriteLine(result[col]);
+                        }
                     }
                 }
                 command.Dispose();
@@ -238,9 +246,21 @@ namespace KTReports
                     command.Dispose();
                 }
             }
+            Console.WriteLine("Done with query");
             return true;
         }
-    }
 
-    // Write tests for insertion and queries
+        // Write tests for insertion and queries
+        public void TestInsertions()
+        {
+            InsertNewFile("test_file_name.csv", "C:\\folder\\kt", FileType.FC, new string[] { "1980-01-01", "1980-01-31" });
+
+        }
+
+        public void TestQueries()
+        {
+            Query(new string[] { "*" }, new string[] { "ImportedFiles" }, "date(\"1980-02-01\") > date(start_date)");
+            Query(new string[] { "*" }, new string[] { "ImportedFiles" }, "date(\"1980-01-20\") > end_date");
+        }
+    }
 }
