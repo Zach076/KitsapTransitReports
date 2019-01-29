@@ -180,7 +180,8 @@ namespace KTReports
         }
 
         public enum FileType {NFC, FC, RSD};
-        public Boolean InsertNewFile(string fileName, string fileLocation, FileType fileType, string[] dateRange)
+        // returns nullable int
+        public long? InsertNewFile(string fileName, string fileLocation, FileType fileType, string[] dateRange)
         {
             try
             {
@@ -203,16 +204,240 @@ namespace KTReports
             catch (SQLiteException sqle)
             {
                 Console.WriteLine(sqle.StackTrace);
-                return false;
+                return null;
             }
             catch (IndexOutOfRangeException ie)
             {
                 Console.WriteLine(ie.StackTrace);
+                return null;
+            }
+            // return file id here
+            return sqliteConnection.LastInsertRowId;
+        }
+
+        public Boolean InsertFCD(Dictionary<string, string> keyValuePairs)
+        {
+            try
+            {
+
+                string insertSQL = @"INSERT INTO FareCardData 
+                    (route_id, is_weekday, transit_operator, source_participant, service_participant, mode, route_direction, trip_start, boardings, file_id)
+                    VALUES (@route_id, @is_weekday, @transit_operator, @source_participant, @service_participant, @mode, @route_direction, @trip_start, @boardings, @file_id)";
+                using (SQLiteCommand command = new SQLiteCommand())
+                {
+                    command.CommandText = insertSQL;
+                    command.Connection = sqliteConnection;
+                    command.Parameters.Add(new SQLiteParameter("@route_id", keyValuePairs["route_id"]));
+                    command.Parameters.Add(new SQLiteParameter("@is_weekday", keyValuePairs["is_weekday"]));
+                    command.Parameters.Add(new SQLiteParameter("@transit_operator", keyValuePairs["transit_operator"]));
+                    command.Parameters.Add(new SQLiteParameter("@source_participant", keyValuePairs["source_participant"]));
+                    command.Parameters.Add(new SQLiteParameter("@service_participant", keyValuePairs["service_participant"]));
+                    command.Parameters.Add(new SQLiteParameter("@mode", keyValuePairs["mode"]));
+                    command.Parameters.Add(new SQLiteParameter("@route_direction", keyValuePairs["route_direction"]));
+                    command.Parameters.Add(new SQLiteParameter("@trip_start", keyValuePairs["trip_start"]));
+                    command.Parameters.Add(new SQLiteParameter("@boardings", keyValuePairs["boardings"]));
+                    command.Parameters.Add(new SQLiteParameter("@file_id", keyValuePairs["file_id"]));
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (SQLiteException sqle)
+            {
+                Console.WriteLine(sqle.StackTrace);
                 return false;
             }
             return true;
         }
 
+        public Boolean InsertNFC(Dictionary<string, string> keyValuePairs)
+        {
+            try
+            {
+
+                string insertSQL = 
+                    @"INSERT INTO NonFareCardData 
+                        (route_id, is_weekday, route_direction, total_ridership, total_non_ridership, adult_cash_fare, youth_cash_fare, reduced_cash_fare, paper_transfer,
+                        free_ride, personal_care_attendant, passenger_headcount, cash_fare_underpmnt, cash_upgrade, special_survey, wheelchair, bicycle, ferry_passenger_headcount, file_id) 
+                    VALUES (@route_id, @is_weekday, @route_direction, @total_ridership, @total_non_ridership, @adult_cash_fare, @youth_cash_fare, 
+                        @reduced_cash_fare, @paper_transfer, @free_ride, @personal_care_attendant, @passenger_headcount, @cash_fare_underpmnt, @cash_upgrade, @special_survey,
+                        @wheelchair, @bicycle, @ferry_passenger_headcount, @file_id)";
+                using (SQLiteCommand command = new SQLiteCommand())
+                {
+                    command.CommandText = insertSQL;
+                    command.Connection = sqliteConnection;
+                    command.Parameters.Add(new SQLiteParameter("@route_id", keyValuePairs["route_id"]));
+                    command.Parameters.Add(new SQLiteParameter("@is_weekday", keyValuePairs["is_weekday"]));
+                    command.Parameters.Add(new SQLiteParameter("@route_direction", keyValuePairs["route_direction"]));
+                    command.Parameters.Add(new SQLiteParameter("@total_ridership", keyValuePairs["total_ridership"]));
+                    command.Parameters.Add(new SQLiteParameter("@total_non_ridership", keyValuePairs["total_non_ridership"]));
+                    command.Parameters.Add(new SQLiteParameter("@adult_cash_fare", keyValuePairs["adult_cash_fare"]));
+                    command.Parameters.Add(new SQLiteParameter("@youth_cash_fare", keyValuePairs["youth_cash_fare"]));
+                    command.Parameters.Add(new SQLiteParameter("@reduced_cash_fare", keyValuePairs["paper_transfer"]));
+                    command.Parameters.Add(new SQLiteParameter("@free_ride", keyValuePairs["free_ride"]));
+                    command.Parameters.Add(new SQLiteParameter("@personal_care_attendant", keyValuePairs["personal_care_attendant"]));
+                    command.Parameters.Add(new SQLiteParameter("@passenger_headcount", keyValuePairs["passenger_headcount"]));
+                    command.Parameters.Add(new SQLiteParameter("@cash_fare_underpmnt", keyValuePairs["cash_fare_underpmnt"]));
+                    command.Parameters.Add(new SQLiteParameter("@cash_upgrade", keyValuePairs["cash_upgrade"]));
+                    command.Parameters.Add(new SQLiteParameter("@special_survey", keyValuePairs["special_survey"]));
+                    command.Parameters.Add(new SQLiteParameter("@wheelchair", keyValuePairs["wheelchair"]));
+                    command.Parameters.Add(new SQLiteParameter("@bicycle", keyValuePairs["bicycle"]));
+                    command.Parameters.Add(new SQLiteParameter("@ferry_passenger_headcount", keyValuePairs["ferry_passenger_headcount"]));
+                    command.Parameters.Add(new SQLiteParameter("@file_id", keyValuePairs["file_id"]));
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (SQLiteException sqle)
+            {
+                Console.WriteLine(sqle.StackTrace);
+                return false;
+            }
+            return true;
+        }
+
+        public Boolean InsertRSD(Dictionary<string, string> keyValuePairs)
+        {
+            try
+            {
+
+                string insertSQL =
+                    @"INSERT INTO RouteStopData 
+                        (route_stop_id, route_name, minus_door_1_person, minus_door_2_person, door_1_person, door_2_person, file_id) 
+                    VALUES (@route_stop_id, @route_name, @minus_door_1_person, @minus_door_2_person, @door_1_person, @door_2_person, @file_id)";
+                using (SQLiteCommand command = new SQLiteCommand())
+                {
+                    command.CommandText = insertSQL;
+                    command.Connection = sqliteConnection;
+                    command.Parameters.Add(new SQLiteParameter("@route_stop_id", keyValuePairs["route_stop_id"]));
+                    command.Parameters.Add(new SQLiteParameter("@route_name", keyValuePairs["route_name"]));
+                    command.Parameters.Add(new SQLiteParameter("@minus_door_1_person", keyValuePairs["minus_door_1_person"]));
+                    command.Parameters.Add(new SQLiteParameter("@minus_door_2_person", keyValuePairs["minus_door_2_person"]));
+                    command.Parameters.Add(new SQLiteParameter("@door_1_person", keyValuePairs["door_1_person"]));
+                    command.Parameters.Add(new SQLiteParameter("@door_2_person", keyValuePairs["door_2_person"]));
+                    command.Parameters.Add(new SQLiteParameter("@file_id", keyValuePairs["file_id"]));
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (SQLiteException sqle)
+            {
+                Console.WriteLine(sqle.StackTrace);
+                return false;
+            }
+            return true;
+        }
+
+        public Boolean InsertReportHistory(Dictionary<string, string> keyValuePairs)
+        {
+            try
+            {
+
+                string insertSQL =
+                    @"INSERT INTO ReportHistory 
+                        (report_location, datetime_created, report_range) 
+                    VALUES (@report_location, @datetime_created, @report_range)";
+                using (SQLiteCommand command = new SQLiteCommand())
+                {
+                    command.CommandText = insertSQL;
+                    command.Connection = sqliteConnection;
+                    command.Parameters.Add(new SQLiteParameter("@report_location", keyValuePairs["report_location"]));
+                    command.Parameters.Add(new SQLiteParameter("@datetime_created", keyValuePairs["datetime_created"]));
+                    command.Parameters.Add(new SQLiteParameter("@report_range", keyValuePairs["report_range"]));
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (SQLiteException sqle)
+            {
+                Console.WriteLine(sqle.StackTrace);
+                return false;
+            }
+            return true;
+        }
+
+        public Boolean InsertRoutes(Dictionary<string, string> keyValuePairs)
+        {
+            try
+            {
+
+                string insertSQL =
+                    @"INSERT INTO Routes 
+                        (master_route_id, assigned_route_id, start_date, end_date, route_name, district, distance, num_trips_week, 
+                        num_trips_sat, num_trips_hol, weekday_hours, saturday_hours, holiday_hours) 
+                    VALUES (@master_route_id, @assigned_route_id, @start_date, @end_date, @route_name, @district, @distance, @num_trips_week
+                         @num_trips_sat, @num_trips_hol, @weekday_hours, @saturday_hours, @holiday_hours)";
+                using (SQLiteCommand command = new SQLiteCommand())
+                {
+                    command.CommandText = insertSQL;
+                    command.Connection = sqliteConnection;
+                    command.Parameters.Add(new SQLiteParameter("@master_route_id", keyValuePairs["master_route_id"]));
+                    command.Parameters.Add(new SQLiteParameter("@assigned_route_id", keyValuePairs["assigned_route_id"]));
+                    command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
+                    command.Parameters.Add(new SQLiteParameter("@end_date", keyValuePairs["end_date"]));
+                    command.Parameters.Add(new SQLiteParameter("@route_name", keyValuePairs["route_name"]));
+                    command.Parameters.Add(new SQLiteParameter("@district", keyValuePairs["district"]));
+                    command.Parameters.Add(new SQLiteParameter("@distance", keyValuePairs["distance"]));
+                    command.Parameters.Add(new SQLiteParameter("@num_trips_week", keyValuePairs["num_trips_week"]));
+                    command.Parameters.Add(new SQLiteParameter("@num_trips_sat", keyValuePairs["num_trips_sat"]));
+                    command.Parameters.Add(new SQLiteParameter("@weekday_hours", keyValuePairs["weekday_hours"]));
+                    command.Parameters.Add(new SQLiteParameter("@saturday_hours", keyValuePairs["saturday_hours"]));
+                    command.Parameters.Add(new SQLiteParameter("@holiday_hours", keyValuePairs["holiday_hours"]));
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (SQLiteException sqle)
+            {
+                Console.WriteLine(sqle.StackTrace);
+                return false;
+            }
+            return true;
+        }
+
+        public Boolean InsertRouteStops(Dictionary<string, string> keyValuePairs)
+        {
+            try
+            {
+
+                string insertSQL =
+                    @"INSERT INTO RouteStops 
+                        (master_rs_id, assigned_rs_id, rs_name, route_id, start_date, end_date) 
+                    VALUES (@master_rs_id, @assigned_rs_id, @rs_name, @route_id, @start_date, @end_date)";
+                using (SQLiteCommand command = new SQLiteCommand())
+                {
+                    command.CommandText = insertSQL;
+                    command.Connection = sqliteConnection;
+                    command.Parameters.Add(new SQLiteParameter("@master_rs_id", keyValuePairs["master_rs_id"]));
+                    command.Parameters.Add(new SQLiteParameter("@assigned_rs_id", keyValuePairs["assigned_rs_id"]));
+                    command.Parameters.Add(new SQLiteParameter("@rs_name", keyValuePairs["rs_name"]));
+                    command.Parameters.Add(new SQLiteParameter("@route_id", keyValuePairs["route_id"]));
+                    command.Parameters.Add(new SQLiteParameter("@route_name", keyValuePairs["route_name"]));
+                    command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
+                    command.Parameters.Add(new SQLiteParameter("@end_date", keyValuePairs["end_date"]));
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (SQLiteException sqle)
+            {
+                Console.WriteLine(sqle.StackTrace);
+                return false;
+            }
+            return true;
+        }
+
+        public Boolean InsertNewRoute(Dictionary<string, string> keyValuePairs)
+        {
+            // TODO
+            string addToMaster = "INSERT INTO MasterRoutes (master_route_id) VALUES (null)";
+            SQLiteCommand command = new SQLiteCommand(addToMaster, sqliteConnection);
+            command.ExecuteNonQuery();
+            return true;
+        }
+
+        public Boolean InsertNewRouteStop(Dictionary<string, string> keyValuePairs)
+        {
+            // TODO
+            return true;
+        }
+
+        // TODO: Methods to update information, rather than just inserting
+
+        
         public Boolean Query(string[] selection, string[] tables, string expressions)
         {
             SQLiteCommand command = null;
@@ -253,8 +478,94 @@ namespace KTReports
         // Write tests for insertion and queries
         public void TestInsertions()
         {
-            InsertNewFile("test_file_name.csv", "C:\\folder\\kt", FileType.FC, new string[] { "1980-01-01", "1980-01-31" });
+            long? file_id = InsertNewFile("test_file_name.csv", "C:\\folder\\kt", FileType.FC, new string[] { "1980-01-01", "1980-01-31" });
+            if (file_id == null)
+            {
+                return;
+            }
 
+            var fcd1 = new Dictionary<string, string>
+            {
+                { "route_id", 90.ToString() },
+                { "is_weekday", false.ToString() },
+                { "transit_operator", "Kitsap Transit" },
+                { "source_participant", "Kitsap Transit" },
+                { "service_participant", "Kitsap Transit" },
+                { "mode", "Bus" },
+                { "route_direction", "Inbound" },
+                { "trip_start", "10:00" },
+                { "boardings", 536.ToString() },
+                { "file_id", file_id.ToString() }
+            };
+            InsertFCD(fcd1);
+
+            var fcd2 = new Dictionary<string, string>
+            {
+                { "route_id", 50.ToString() },
+                { "is_weekday", true.ToString() },
+                { "transit_operator", "Kitsap Transit" },
+                { "source_participant", "Kitsap Transit" },
+                { "service_participant", "Kitsap Transit" },
+                { "mode", "Bus" },
+                { "route_direction", "Outbound" },
+                { "trip_start", "14:00" },
+                { "boardings", 205.ToString() },
+                { "file_id", file_id.ToString() }
+            };
+            InsertFCD(fcd2);
+
+            var fcd3 = new Dictionary<string, string>
+            {
+                { "route_id", 90.ToString() },
+                { "is_weekday", false.ToString() },
+                { "transit_operator", "Kitsap Transit" },
+                { "source_participant", "Kitsap Transit" },
+                { "service_participant", "Kitsap Transit" },
+                { "mode", "Bus" },
+                { "route_direction", "Outbound" },
+                { "trip_start", "12:00" },
+                { "boardings", 170.ToString() },
+                { "file_id", file_id.ToString() }
+            };
+            InsertFCD(fcd3);
+
+            InsertNewRoute(fcd3);
+
+            /*var route90 = new Dictionary<string, string>
+            {
+                { "master_route_id", master_route_id },
+                { "assigned_route_id", 90.ToString() },
+                { "start_date", "1975-01-01" },
+                // Leave out end_date
+                { "route_name", "The Best Route" },
+                { "district", "Bremerton" },
+                { "distance", 9.45.ToString() },
+                { "num_trips_week", 8.ToString() },
+                { "num_trips_sat", 6.ToString() },
+                { "num_trips_hol", 0.ToString() },
+                { "weekday_hours", 3.ToString() },
+                { "saturday_hours", 2.5.ToString() },
+                { "holiday_hours", 0.ToString() }
+            };
+            InsertRoutes(route90);
+
+            var route50 = new Dictionary<string, string>
+            {
+                { "master_route_id", master_route_id },
+                { "assigned_route_id", 50.ToString() },
+                { "start_date", "1975-01-01" },
+                // Leave out end_date
+                { "route_name", "Route Num 50" },
+                { "district", "Poulsbo" },
+                { "distance", 5.5.ToString() },
+                { "num_trips_week", 9.ToString() },
+                { "num_trips_sat", 7.ToString() },
+                { "num_trips_hol", 5.ToString() },
+                { "weekday_hours", 4.ToString() },
+                { "saturday_hours", 3.5.ToString() },
+                { "holiday_hours", 3.ToString() }
+            };
+            InsertRoutes(route50); */
         }
 
         public void TestQueries()
