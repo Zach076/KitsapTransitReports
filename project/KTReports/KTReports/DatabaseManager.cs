@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Data;
 using System.Data.SQLite;
 using System.IO;
 using System.Linq;
@@ -12,9 +14,10 @@ namespace KTReports
 {
     public class DatabaseManager
     {
-        public SQLiteConnection sqliteConnection;
+        private static DatabaseManager dbManagerInstance = null;
+        private SQLiteConnection sqliteConnection;
 
-        public DatabaseManager()
+        private DatabaseManager()
         {
             sqliteConnection = new SQLiteConnection("Data Source=ktdatabase.sqlite3");
             if (File.Exists("./ktdatabase.sqlite3"))
@@ -28,9 +31,15 @@ namespace KTReports
             }
             sqliteConnection.Open();
             CreateTables();
-            TestInsertions();
-            TestQueries();
+        }
 
+        public static DatabaseManager GetDBManager()
+        {
+            if (dbManagerInstance == null)
+            {
+                dbManagerInstance = new DatabaseManager();
+            }
+            return dbManagerInstance;
         }
 
         private void CreateTables()
@@ -158,36 +167,16 @@ namespace KTReports
             }
         }
 
-        public Boolean Insert(string table, string[] keys, string[] values)
-        {
-            try
-            {
-                string insertSQL = "INSERT INTO @table (" + 
-                    string.Join(", ", keys) + 
-                    ") VALUES (" + 
-                    string.Join(", ", values) + ")";
-                using (SQLiteCommand command = new SQLiteCommand(insertSQL, sqliteConnection))
-                {
-                    command.ExecuteNonQuery();
-                }
-            }
-            catch (SQLiteException sqle)
-            {
-                Console.WriteLine(sqle.StackTrace);
-                return false;
-            }
-            return true;
-        }
-
-        public enum FileType {NFC, FC, RSD};
-        // returns nullable int
+        public enum FileType { NFC, FC, RSD };
+        // returns nullable long
         public long? InsertNewFile(string fileName, string fileLocation, FileType fileType, string[] dateRange)
         {
             try
             {
-               
-                string insertSQL = @"INSERT INTO ImportedFiles 
-                    (name, dir_location, file_type, start_date, end_date) 
+
+                string insertSQL =
+                    @"INSERT INTO ImportedFiles 
+                        (name, dir_location, file_type, start_date, end_date) 
                     VALUES (@fileName, @fileLocation, @fileType, @startDate, @endDate)";
                 using (SQLiteCommand command = new SQLiteCommand())
                 {
@@ -220,8 +209,9 @@ namespace KTReports
             try
             {
 
-                string insertSQL = @"INSERT INTO FareCardData 
-                    (route_id, is_weekday, transit_operator, source_participant, service_participant, mode, route_direction, trip_start, boardings, file_id)
+                string insertSQL =
+                    @"INSERT INTO FareCardData 
+                        (route_id, is_weekday, transit_operator, source_participant, service_participant, mode, route_direction, trip_start, boardings, file_id)
                     VALUES (@route_id, @is_weekday, @transit_operator, @source_participant, @service_participant, @mode, @route_direction, @trip_start, @boardings, @file_id)";
                 using (SQLiteCommand command = new SQLiteCommand())
                 {
@@ -253,7 +243,7 @@ namespace KTReports
             try
             {
 
-                string insertSQL = 
+                string insertSQL =
                     @"INSERT INTO NonFareCardData 
                         (route_id, is_weekday, route_direction, total_ridership, total_non_ridership, adult_cash_fare, youth_cash_fare, reduced_cash_fare, paper_transfer,
                         free_ride, personal_care_attendant, passenger_headcount, cash_fare_underpmnt, cash_upgrade, special_survey, wheelchair, bicycle, ferry_passenger_headcount, file_id) 
@@ -387,7 +377,8 @@ namespace KTReports
             {
                 Console.WriteLine(sqle.StackTrace);
                 throw sqle;
-                return false;
+                // Throw for now, handle in future
+                //return false;
             }
             return true;
         }
@@ -425,11 +416,9 @@ namespace KTReports
 
         public Boolean InsertNewRoute(Dictionary<string, string> keyValuePairs)
         {
-            // TODO
             try
             {
-                // Make this all atomic by using Transaction
-                string addToMaster = "INSERT INTO MasterRoutes (master_route_id) VALUES (null)";
+                string addToMaster = @"INSERT INTO MasterRoutes (master_route_id) VALUES (null)";
                 using (SQLiteCommand masterCommand = new SQLiteCommand(addToMaster, sqliteConnection))
                 {
                     masterCommand.ExecuteNonQuery();
@@ -448,146 +437,74 @@ namespace KTReports
 
         public Boolean InsertNewRouteStop(Dictionary<string, string> keyValuePairs)
         {
-            // TODO
-            string addToMaster = "INSERT INTO MasterRouteStops (master_rs_id) VALUES (null)";
-            SQLiteCommand command = new SQLiteCommand(addToMaster, sqliteConnection);
-            command.ExecuteNonQuery();
-            return true;
-        }
-
-        // TODO: Methods to update information, rather than just inserting
-
-        
-        public Boolean Query(string[] selection, string[] tables, string expressions)
-        {
-            SQLiteCommand command = null;
             try
             {
-                string query = "SELECT " + string.Join(", ", selection) + "FROM " + string.Join(", ", tables) + " WHERE " + expressions;
-                command = new SQLiteCommand(query, sqliteConnection);
-                using (SQLiteDataReader reader = command.ExecuteReader())
+                string addToMaster = @"INSERT INTO MasterRouteStops (master_rs_id) VALUES (null)";
+                using (SQLiteCommand masterCommand = new SQLiteCommand(addToMaster, sqliteConnection))
                 {
-                    while (reader.Read())
-                    {
-                        var result = reader.GetValues();
-                        foreach (string col in result.AllKeys)
-                        {
-                            Console.Write(col + " ");
-                            Console.WriteLine(result[col]);
-                        }
-                    }
+                    masterCommand.ExecuteNonQuery();
                 }
-                command.Dispose();
             }
             catch (SQLiteException sqle)
             {
                 Console.WriteLine(sqle.StackTrace);
                 return false;
             }
-            finally
-            {
-                if (command != null)
-                {
-                    command.Dispose();
-                }
-            }
-            Console.WriteLine("Done with query");
+            long master_rs_id = sqliteConnection.LastInsertRowId;
+            keyValuePairs.Add("master_rs_id", master_rs_id.ToString());
+            InsertRoutes(keyValuePairs);
             return true;
         }
 
-        // Write tests for insertion and queries
-        public void TestInsertions()
+        // TODO: Methods to update information, rather than just inserting
+
+        public List<NameValueCollection> Query(string[] selection, string[] tables, string expressions)
         {
-            long? file_id = InsertNewFile("test_file_name.csv", "C:\\folder\\kt", FileType.FC, new string[] { "1980-01-01", "1980-01-31" });
-            if (file_id == null)
+            string query = "SELECT " + string.Join(", ", selection) + " FROM " + string.Join(", ", tables) + " WHERE " + expressions;
+            var results = new List<NameValueCollection>();
+            using (var command = new SQLiteCommand(query, sqliteConnection))
             {
-                return;
+                using (SQLiteDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        NameValueCollection row = reader.GetValues();
+                        results.Add(row);
+                    }
+                }
             }
-
-            var fcd1 = new Dictionary<string, string>
-            {
-                { "route_id", 90.ToString() },
-                { "is_weekday", false.ToString() },
-                { "transit_operator", "Kitsap Transit" },
-                { "source_participant", "Kitsap Transit" },
-                { "service_participant", "Kitsap Transit" },
-                { "mode", "Bus" },
-                { "route_direction", "Inbound" },
-                { "trip_start", "10:00" },
-                { "boardings", 536.ToString() },
-                { "file_id", file_id.ToString() }
-            };
-            InsertFCD(fcd1);
-
-            var fcd2 = new Dictionary<string, string>
-            {
-                { "route_id", 50.ToString() },
-                { "is_weekday", true.ToString() },
-                { "transit_operator", "Kitsap Transit" },
-                { "source_participant", "Kitsap Transit" },
-                { "service_participant", "Kitsap Transit" },
-                { "mode", "Bus" },
-                { "route_direction", "Outbound" },
-                { "trip_start", "14:00" },
-                { "boardings", 205.ToString() },
-                { "file_id", file_id.ToString() }
-            };
-            InsertFCD(fcd2);
-
-            var fcd3 = new Dictionary<string, string>
-            {
-                { "route_id", 90.ToString() },
-                { "is_weekday", false.ToString() },
-                { "transit_operator", "Kitsap Transit" },
-                { "source_participant", "Kitsap Transit" },
-                { "service_participant", "Kitsap Transit" },
-                { "mode", "Bus" },
-                { "route_direction", "Outbound" },
-                { "trip_start", "12:00" },
-                { "boardings", 170.ToString() },
-                { "file_id", file_id.ToString() }
-            };
-            InsertFCD(fcd3);
-
-            var route90 = new Dictionary<string, string>
-            {
-                { "assigned_route_id", 90.ToString() },
-                { "start_date", "1975-01-01" },
-                // Leave out end_date
-                { "route_name", "The Best Route" },
-                { "district", "Bremerton" },
-                { "distance", 9.45.ToString() },
-                { "num_trips_week", 8.ToString() },
-                { "num_trips_sat", 6.ToString() },
-                { "num_trips_hol", 0.ToString() },
-                { "weekday_hours", 3.ToString() },
-                { "saturday_hours", 2.5.ToString() },
-                { "holiday_hours", 0.ToString() }
-            };
-            InsertNewRoute(route90);
-
-            var route50 = new Dictionary<string, string>
-            {
-                { "assigned_route_id", 50.ToString() },
-                { "start_date", "1975-01-01" },
-                // Leave out end_date
-                { "route_name", "Route Num 50" },
-                { "district", "Poulsbo" },
-                { "distance", 5.5.ToString() },
-                { "num_trips_week", 9.ToString() },
-                { "num_trips_sat", 7.ToString() },
-                { "num_trips_hol", 5.ToString() },
-                { "weekday_hours", 4.ToString() },
-                { "saturday_hours", 3.5.ToString() },
-                { "holiday_hours", 3.ToString() }
-            };
-            InsertNewRoute(route50); 
+            
+            return results;
         }
 
-        public void TestQueries()
+        public static void TestDB()
         {
-            Query(new string[] { "*" }, new string[] { "ImportedFiles" }, "date(\"1980-02-01\") > date(start_date)");
-            Query(new string[] { "*" }, new string[] { "ImportedFiles" }, "date(\"1980-01-20\") > end_date");
+            TestDB tests = new TestDB();
+            tests.TestInsertions();
+            tests.TestQueries();
         }
+
+
+        /* Only use for testing purposes
+        public Boolean Insert(string table, string[] keys, string[] values)
+        {
+            try
+            {
+                string insertSQL = "INSERT INTO @table (" + 
+                    string.Join(", ", keys) + 
+                    ") VALUES (" + 
+                    string.Join(", ", values) + ")";
+                using (SQLiteCommand command = new SQLiteCommand(insertSQL, sqliteConnection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (SQLiteException sqle)
+            {
+                Console.WriteLine(sqle.StackTrace);
+                return false;
+            }
+            return true;
+        } */
     }
 }

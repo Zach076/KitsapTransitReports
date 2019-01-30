@@ -17,7 +17,8 @@ namespace KTReports
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            databaseManager = new DatabaseManager();
+            databaseManager = DatabaseManager.GetDBManager();
+            DatabaseManager.TestDB();
         }
 
     }
