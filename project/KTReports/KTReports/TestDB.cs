@@ -180,7 +180,7 @@ namespace KTReports
         public void Test3()
         {
             Console.WriteLine("Starting Test3...");
-            var results = dbManager.Query(new string[] { "fc_id, route_id, boardings, i.file_id" }, new string[] { "FareCardData as f, ImportedFiles as i" }, 
+            var results = dbManager.Query(new string[] { "fc_id", "route_id", "boardings", "i.file_id" }, new string[] { "FareCardData as f", "ImportedFiles as i" }, 
                 "f.route_id == 90 AND f.file_id == i.file_id AND i.end_date < date(\"1980-05-01\")");
             var resultStrs = new List<string>();
             foreach (var row in results)
