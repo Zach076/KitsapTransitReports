@@ -16,6 +16,7 @@ namespace KTReports
 
         public void TestInsertions()
         {
+            // Insert new file information into the database
             long? file_id = dbManager.InsertNewFile("test_file_name.csv", "C:\\folder\\kt", DatabaseManager.FileType.FC, new string[] { "1980-01-01", "1980-01-31" });
             if (file_id == null)
             {
@@ -23,6 +24,7 @@ namespace KTReports
             }
             dbManager.InsertNewFile("no_data_file.csv", "C:\\random\\dir", DatabaseManager.FileType.FC, new string[] { "1980-02-01", "1980-02-31" });
 
+            // Insert new fare card data into the database
             var fcd1 = new Dictionary<string, string>
                 {
                     { "route_id", 90.ToString() },
@@ -68,6 +70,7 @@ namespace KTReports
                 };
             dbManager.InsertFCD(fcd3);
 
+            // Insert new routes into the database
             var route90 = new Dictionary<string, string>
                 {
                     { "assigned_route_id", 90.ToString() },
@@ -146,6 +149,7 @@ namespace KTReports
                 resultStrs.Add(rowStr);
                 Console.WriteLine(rowStr);
             }
+            // truth is the expected results from the query
             string[] truth = { "file_id: 1, name: test_file_name.csv, dir_location: C:\\folder\\kt, file_type: FC, start_date: 1980-01-01, end_date: 1980-01-31" };
             CheckTestMatch(resultStrs, truth, 1);
         }
@@ -177,7 +181,7 @@ namespace KTReports
         {
             Console.WriteLine("Starting Test3...");
             var results = dbManager.Query(new string[] { "fc_id, route_id, boardings, i.file_id" }, new string[] { "FareCardData as f, ImportedFiles as i" }, 
-                "f.route_id == 90 AND f.file_id == i.file_id AND i.end_date > date(\"1980-05-01\")");
+                "f.route_id == 90 AND f.file_id == i.file_id AND i.end_date < date(\"1980-05-01\")");
             var resultStrs = new List<string>();
             foreach (var row in results)
             {

@@ -14,25 +14,23 @@ namespace KTReports
 {
     public class DatabaseManager
     {
+        // Singleton instance of the DatabaseManager
         private static DatabaseManager dbManagerInstance = null;
         private SQLiteConnection sqliteConnection;
 
         private DatabaseManager()
         {
             sqliteConnection = new SQLiteConnection("Data Source=ktdatabase.sqlite3");
-            if (File.Exists("./ktdatabase.sqlite3"))
+            // Create the database if it doesn't exist
+            if (!File.Exists("./ktdatabase.sqlite3"))
             {
                 SQLiteConnection.CreateFile("ktdatabase.sqlite3");
-                Console.WriteLine("Database file created");
-            }
-            else
-            {
-                Console.WriteLine("Already created database");
             }
             sqliteConnection.Open();
             CreateTables();
         }
 
+        // Gets a single instance of the DatabaseManager (singleton)
         public static DatabaseManager GetDBManager()
         {
             if (dbManagerInstance == null)
@@ -42,16 +40,17 @@ namespace KTReports
             return dbManagerInstance;
         }
 
+        // Current schema: https://i.imgur.com/MWTZOzy.png
         private void CreateTables()
         {
+            // Complete all commands or none at all
             using (TransactionScope transaction = new TransactionScope())
             {
                 List<string> commands = new List<string>();
-                // When we add a brand new route, add a new master route entry and detail routes entry.
+                // Note: When we add a brand new route, add a new master route entry and detail routes entry.
                 // When we update route information, like name or assigned route id, update the old detail route with an end_date,
                 // then add a new detail routes entry with the same master route id.
                 // If we update detailed historical route information, user picks a date to begin the change and a date to end the change.
-                // We will find the detailed 
                 string routes = @"CREATE TABLE IF NOT EXISTS Routes (
                     id integer PRIMARY KEY AUTOINCREMENT,
 	                master_route_id integer,
@@ -79,9 +78,10 @@ namespace KTReports
 	                end_date text
                 )";
                 commands.Add(routeStops);
+                // Restarting the program will reset data that is imported from files
                 string dropRSD = @"DROP TABLE IF EXISTS RouteStopData";
                 commands.Add(dropRSD);
-                string routeStopsData = @"CREATE TABLE RouteStopsData (
+                string routeStopsData = @"CREATE TABLE RouteStopData (
 	                sd_id integer PRIMARY KEY AUTOINCREMENT,
 	                route_stop_id integer,
 	                route_name text,
@@ -91,7 +91,7 @@ namespace KTReports
 	                door_2_person integer,
 	                file_id integer
                 )";
-                commands.Add(routeStopsData);
+                commands.Add(routeStopsData); 
                 string dropNFCD = @"DROP TABLE IF EXISTS nonFareCardData";
                 commands.Add(dropNFCD);
                 string nonFareCardData = @"CREATE TABLE NonFareCardData (
@@ -116,7 +116,7 @@ namespace KTReports
 	                ferry_passenger_headcount integer,
 	                file_id integer
                 )";
-                commands.Add(nonFareCardData);
+                commands.Add(nonFareCardData); 
                 string dropFCD = @"DROP TABLE IF EXISTS FareCardData";
                 commands.Add(dropFCD);
                 string fareCardData = @"CREATE TABLE FareCardData (
@@ -132,7 +132,7 @@ namespace KTReports
 	                boardings text,
 	                file_id integer
                 )";
-                commands.Add(fareCardData);
+                commands.Add(fareCardData); 
                 string reportHistory = @"CREATE TABLE IF NOT EXISTS ReportHistory (
 	                report_id integer PRIMARY KEY AUTOINCREMENT,
 	                report_location string,
@@ -148,6 +148,8 @@ namespace KTReports
 	                master_stop_id integer PRIMARY KEY AUTOINCREMENT
                 )";
                 commands.Add(masterRouteStops);
+                string dropImportedFiles = @"DROP TABLE IF EXISTS ImportedFiles";
+                commands.Add(dropImportedFiles);
                 string importedFiles = @"CREATE TABLE IF NOT EXISTS ImportedFiles (
 	                file_id integer PRIMARY KEY AUTOINCREMENT,
 	                name text,
@@ -157,6 +159,7 @@ namespace KTReports
 	                end_date text
                 )";
                 commands.Add(importedFiles);
+                // Execute each command
                 foreach (string commandStr in commands)
                 {
                     SQLiteCommand command = new SQLiteCommand(commandStr, sqliteConnection);
@@ -168,12 +171,11 @@ namespace KTReports
         }
 
         public enum FileType { NFC, FC, RSD };
-        // returns nullable long
+        // Insert brand new file information into the db (returns the file_id)
         public long? InsertNewFile(string fileName, string fileLocation, FileType fileType, string[] dateRange)
         {
             try
             {
-
                 string insertSQL =
                     @"INSERT INTO ImportedFiles 
                         (name, dir_location, file_type, start_date, end_date) 
@@ -200,15 +202,16 @@ namespace KTReports
                 Console.WriteLine(ie.StackTrace);
                 return null;
             }
-            // return file id here
+            // Return file id here
             return sqliteConnection.LastInsertRowId;
         }
 
-        public Boolean InsertFCD(Dictionary<string, string> keyValuePairs)
+        // Insert new fare card data (ORCA)
+        // Returns bool based on success of insertion
+        public bool InsertFCD(Dictionary<string, string> keyValuePairs)
         {
             try
             {
-
                 string insertSQL =
                     @"INSERT INTO FareCardData 
                         (route_id, is_weekday, transit_operator, source_participant, service_participant, mode, route_direction, trip_start, boardings, file_id)
@@ -238,11 +241,12 @@ namespace KTReports
             return true;
         }
 
-        public Boolean InsertNFC(Dictionary<string, string> keyValuePairs)
+        // Insert non-fare card data into the database
+        // Returns bool based on the success of the operation
+        public bool InsertNFC(Dictionary<string, string> keyValuePairs)
         {
             try
             {
-
                 string insertSQL =
                     @"INSERT INTO NonFareCardData 
                         (route_id, is_weekday, route_direction, total_ridership, total_non_ridership, adult_cash_fare, youth_cash_fare, reduced_cash_fare, paper_transfer,
@@ -283,11 +287,12 @@ namespace KTReports
             return true;
         }
 
-        public Boolean InsertRSD(Dictionary<string, string> keyValuePairs)
+
+        // Insert Route Stop Data (from the CSV file)
+        public bool InsertRSD(Dictionary<string, string> keyValuePairs)
         {
             try
             {
-
                 string insertSQL =
                     @"INSERT INTO RouteStopData 
                         (route_stop_id, route_name, minus_door_1_person, minus_door_2_person, door_1_person, door_2_person, file_id) 
@@ -314,11 +319,11 @@ namespace KTReports
             return true;
         }
 
-        public Boolean InsertReportHistory(Dictionary<string, string> keyValuePairs)
+        // After creating a new report, we want to insert details about the creation in the DB
+        public bool InsertReportHistory(Dictionary<string, string> keyValuePairs)
         {
             try
             {
-
                 string insertSQL =
                     @"INSERT INTO ReportHistory 
                         (report_location, datetime_created, report_range) 
@@ -341,11 +346,11 @@ namespace KTReports
             return true;
         }
 
-        public Boolean InsertRoutes(Dictionary<string, string> keyValuePairs)
+        // Insert a route (either new or a change to a route using an existing master key)
+        public bool InsertRoutes(Dictionary<string, string> keyValuePairs)
         {
             try
             {
-
                 string insertSQL =
                     @"INSERT INTO Routes 
                         (master_route_id, assigned_route_id, start_date, end_date, route_name, district, distance, num_trips_week, 
@@ -383,11 +388,11 @@ namespace KTReports
             return true;
         }
 
-        public Boolean InsertRouteStops(Dictionary<string, string> keyValuePairs)
+        // Insert a route stop (either new or a change to a route stop using an existing master key) into the DB
+        public bool InsertRouteStops(Dictionary<string, string> keyValuePairs)
         {
             try
             {
-
                 string insertSQL =
                     @"INSERT INTO RouteStops 
                         (master_rs_id, assigned_rs_id, rs_name, route_id, start_date, end_date) 
@@ -414,10 +419,12 @@ namespace KTReports
             return true;
         }
 
-        public Boolean InsertNewRoute(Dictionary<string, string> keyValuePairs)
+        // Creates a brand new route (NOT an update to an existing route)
+        public bool InsertNewRoute(Dictionary<string, string> keyValuePairs)
         {
             try
             {
+                // MasterRoutes PK is set to auto increment
                 string addToMaster = @"INSERT INTO MasterRoutes (master_route_id) VALUES (null)";
                 using (SQLiteCommand masterCommand = new SQLiteCommand(addToMaster, sqliteConnection))
                 {
@@ -429,13 +436,15 @@ namespace KTReports
                 Console.WriteLine(sqle.StackTrace);
                 return false;
             }
+            // Use the new master route id when inserting a route into the Routes table
             long master_route_id = sqliteConnection.LastInsertRowId;
             keyValuePairs.Add("master_route_id", master_route_id.ToString());
             InsertRoutes(keyValuePairs);
             return true;
         }
 
-        public Boolean InsertNewRouteStop(Dictionary<string, string> keyValuePairs)
+        // Creates a brand new route stop (NOT an update to an existing route stop)
+        public bool InsertNewRouteStop(Dictionary<string, string> keyValuePairs)
         {
             try
             {
@@ -450,14 +459,14 @@ namespace KTReports
                 Console.WriteLine(sqle.StackTrace);
                 return false;
             }
+            // Use the new master route stop id when inserting a route stop into the RouteStops table
             long master_rs_id = sqliteConnection.LastInsertRowId;
             keyValuePairs.Add("master_rs_id", master_rs_id.ToString());
             InsertRoutes(keyValuePairs);
             return true;
         }
 
-        // TODO: Methods to update information, rather than just inserting
-
+        // A generic method for querying data from the database
         public List<NameValueCollection> Query(string[] selection, string[] tables, string expressions)
         {
             string query = "SELECT " + string.Join(", ", selection) + " FROM " + string.Join(", ", tables) + " WHERE " + expressions;
@@ -473,17 +482,9 @@ namespace KTReports
                     }
                 }
             }
-            
+            // Returns a list of NameValueCollections, which are like Dictionaries
             return results;
         }
-
-        public static void TestDB()
-        {
-            TestDB tests = new TestDB();
-            tests.TestInsertions();
-            tests.TestQueries();
-        }
-
 
         /* Only use for testing purposes
         public Boolean Insert(string table, string[] keys, string[] values)
@@ -506,5 +507,8 @@ namespace KTReports
             }
             return true;
         } */
+
+        // TODO: Methods to handle updates for information in tables, rather than only inserting
+        // TODO: Methods that handle specific queries rather than a generic method
     }
 }

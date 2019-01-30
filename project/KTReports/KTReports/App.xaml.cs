@@ -17,8 +17,12 @@ namespace KTReports
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            // Gets a singleton for database manager
             databaseManager = DatabaseManager.GetDBManager();
-            DatabaseManager.TestDB();
+            // Run tests on insertions and queries for database
+            TestDB test = new TestDB();
+            test.TestInsertions();
+            test.TestQueries();
         }
 
     }
