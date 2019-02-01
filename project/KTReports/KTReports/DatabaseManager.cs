@@ -20,27 +20,37 @@ namespace KTReports
 
         private DatabaseManager()
         {
-            sqliteConnection = new SQLiteConnection("Data Source=ktdatabase.sqlite3");
+            ConnectToDB("ktdatabase");
+        }
+
+        private DatabaseManager(string fileName)
+        {
+            ConnectToDB(fileName);
+        }
+
+        private void ConnectToDB(string fileName)
+        {
+            sqliteConnection = new SQLiteConnection("Data Source=" + fileName + ".sqlite3");
             // Create the database if it doesn't exist
-            if (!File.Exists("./ktdatabase.sqlite3"))
+            if (!File.Exists("./" + fileName + ".sqlite3"))
             {
-                SQLiteConnection.CreateFile("ktdatabase.sqlite3");
+                SQLiteConnection.CreateFile(fileName + ".sqlite3");
             }
             sqliteConnection.Open();
             CreateTables();
         }
 
         // Gets a single instance of the DatabaseManager (singleton)
-        public static DatabaseManager GetDBManager()
+        public static DatabaseManager GetDBManager(string optionalName = "ktdatabase")
         {
             if (dbManagerInstance == null)
             {
-                dbManagerInstance = new DatabaseManager();
+                dbManagerInstance = new DatabaseManager(optionalName);
             }
             return dbManagerInstance;
         }
 
-        // Current schema: https://i.imgur.com/MWTZOzy.png
+        // Current schema: https://i.imgur.com/ouJqLx0.png
         private void CreateTables()
         {
             // Complete all commands or none at all
@@ -52,11 +62,10 @@ namespace KTReports
                 // then add a new detail routes entry with the same master route id.
                 // If we update detailed historical route information, user picks a date to begin the change and a date to end the change.
                 string routes = @"CREATE TABLE IF NOT EXISTS Routes (
-                    id integer PRIMARY KEY AUTOINCREMENT,
-	                master_route_id integer,
-                    assigned_route_id integer,
+                    route_id integer,
 	                start_date text,
                     end_date text,
+	                master_route_id integer,
 	                route_name text,
                     district text,
 	                distance float,
@@ -65,17 +74,17 @@ namespace KTReports
                     num_trips_hol float,
                     weekday_hours float,
                     saturday_hours float,
-                    holiday_hours float
+                    holiday_hours float,
+                    PRIMARY KEY(route_id, start_date, end_date)
                 )";
                 commands.Add(routes);
                 string routeStops = @"CREATE TABLE IF NOT EXISTS RouteStops (
-	                id integer PRIMARY KEY AUTOINCREMENT,
-	                master_rs_id integer,
-	                assigned_rs_id integer,
-	                rs_name text,
-	                route_id integer,
+                    stop_id integer,
 	                start_date text,
 	                end_date text
+                    stop_name text,
+	                master_stop_id integer,
+                    PRIMARY KEY(stop_id, start_date, end_date)
                 )";
                 commands.Add(routeStops);
                 // Restarting the program will reset data that is imported from files
@@ -83,8 +92,10 @@ namespace KTReports
                 commands.Add(dropRSD);
                 string routeStopsData = @"CREATE TABLE RouteStopData (
 	                sd_id integer PRIMARY KEY AUTOINCREMENT,
-	                route_stop_id integer,
-	                route_name text,
+	                stop_id integer,
+                    start_date text,
+                    end_date text,
+	                stop_name text,
 	                minus_door_1_person integer,
 	                minus_door_2_person integer,
 	                door_1_person integer,
@@ -97,6 +108,8 @@ namespace KTReports
                 string nonFareCardData = @"CREATE TABLE NonFareCardData (
 	                nfc_id integer PRIMARY KEY AUTOINCREMENT,
 	                route_id integer,
+                    start_date text,
+                    end_date text,
 	                is_weekday boolean,
 	                route_direction text,
 	                total_ridership integer,
@@ -122,6 +135,8 @@ namespace KTReports
                 string fareCardData = @"CREATE TABLE FareCardData (
 	                fc_id integer PRIMARY KEY AUTOINCREMENT,
 	                route_id integer,
+                    start_date text,
+                    end_date text,
 	                is_weekday boolean,
 	                transit_operator text,
 	                source_participant text,
@@ -155,8 +170,7 @@ namespace KTReports
 	                name text,
 	                dir_location text,
 	                file_type text,
-	                start_date text,
-	                end_date text
+	                import_date text
                 )";
                 commands.Add(importedFiles);
                 // Execute each command
@@ -172,14 +186,14 @@ namespace KTReports
 
         public enum FileType { NFC, FC, RSD };
         // Insert brand new file information into the db (returns the file_id)
-        public long? InsertNewFile(string fileName, string fileLocation, FileType fileType, string[] dateRange)
+        public long? InsertNewFile(string fileName, string fileLocation, FileType fileType, string importDate)
         {
             try
             {
                 string insertSQL =
                     @"INSERT INTO ImportedFiles 
-                        (name, dir_location, file_type, start_date, end_date) 
-                    VALUES (@fileName, @fileLocation, @fileType, @startDate, @endDate)";
+                        (name, dir_location, file_type, import_date) 
+                    VALUES (@fileName, @fileLocation, @fileType, @import_date)";
                 using (SQLiteCommand command = new SQLiteCommand())
                 {
                     command.CommandText = insertSQL;
@@ -187,8 +201,7 @@ namespace KTReports
                     command.Parameters.Add(new SQLiteParameter("@fileName", fileName));
                     command.Parameters.Add(new SQLiteParameter("@fileLocation", fileLocation));
                     command.Parameters.Add(new SQLiteParameter("@fileType", fileType.ToString()));
-                    command.Parameters.Add(new SQLiteParameter("@startDate", dateRange[0]));
-                    command.Parameters.Add(new SQLiteParameter("@endDate", dateRange[1]));
+                    command.Parameters.Add(new SQLiteParameter("@import_date", importDate));
                     command.ExecuteNonQuery();
                 }
             }
@@ -214,13 +227,15 @@ namespace KTReports
             {
                 string insertSQL =
                     @"INSERT INTO FareCardData 
-                        (route_id, is_weekday, transit_operator, source_participant, service_participant, mode, route_direction, trip_start, boardings, file_id)
-                    VALUES (@route_id, @is_weekday, @transit_operator, @source_participant, @service_participant, @mode, @route_direction, @trip_start, @boardings, @file_id)";
+                        (route_id, start_date, end_date, is_weekday, transit_operator, source_participant, service_participant, mode, route_direction, trip_start, boardings, file_id)
+                    VALUES (@route_id, @start_date, @end_date, @is_weekday, @transit_operator, @source_participant, @service_participant, @mode, @route_direction, @trip_start, @boardings, @file_id)";
                 using (SQLiteCommand command = new SQLiteCommand())
                 {
                     command.CommandText = insertSQL;
                     command.Connection = sqliteConnection;
                     command.Parameters.Add(new SQLiteParameter("@route_id", keyValuePairs["route_id"]));
+                    command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
+                    command.Parameters.Add(new SQLiteParameter("@end_date", keyValuePairs["end_date"]));
                     command.Parameters.Add(new SQLiteParameter("@is_weekday", keyValuePairs["is_weekday"]));
                     command.Parameters.Add(new SQLiteParameter("@transit_operator", keyValuePairs["transit_operator"]));
                     command.Parameters.Add(new SQLiteParameter("@source_participant", keyValuePairs["source_participant"]));
@@ -249,9 +264,9 @@ namespace KTReports
             {
                 string insertSQL =
                     @"INSERT INTO NonFareCardData 
-                        (route_id, is_weekday, route_direction, total_ridership, total_non_ridership, adult_cash_fare, youth_cash_fare, reduced_cash_fare, paper_transfer,
+                        (route_id, start_date, end_date, is_weekday, route_direction, total_ridership, total_non_ridership, adult_cash_fare, youth_cash_fare, reduced_cash_fare, paper_transfer,
                         free_ride, personal_care_attendant, passenger_headcount, cash_fare_underpmnt, cash_upgrade, special_survey, wheelchair, bicycle, ferry_passenger_headcount, file_id) 
-                    VALUES (@route_id, @is_weekday, @route_direction, @total_ridership, @total_non_ridership, @adult_cash_fare, @youth_cash_fare, 
+                    VALUES (@route_id, @start_date, @end_date, @is_weekday, @route_direction, @total_ridership, @total_non_ridership, @adult_cash_fare, @youth_cash_fare, 
                         @reduced_cash_fare, @paper_transfer, @free_ride, @personal_care_attendant, @passenger_headcount, @cash_fare_underpmnt, @cash_upgrade, @special_survey,
                         @wheelchair, @bicycle, @ferry_passenger_headcount, @file_id)";
                 using (SQLiteCommand command = new SQLiteCommand())
@@ -259,6 +274,8 @@ namespace KTReports
                     command.CommandText = insertSQL;
                     command.Connection = sqliteConnection;
                     command.Parameters.Add(new SQLiteParameter("@route_id", keyValuePairs["route_id"]));
+                    command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
+                    command.Parameters.Add(new SQLiteParameter("@end_date", keyValuePairs["end_date"]));
                     command.Parameters.Add(new SQLiteParameter("@is_weekday", keyValuePairs["is_weekday"]));
                     command.Parameters.Add(new SQLiteParameter("@route_direction", keyValuePairs["route_direction"]));
                     command.Parameters.Add(new SQLiteParameter("@total_ridership", keyValuePairs["total_ridership"]));
@@ -295,13 +312,15 @@ namespace KTReports
             {
                 string insertSQL =
                     @"INSERT INTO RouteStopData 
-                        (route_stop_id, route_name, minus_door_1_person, minus_door_2_person, door_1_person, door_2_person, file_id) 
-                    VALUES (@route_stop_id, @route_name, @minus_door_1_person, @minus_door_2_person, @door_1_person, @door_2_person, @file_id)";
+                        (stop_id, start_date, end_date, route_name, minus_door_1_person, minus_door_2_person, door_1_person, door_2_person, file_id) 
+                    VALUES (@stop_id, @start_date, @end_date, @route_name, @minus_door_1_person, @minus_door_2_person, @door_1_person, @door_2_person, @file_id)";
                 using (SQLiteCommand command = new SQLiteCommand())
                 {
                     command.CommandText = insertSQL;
                     command.Connection = sqliteConnection;
-                    command.Parameters.Add(new SQLiteParameter("@route_stop_id", keyValuePairs["route_stop_id"]));
+                    command.Parameters.Add(new SQLiteParameter("@stop_id", keyValuePairs["stop_id"]));
+                    command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
+                    command.Parameters.Add(new SQLiteParameter("@end_date", keyValuePairs["end_date"]));
                     command.Parameters.Add(new SQLiteParameter("@route_name", keyValuePairs["route_name"]));
                     command.Parameters.Add(new SQLiteParameter("@minus_door_1_person", keyValuePairs["minus_door_1_person"]));
                     command.Parameters.Add(new SQLiteParameter("@minus_door_2_person", keyValuePairs["minus_door_2_person"]));
@@ -353,16 +372,16 @@ namespace KTReports
             {
                 string insertSQL =
                     @"INSERT INTO Routes 
-                        (master_route_id, assigned_route_id, start_date, end_date, route_name, district, distance, num_trips_week, 
+                        (master_route_id, route_id, start_date, end_date, route_name, district, distance, num_trips_week, 
                         num_trips_sat, num_trips_hol, weekday_hours, saturday_hours, holiday_hours) 
-                    VALUES (@master_route_id, @assigned_route_id, @start_date, @end_date, @route_name, @district, @distance, @num_trips_week,
+                    VALUES (@master_route_id, @route_id, @start_date, @end_date, @route_name, @district, @distance, @num_trips_week,
                          @num_trips_sat, @num_trips_hol, @weekday_hours, @saturday_hours, @holiday_hours)";
                 using (SQLiteCommand command = new SQLiteCommand())
                 {
                     command.CommandText = insertSQL;
                     command.Connection = sqliteConnection;
                     command.Parameters.Add(new SQLiteParameter("@master_route_id", keyValuePairs["master_route_id"]));
-                    command.Parameters.Add(new SQLiteParameter("@assigned_route_id", keyValuePairs["assigned_route_id"]));
+                    command.Parameters.Add(new SQLiteParameter("@route_id", keyValuePairs["route_id"]));
                     command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
                     keyValuePairs.TryGetValue("end_date", out string end_date);
                     command.Parameters.Add(new SQLiteParameter("@end_date", end_date));
@@ -395,19 +414,17 @@ namespace KTReports
             {
                 string insertSQL =
                     @"INSERT INTO RouteStops 
-                        (master_rs_id, assigned_rs_id, rs_name, route_id, start_date, end_date) 
-                    VALUES (@master_rs_id, @assigned_rs_id, @rs_name, @route_id, @start_date, @end_date)";
+                        (stop_id, start_date, end_date, stop_name, master_stop_id) 
+                    VALUES (@stop_id, @start_date, @end_date, @stop_name, @master_stop_id)";
                 using (SQLiteCommand command = new SQLiteCommand())
                 {
                     command.CommandText = insertSQL;
                     command.Connection = sqliteConnection;
-                    command.Parameters.Add(new SQLiteParameter("@master_rs_id", keyValuePairs["master_rs_id"]));
-                    command.Parameters.Add(new SQLiteParameter("@assigned_rs_id", keyValuePairs["assigned_rs_id"]));
-                    command.Parameters.Add(new SQLiteParameter("@rs_name", keyValuePairs["rs_name"]));
-                    command.Parameters.Add(new SQLiteParameter("@route_id", keyValuePairs["route_id"]));
-                    command.Parameters.Add(new SQLiteParameter("@route_name", keyValuePairs["route_name"]));
+                    command.Parameters.Add(new SQLiteParameter("@stop_id", keyValuePairs["stop_id"]));
                     command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
                     command.Parameters.Add(new SQLiteParameter("@end_date", keyValuePairs["end_date"]));
+                    command.Parameters.Add(new SQLiteParameter("@stop_name", keyValuePairs["stop_name"]));
+                    command.Parameters.Add(new SQLiteParameter("@master_stop_id", keyValuePairs["master_stop_id"]));
                     command.ExecuteNonQuery();
                 }
             }
@@ -486,6 +503,14 @@ namespace KTReports
             return results;
         }
 
+        // Currently used for closing the Test Database before db file removal
+        public void CloseDatabase()
+        {
+            sqliteConnection.Close();
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+
         /* Only use for testing purposes
         public Boolean Insert(string table, string[] keys, string[] values)
         {
@@ -509,6 +534,7 @@ namespace KTReports
         } */
 
         // TODO: Methods to handle updates for information in tables, rather than only inserting
+        // TODO: Methods to remove data from tables
         // TODO: Methods that handle specific queries rather than a generic method
     }
 }
