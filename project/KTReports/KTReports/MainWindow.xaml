@@ -43,5 +43,20 @@
             <CheckBox x:Name="passengersPerMile" Content="Passengers per Mile" Canvas.Left="382" Canvas.Top="311" Height="32" Width="200" FontSize="18" RenderTransformOrigin="0.5,0.5" Foreground="White" Cursor="Arrow"/>
             <CheckBox x:Name="passenerPerHour" Content="Passengers per Hour" Canvas.Left="382" Canvas.Top="374" Height="32" Width="200" FontSize="18" RenderTransformOrigin="0.5,0.5" Foreground="White" Cursor="Arrow"/>
         </Canvas>
+        <Canvas x:Name="file" HorizontalAlignment="Left" Height="650" Margin="80,0,0,0" Width="1100" Background="#FF2534CB" RenderTransformOrigin="0.5,0.5" IsEnabled="False" Visibility="Hidden">
+            <Canvas.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform Y="-637" X="-80"/>
+                </TransformGroup>
+            </Canvas.RenderTransform>
+            <Button Content="Done" Height="54" Canvas.Left="882" Canvas.Top="460" Width="140" FontSize="36" Background="#FF08F17D"
+                    Click="Done_File"/>
+            <RichTextBox x:Name="textFile" Height="408" Canvas.Left="28" Canvas.Top="31" Width="1036">
+                <FlowDocument/>
+            </RichTextBox>
+        </Canvas>
     </StackPanel>
 </Window>
