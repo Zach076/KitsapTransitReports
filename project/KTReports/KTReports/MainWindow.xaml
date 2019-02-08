@@ -5,19 +5,23 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KTReports"
         mc:Ignorable="d"
-        Title="Kitsap Transit Reports" Height="700" Width="1100" MinWidth="50" MinHeight="30"
+        Title="Kitsap Transit Reports" Height="700" Width="1100" MinWidth="50" MinHeight="30" Visibility="Visible"
     >
     <StackPanel>
         <DockPanel>
             <Menu>
                 <MenuItem Header="_File">
-                    <MenuItem Header="Import Files" Margin="0,5,0,5"/>
-                    <MenuItem Header="Open Part Reports" Margin="0,5,0,5"/>
+                    <MenuItem Header="Import Files" 
+                              Margin="0,5,0,5"
+                              Click="Import_File"/>
+                    <MenuItem Header="Open Past Reports" Margin="0,5,0,5"/>
                     <MenuItem Header="Close" 
                               Margin="0,5,0,5"
                               Click="Close_Clicked"/>
                 </MenuItem>
-                <MenuItem Header="Create Report" Margin="0,5,0,5"/>
+                <MenuItem Header="Create Report"
+                          Margin="0,5,0,5"
+                          Click="Report_Options"/>
                 <MenuItem Header="View Visualizations" Margin="0,5,0,5"/>
                 <MenuItem Header="Update Route Info" Margin="0,5,0,5"/>
                 <MenuItem Header="Help" Margin="0,5,0,5"/>
@@ -26,5 +30,33 @@
         <Grid>
 
         </Grid>
+        <Canvas x:Name="rOptions" Height="639" HorizontalAlignment="Right" Width="1092" Background="#FF2534CB" ScrollViewer.VerticalScrollBarVisibility="Disabled" IsEnabled="False" Visibility="Hidden">
+            <Button Content="Generate" Canvas.Left="829" Canvas.Top="476" Width="191" Background="#FF37DE56" Height="58" FontSize="36"
+                    Click="Generate_Report"/>
+            <TextBox Height="66" Canvas.Left="254" TextWrapping="Wrap" Text="Select Informtion to be displayed" Canvas.Top="49" Width="549" SelectionBrush="#FFE9E9F3" FontSize="36" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" TextDecorations="Underline" IsReadOnly="True"/>
+            <CheckBox x:Name="routeNumber" Content="Route Number" Canvas.Left="130" Canvas.Top="197" Height="32" Width="200" FontSize="18" RenderTransformOrigin="0.5,0.5" Foreground="White" Cursor="Arrow"/>
+            <CheckBox x:Name="routeName" Content="Route Name" Canvas.Left="130" Canvas.Top="255" Height="32" Width="200" FontSize="18" RenderTransformOrigin="0.5,0.5" Foreground="White" Cursor="Arrow"/>
+            <CheckBox x:Name="totalPassengers" Content="Total Passengers" Canvas.Left="130" Canvas.Top="311" Height="32" Width="200" FontSize="18" RenderTransformOrigin="0.5,0.5" Foreground="White" Cursor="Arrow"/>
+            <CheckBox x:Name="noTrips" Content="Number of Trips" Canvas.Left="130" Canvas.Top="374" Height="32" Width="200" FontSize="18" RenderTransformOrigin="0.5,0.5" Foreground="White" Cursor="Arrow"/>
+            <CheckBox x:Name="revenueMiles" Content="Revenue Miles" Canvas.Left="382" Canvas.Top="197" Height="32" Width="200" FontSize="18" RenderTransformOrigin="0.5,0.5" Foreground="White" Cursor="Arrow"/>
+            <CheckBox x:Name="revenueHours" Content="Revenue Hours" Canvas.Left="382" Canvas.Top="255" Height="32" Width="200" FontSize="18" RenderTransformOrigin="0.5,0.5" Foreground="White" Cursor="Arrow"/>
+            <CheckBox x:Name="passengersPerMile" Content="Passengers per Mile" Canvas.Left="382" Canvas.Top="311" Height="32" Width="200" FontSize="18" RenderTransformOrigin="0.5,0.5" Foreground="White" Cursor="Arrow"/>
+            <CheckBox x:Name="passenerPerHour" Content="Passengers per Hour" Canvas.Left="382" Canvas.Top="374" Height="32" Width="200" FontSize="18" RenderTransformOrigin="0.5,0.5" Foreground="White" Cursor="Arrow"/>
+        </Canvas>
+        <Canvas x:Name="file" HorizontalAlignment="Left" Height="650" Margin="80,0,0,0" Width="1100" Background="#FF2534CB" RenderTransformOrigin="0.5,0.5" IsEnabled="False" Visibility="Hidden">
+            <Canvas.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform Y="-637" X="-80"/>
+                </TransformGroup>
+            </Canvas.RenderTransform>
+            <Button Content="Done" Height="54" Canvas.Left="882" Canvas.Top="460" Width="140" FontSize="36" Background="#FF08F17D"
+                    Click="Done_File"/>
+            <RichTextBox x:Name="textFile" Height="408" Canvas.Left="28" Canvas.Top="31" Width="1036">
+                <FlowDocument/>
+            </RichTextBox>
+        </Canvas>
     </StackPanel>
 </Window>
