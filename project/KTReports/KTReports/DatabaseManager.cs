@@ -173,6 +173,14 @@ namespace KTReports
 	                import_date text
                 )";
                 commands.Add(importedFiles);
+
+                string holidays = @"CREATE TABLE IF NOT EXISTS Holidays (
+	                holiday_id integer PRIMARY KEY AUTOINCREMENT,
+                    month integer,
+	                day integer
+                )";
+
+                commands.Add(holidays);
                 // Execute each command
                 foreach (string commandStr in commands)
                 {
@@ -481,6 +489,45 @@ namespace KTReports
             keyValuePairs.Add("master_rs_id", master_rs_id.ToString());
             InsertRoutes(keyValuePairs);
             return true;
+        }
+
+        // Creates a brand new route stop (NOT an update to an existing route stop)
+        public bool InsertHoliday(Dictionary<string, string> keyValuePairs)
+        {
+            string insertSQL =
+                    @"INSERT INTO Holidays 
+                        (month, day) 
+                    VALUES (@month, @day)";
+            using (SQLiteCommand command = new SQLiteCommand())
+            {
+                command.CommandText = insertSQL;
+                command.Connection = sqliteConnection;
+                command.Parameters.Add(new SQLiteParameter("@month", keyValuePairs["month"]));
+                command.Parameters.Add(new SQLiteParameter("@day", keyValuePairs["day"]));
+                command.ExecuteNonQuery();
+            }
+            return true;
+        }
+
+        public List<NameValueCollection> GetHolidaysInMonth(int month)
+        {
+            var results = new List<NameValueCollection>();
+            string query = @"SELECT days FROM Holidays WHERE @month == Holidays.month";
+            using (SQLiteCommand command = new SQLiteCommand())
+            {
+                command.CommandText = query;
+                command.Connection = sqliteConnection;
+                command.Parameters.Add(new SQLiteParameter("@month", month));
+                using (SQLiteDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        NameValueCollection row = reader.GetValues();
+                        results.Add(row);
+                    }
+                }
+            }
+            return results;
         }
 
         // A generic method for querying data from the database
