@@ -130,14 +130,14 @@ namespace KTReports
         {
             rOptions.IsEnabled = true;
             rOptions.Visibility = Visibility.Visible;
-        }
+        } /*
 
         private void Generate_Report(object sender, RoutedEventArgs e)
         {
             rOptions.IsEnabled = false;
             rOptions.Visibility = Visibility.Hidden;
         }
-
+        */
         private void Done_File(object sender, RoutedEventArgs e)
         {
             file.IsEnabled = false;
