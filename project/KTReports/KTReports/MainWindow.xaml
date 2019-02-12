@@ -5,93 +5,30 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KTReports"
         mc:Ignorable="d"
-        Title="Kitsap Transit Reports" Height="700" Width="1100" MinWidth="50" MinHeight="30" Visibility="Visible"
+        Title="Kitsap Transit Reports" Height="500" Width="1100" MinWidth="50" MinHeight="30" Visibility="Visible"
     >
-    <StackPanel>
-        <DockPanel>
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Top">
             <Menu>
                 <MenuItem Header="_File">
                     <MenuItem Header="Import Files" 
                               Margin="0,5,0,5"
-                              Click="Import_File"/>
-                    <MenuItem Header="Open Past Reports" Margin="0,5,0,5"/>
+                              Click="ImportFile"/>
                     <MenuItem Header="Close" 
                               Margin="0,5,0,5"
-                              Click="Close_Clicked"/>
+                              Click="CloseClicked"/>
                 </MenuItem>
                 <MenuItem Header="Create Report"
                           Margin="0,5,0,5"
-                          Click="Report_Options"/>
+                          Click="OpenReportsPage"/>
                 <MenuItem Header="View Visualizations" Margin="0,5,0,5"/>
                 <MenuItem Header="Update Route Info" Margin="0,5,0,5"/>
                 <MenuItem Header="Help" Margin="0,5,0,5"/>
             </Menu>
         </DockPanel>
-        <Grid Name="rOptions">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Name="Options" Width="1.25*"/>
-                <ColumnDefinition Name="ReportWindow" Width="3*"/>
-            </Grid.ColumnDefinitions>
-            <StackPanel Name="OptionsStack" Grid.Column="0">
-                <GroupBox Name="PropertiesBox">
-                    <StackPanel>
-                        <TextBlock Margin="0, 5, 0, 2">Select the data-points to include:</TextBlock>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="1*"/>
-                            </Grid.ColumnDefinitions>
 
-                            <StackPanel Grid.Column="0">
-                                <CheckBox IsChecked="True">Select All</CheckBox>
-                                <CheckBox IsChecked="True">Route number</CheckBox>
-                                <CheckBox IsChecked="True">Route name</CheckBox>
-                                <CheckBox IsChecked="True">Total passengers</CheckBox>
-                            </StackPanel>
-                            <StackPanel  Grid.Column="1">
-                                <CheckBox IsChecked="True">Revenue miles</CheckBox>
-                                <CheckBox IsChecked="True">Passengers per mile</CheckBox>
-                                <CheckBox IsChecked="True">Passengers per hour</CheckBox>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
-                </GroupBox>
-                <GroupBox Name="DistrictBox">
-                    <StackPanel>
-                        <TextBlock Margin="0, 5, 0, 2">Select the districts to include:</TextBlock>
-                        <CheckBox IsChecked="True">Select All</CheckBox>
-                        <CheckBox IsChecked="True">Bremerton</CheckBox>
-                        <CheckBox IsChecked="True">Central Kitsap</CheckBox>
-                        <CheckBox IsChecked="True">South Kitsap</CheckBox>
-                        <CheckBox IsChecked="True">North Kitsap</CheckBox>
-                    </StackPanel>
-                </GroupBox>
-                <!--<Calendar Name="StartDateSelector"></Calendar> -->
-                <TextBlock Margin="0,5,0,2" HorizontalAlignment="Center">Select a start date:</TextBlock>
-                <DatePicker Name="StartDatePicker"></DatePicker>
-                <TextBlock Margin="0,5,0,2" HorizontalAlignment="Center">Select an end date:</TextBlock>
-                <DatePicker Name="EndDatePicker" ></DatePicker>
-                <Button Margin="10">Generate Report</Button>
-            </StackPanel>
-            <!--<TextBlock Grid.Column="0">a</TextBlock> -->
-            <TextBlock Grid.Column="1">Display Report Here</TextBlock>
+        <Grid>
+            <Frame x:Name="Main"/>
         </Grid>
-
-        
-        <Canvas x:Name="file" HorizontalAlignment="Left" Height="650" Margin="80,0,0,0" Width="1100" Background="#FF2534CB" RenderTransformOrigin="0.5,0.5" IsEnabled="False" Visibility="Hidden">
-            <Canvas.RenderTransform>
-                <TransformGroup>
-                    <ScaleTransform/>
-                    <SkewTransform/>
-                    <RotateTransform/>
-                    <TranslateTransform Y="-637" X="-80"/>
-                </TransformGroup>
-            </Canvas.RenderTransform>
-            <Button Content="Done" Height="54" Canvas.Left="882" Canvas.Top="460" Width="140" FontSize="36" Background="#FF08F17D"
-                    Click="Done_File"/>
-            <RichTextBox x:Name="textFile" Height="408" Canvas.Left="28" Canvas.Top="31" Width="1036">
-                <FlowDocument/>
-            </RichTextBox>
-        </Canvas>
-    </StackPanel>
+    </DockPanel>
 </Window>
