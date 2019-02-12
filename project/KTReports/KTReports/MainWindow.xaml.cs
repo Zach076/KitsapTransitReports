@@ -25,6 +25,7 @@ namespace KTReports
         public MainWindow()
         {
             InitializeComponent();
+            // Set the Reports page as content by default
             //Main.Content = new Reports();
         }
 
@@ -35,6 +36,7 @@ namespace KTReports
 
         private void OpenReportsPage(object sender, RoutedEventArgs e)
         {
+            // Set the content of the MainWindow to be the Reports page
             Main.Content = new Reports();
         }
 
