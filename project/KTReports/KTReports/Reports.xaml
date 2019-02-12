@@ -1,0 +1,67 @@
+﻿<Page x:Class="KTReports.Reports"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:KTReports"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="Reporting">
+    <Grid Name="rOptions">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Name="Options" Width="1.25*" MinWidth="3in" MaxWidth="4in"/>
+            <ColumnDefinition Name="ReportWindow" Width="3*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Name="OptionsStack" Grid.Column="0" Grid.Row="0">
+            <!--<Button>Back</Button>-->
+            <GroupBox Name="PropertiesBox">
+                <StackPanel>
+                    <TextBlock Margin="0, 5, 0, 3">Select the data points to include:</TextBlock>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Name="DataPointsLeft" Grid.Column="0">
+                            <CheckBox IsChecked="True">Select All</CheckBox>
+                            <CheckBox IsChecked="True">Route number</CheckBox>
+                            <CheckBox IsChecked="True">Route name</CheckBox>
+                            <CheckBox IsChecked="True">Total passengers</CheckBox>
+                        </StackPanel>
+                        <StackPanel Name="DataPointsRight" Grid.Column="1">
+                            <CheckBox IsChecked="True">Revenue miles</CheckBox>
+                            <CheckBox IsChecked="True">Passengers per mile</CheckBox>
+                            <CheckBox IsChecked="True">Passengers per hour</CheckBox>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Name="DistrictBox">
+                <StackPanel Name="DistrictCheckBoxes">
+                    <TextBlock Margin="0, 5, 0, 3">Select the districts to include:</TextBlock>
+                    <CheckBox IsChecked="True">Select All</CheckBox>
+                    <CheckBox IsChecked="True">Bremerton</CheckBox>
+                    <CheckBox IsChecked="True">Central Kitsap</CheckBox>
+                    <CheckBox IsChecked="True">South Kitsap</CheckBox>
+                    <CheckBox IsChecked="True">North Kitsap</CheckBox>
+                </StackPanel>
+            </GroupBox>
+            <!--<Calendar Name="StartDateSelector"></Calendar> -->
+            <TextBlock Margin="0,5,0,2" HorizontalAlignment="Center">Select a start date:</TextBlock>
+            <DatePicker Name="StartDatePicker" Margin="2,0,0,0"></DatePicker>
+            <TextBlock Margin="0,5,0,2" HorizontalAlignment="Center">Select an end date:</TextBlock>
+            <DatePicker Name="EndDatePicker" Margin="2,0,0,0"></DatePicker>
+            <Button Margin="10">Generate Report</Button>
+        </StackPanel>
+        <!--<TextBlock Grid.Column="0">a</TextBlock> -->
+        <DockPanel Grid.Column="1">
+            <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="5" FontSize="16">Past Reports</TextBlock>
+            <DataGrid Name="PastReportsGrid" DockPanel.Dock="Top">
+                <!-- TODO: Fill in-->
+
+            </DataGrid>
+            <Button DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="100" Name="OpenReportButton" Margin="0,0,10,10">Open Report</Button>
+        </DockPanel>
+    </Grid>
+</Page>
