@@ -22,11 +22,27 @@ namespace KTReports
     {
         DateTime startDate;
         DateTime endDate;
+
+        // Can make Reports a singleton
         public Reports()
         {
             InitializeComponent();
         }
 
+        public void OnDataPointClick(object sender, RoutedEventArgs e)
+        {
+            var children = DataPointCheckBoxes.Children;
+            foreach (StackPanel stackPanel in DataPointCheckBoxes.Children)
+            {
+                foreach (CheckBox c in stackPanel.Children)
+                {
+                    if (c.Content.Equals("Select All") && c.IsEnabled)
+                    {
+                        Console.WriteLine("SELECT ALL ENABLED");
+                    }
+                }
+            }
+        }
         // Get date range
         DateTime[] GetDateRange()
         {
