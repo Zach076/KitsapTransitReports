@@ -25,7 +25,7 @@ namespace KTReports
         public MainWindow()
         {
             InitializeComponent();
-            Main.Content = new Reports();
+            //Main.Content = new Reports();
         }
 
         private void CloseClicked(object sender, RoutedEventArgs e)
