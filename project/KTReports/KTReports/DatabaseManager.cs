@@ -550,6 +550,31 @@ namespace KTReports
             return results;
         }
 
+        // Given a district and a date range, return a list of all route id's associated with that district
+        public List<NameValueCollection> GetDistrictRoutes(string district, List<DateTime> reportRange)
+        {
+            string query = @"SELECT * 
+                                FROM Routes 
+                                WHERE start_date <= @report_start AND end_date >= @report_end";
+            var results = new List<NameValueCollection>();
+            using (var command = new SQLiteCommand(query, sqliteConnection))
+            {
+                command.CommandText = query;
+                command.Connection = sqliteConnection;
+                command.Parameters.Add(new SQLiteParameter("@report_start", reportRange[0]));
+                command.Parameters.Add(new SQLiteParameter("@report_end", reportRange[1]));
+                using (SQLiteDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        NameValueCollection row = reader.GetValues();
+                        results.Add(row);
+                    }
+                }
+            }
+            return results;
+        }
+
         // Currently used for closing the Test Database before db file removal
         public void CloseDatabase()
         {

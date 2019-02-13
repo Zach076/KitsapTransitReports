@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,9 +21,6 @@ namespace KTReports
     /// </summary>
     public partial class Reports : Page
     {
-        DateTime startDate;
-        DateTime endDate;
-
         // Can make Reports a singleton
         public Reports()
         {
@@ -75,6 +73,7 @@ namespace KTReports
         public void OnGenerateReportClick(object sender, RoutedEventArgs e)
         {
             Console.WriteLine("Generate Report Clicked");
+            DatabaseManager databaseManager = DatabaseManager.GetDBManager();
             // Get a list of Datapoints to include
             List<string> dataPoints = GetSelectedDataPoints();
             // Get a list of districts to include
@@ -90,9 +89,50 @@ namespace KTReports
             {
                 // Display error message and do not generate report
                 Console.WriteLine("Enter a valid report range.");
+                return;
 
             }
+            // Get all routes per district
+            var districtToRoutes = new Dictionary<string, List<NameValueCollection>>();
+            foreach (var district in districts)
+            {
+                List<NameValueCollection> routes = databaseManager.GetDistrictRoutes(district, reportRange);
+                districtToRoutes.Add(district, routes);
+                /*foreach (var row in routes)
+                {
+                    string rowStr = "";
+                    foreach (string colName in row.AllKeys)
+                    {
+                        if (rowStr.Length != 0)
+                        {
+                            rowStr += ", ";
+                        }
+                        rowStr += colName.ToString() + ": " + row[colName].ToString();
+                    }
+                    Console.WriteLine(rowStr);
+                }*/
+            }
+            
+
+            // When making queries for FC data and NFC data, modify startDate to be the first day of that month
+            // and modify endDate to be the last date of that month because FC and NFC data are accumulated in months, not days
+
+
             // Make queries
+
+            // Get all routes per district
+
+            // Get total ridership from NFC and FC
+
+            // Get num trips from date range
+
+            // Get revenue miles for a route
+
+            // Get revenue hours from db info and calendar
+
+            // Get passengers per mile
+
+            // Get passengers per hour (using total passengers / revenue hours)
         }
 
         private Boolean IsValidRange(List<DateTime> reportRange)
@@ -154,17 +194,6 @@ namespace KTReports
             return districts;
         }
 
-        // Get date range
-        DateTime[] GetDateRange()
-        {
-            return new DateTime[] { startDate, endDate };
-        }
-
-        // Set date range (check if range is accurate)
-        void SetDateRange()
-        {
-            
-        }
         // DateTime(Int32, Int32, Int32) Initializes a new instance of the DateTime structure to the specified year, month, and day.
         // Use DaysInMonth() for constructing the end DateTime
         // Get day of the week using DataTime property .DayOfWeek
