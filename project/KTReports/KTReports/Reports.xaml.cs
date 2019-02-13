@@ -96,6 +96,7 @@ namespace KTReports
             var districtToRoutes = new Dictionary<string, List<NameValueCollection>>();
             foreach (var district in districts)
             {
+                // Need to distinguish between weekday and non-weekday routes
                 List<NameValueCollection> routes = databaseManager.GetDistrictRoutes(district, reportRange);
                 districtToRoutes.Add(district, routes);
                 /*foreach (var row in routes)
@@ -111,16 +112,27 @@ namespace KTReports
                     }
                     Console.WriteLine(rowStr);
                 }*/
+                foreach (var route in routes)
+                {
+                    int routeId = Convert.ToInt32(route["route_id"]);
+                    // Get sum of ridership for each route between reportRange for weekdays
+                    // routeTotal contains nfc.total_ridership, nfc.total_nonridership, fc.boardings and total
+                    List<NameValueCollection> routeTotalWeek = databaseManager.GetRouteRidership(routeId, reportRange, true);
+
+                    // Get sum of ridership for each route between reportRange for saturdays
+                    List<NameValueCollection> routeTotalSat = databaseManager.GetRouteRidership(routeId, reportRange, false);
+                    // TODO: Store these lists or totals in association with their routes so that we can use them
+                    // Could use a Dictionary that maps route id to these lists
+                }
+
             }
-            
+
 
             // When making queries for FC data and NFC data, modify startDate to be the first day of that month
             // and modify endDate to be the last date of that month because FC and NFC data are accumulated in months, not days
 
 
             // Make queries
-
-            // Get all routes per district
 
             // Get total ridership from NFC and FC
 

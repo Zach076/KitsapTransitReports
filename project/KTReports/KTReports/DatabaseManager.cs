@@ -575,6 +575,35 @@ namespace KTReports
             return results;
         }
 
+        // Given a district and a date range, return a list of all route id's associated with that district
+        public List<NameValueCollection> GetRouteRidership(int routeId, List<DateTime> reportRange, Boolean isWeekday)
+        {
+            string query = @"SELECT nfc.total_ridership, nfc.total_nonridership, fc.boardings, 
+                                    (nfc.total_ridership + nfc.total_nonridership + fc.boardings) as total
+                                FROM FareCardData as fc, NonFareCardData as nfc
+                                WHERE start_date <= @report_start 
+                                    AND end_date >= @report_end
+                                    AND is_weekday == @is_weekday";
+            var results = new List<NameValueCollection>();
+            using (var command = new SQLiteCommand(query, sqliteConnection))
+            {
+                command.CommandText = query;
+                command.Connection = sqliteConnection;
+                command.Parameters.Add(new SQLiteParameter("@report_start", reportRange[0]));
+                command.Parameters.Add(new SQLiteParameter("@report_end", reportRange[1]));
+                command.Parameters.Add(new SQLiteParameter("@is_weekday", isWeekday));
+                using (SQLiteDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        NameValueCollection row = reader.GetValues();
+                        results.Add(row);
+                    }
+                }
+            }
+            return results;
+        }
+
         // Currently used for closing the Test Database before db file removal
         public void CloseDatabase()
         {
