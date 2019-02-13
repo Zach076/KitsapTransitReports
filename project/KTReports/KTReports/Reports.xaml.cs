@@ -76,13 +76,82 @@ namespace KTReports
         {
             Console.WriteLine("Generate Report Clicked");
             // Get a list of Datapoints to include
-
+            List<string> dataPoints = GetSelectedDataPoints();
             // Get a list of districts to include
-
-            // Get the start and end dates
+            List<string> districts = GetSelectedDistricts();
+            /*foreach (string district in districts)
+            {
+                Console.WriteLine(district);
+            }*/
+            // Get the start and end dates and validate
+            List<DateTime> reportRange = GetReportRange();
             // Validate the start and end dates
+            if (!IsValidRange(reportRange))
+            {
+                // Display error message and do not generate report
+                Console.WriteLine("Enter a valid report range.");
 
+            }
             // Make queries
+        }
+
+        private Boolean IsValidRange(List<DateTime> reportRange)
+        {
+            if (reportRange.Count != 2 || reportRange[0].CompareTo(reportRange[1]) > 0)
+            {
+                // reportRange contains null values or start date is later than end date, which is invalid
+                return false;
+            }
+            return true;
+        }
+
+        private List<DateTime> GetReportRange()
+        {
+            List<DateTime> reportRange = new List<DateTime>();
+            if (StartDatePicker.SelectedDate != null)
+            {
+                DateTime startDate = StartDatePicker.SelectedDate.Value;
+                reportRange.Add(startDate);
+            }
+            if (EndDatePicker.SelectedDate != null)
+            {
+                DateTime endDate = EndDatePicker.SelectedDate.Value;
+                reportRange.Add(endDate);
+            }
+            return reportRange;
+        }
+
+        private List<string> GetSelectedDataPoints()
+        {
+            var dataPoints = new List<string>();
+            foreach (var uiElem in DataPointCheckBoxes.Children)
+            {
+                if (uiElem.GetType() != typeof(StackPanel)) continue;
+
+                foreach (CheckBox c in ((StackPanel)uiElem).Children)
+                {
+                    if (c != SelectAllDataPoints && c.IsChecked == true)
+                    {
+                        dataPoints.Add(c.Content.ToString());
+                    }
+                }
+            }
+            return dataPoints;
+        }
+
+        private List<string> GetSelectedDistricts()
+        {
+            var districts = new List<string>();
+            foreach (var uiElem in DistrictCheckBoxes.Children)
+            {
+                if (uiElem.GetType() != typeof(CheckBox)) continue;
+                CheckBox c = (CheckBox)uiElem;
+                if (c != SelectAllDistricts && c.IsChecked == true)
+                {
+                    districts.Add(c.Content.ToString());
+                }
+            }
+            return districts;
         }
 
         // Get date range
