@@ -131,18 +131,17 @@ namespace KTReports
             // When making queries for FC data and NFC data, modify startDate to be the first day of that month
             // and modify endDate to be the last date of that month because FC and NFC data are accumulated in months, not days
 
+            // Get num trips from date range for weekdays and saturdays separately
+            // This requires counting (number of weekdays in date range - number of holidays on weekdays in day range) * num trips made per weekday
+            // and (number of holidays on weekdays * number of trips made on holidays)
+            // The same logic applies for saturday calculations
+      
 
-            // Make queries
+            // Get revenue miles for a route (distance of trip * num trips during week (regardless of holiday or not))
 
-            // Get total ridership from NFC and FC
+            // Get revenue hours (num hours on weekday * number of weekdays excluding holidays)
 
-            // Get num trips from date range
-
-            // Get revenue miles for a route
-
-            // Get revenue hours from db info and calendar
-
-            // Get passengers per mile
+            // Get passengers per mile (total passengers on weekdays / revenue miles)
 
             // Get passengers per hour (using total passengers / revenue hours)
         }
