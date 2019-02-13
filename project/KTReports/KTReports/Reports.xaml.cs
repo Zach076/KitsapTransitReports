@@ -31,18 +31,60 @@ namespace KTReports
 
         public void OnDataPointClick(object sender, RoutedEventArgs e)
         {
-            var children = DataPointCheckBoxes.Children;
-            foreach (StackPanel stackPanel in DataPointCheckBoxes.Children)
+            CheckBox senderCheckBox = (CheckBox) sender;
+            if (senderCheckBox == SelectAllDataPoints && senderCheckBox.IsChecked == true)
             {
-                foreach (CheckBox c in stackPanel.Children)
+                // Enable all checkboxes for data points
+                foreach (var uiElem in DataPointCheckBoxes.Children)
                 {
-                    if (c.Content.Equals("Select All") && c.IsEnabled)
+                    if (uiElem.GetType() != typeof(StackPanel)) continue;
+
+                    foreach (CheckBox c in ((StackPanel)uiElem).Children)
                     {
-                        Console.WriteLine("SELECT ALL ENABLED");
+                        c.IsChecked = true;
                     }
                 }
             }
+            else if (senderCheckBox.IsChecked == false)
+            {
+                // A checkbox was unchecked
+                SelectAllDataPoints.IsChecked = false;
+            }
         }
+
+        public void OnDistictClick(object sender, RoutedEventArgs e)
+        {
+            CheckBox senderCheckBox = (CheckBox) sender;
+            if (senderCheckBox == SelectAllDistricts && senderCheckBox.IsChecked == true)
+            {
+                // Enable all checkboxes for data points
+                foreach (var uiElem in DistrictCheckBoxes.Children)
+                {
+                    if (uiElem.GetType() != typeof(CheckBox)) continue;
+                    CheckBox c = (CheckBox)uiElem;
+                    c.IsChecked = true;
+                }
+            }
+            else if (senderCheckBox.IsChecked == false)
+            {
+                // A checkbox was unchecked
+                SelectAllDistricts.IsChecked = false;
+            }
+        }
+
+        public void OnGenerateReportClick(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("Generate Report Clicked");
+            // Get a list of Datapoints to include
+
+            // Get a list of districts to include
+
+            // Get the start and end dates
+            // Validate the start and end dates
+
+            // Make queries
+        }
+
         // Get date range
         DateTime[] GetDateRange()
         {

@@ -24,7 +24,7 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Name="DataPointsLeft" Grid.Column="0">
-                            <CheckBox IsChecked="True" Click="OnDataPointClick">Select All</CheckBox>
+                            <CheckBox Name="SelectAllDataPoints" IsChecked="True" Click="OnDataPointClick">Select All</CheckBox>
                             <CheckBox IsChecked="True" Click="OnDataPointClick">Route number</CheckBox>
                             <CheckBox IsChecked="True" Click="OnDataPointClick">Route name</CheckBox>
                             <CheckBox IsChecked="True" Click="OnDataPointClick">Total passengers</CheckBox>
@@ -40,11 +40,11 @@
             <GroupBox Name="DistrictBox">
                 <StackPanel Name="DistrictCheckBoxes">
                     <TextBlock Margin="0, 5, 0, 3">Select the districts to include:</TextBlock>
-                    <CheckBox IsChecked="True">Select All</CheckBox>
-                    <CheckBox IsChecked="True">Bremerton</CheckBox>
-                    <CheckBox IsChecked="True">Central Kitsap</CheckBox>
-                    <CheckBox IsChecked="True">South Kitsap</CheckBox>
-                    <CheckBox IsChecked="True">North Kitsap</CheckBox>
+                    <CheckBox Name="SelectAllDistricts" IsChecked="True" Click="OnDistictClick">Select All</CheckBox>
+                    <CheckBox IsChecked="True" Click="OnDistictClick">Bremerton</CheckBox>
+                    <CheckBox IsChecked="True" Click="OnDistictClick">Central Kitsap</CheckBox>
+                    <CheckBox IsChecked="True" Click="OnDistictClick">South Kitsap</CheckBox>
+                    <CheckBox IsChecked="True" Click="OnDistictClick">North Kitsap</CheckBox>
                 </StackPanel>
             </GroupBox>
             <!--<Calendar Name="StartDateSelector"></Calendar> -->
@@ -52,7 +52,7 @@
             <DatePicker Name="StartDatePicker" Margin="2,0,0,0"></DatePicker>
             <TextBlock Margin="0,5,0,2" HorizontalAlignment="Center">Select an end date:</TextBlock>
             <DatePicker Name="EndDatePicker" Margin="2,0,0,0"></DatePicker>
-            <Button Margin="10">Generate Report</Button>
+            <Button Margin="10" Click="OnGenerateReportClick">Generate Report</Button>
         </StackPanel>
         <!--<TextBlock Grid.Column="0">a</TextBlock> -->
         <DockPanel Grid.Column="1">
