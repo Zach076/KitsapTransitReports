@@ -13,5 +13,18 @@ namespace KTReports
     /// </summary>
     public partial class App : Application
     {
+        public DatabaseManager databaseManager;
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            // Gets a singleton for database manager
+            // databaseManager = DatabaseManager.GetDBManager();
+            // Run tests on insertions and queries for a test database
+            TestDB test = new TestDB();
+            test.TestInsertions();
+            test.TestQueries();
+            test.RemoveDB();
+        }
+
     }
 }

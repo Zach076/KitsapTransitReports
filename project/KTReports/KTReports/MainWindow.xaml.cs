@@ -25,15 +25,23 @@ namespace KTReports
         public MainWindow()
         {
             InitializeComponent();
+            // Set the Reports page as content by default
+            //Main.Content = new Reports();
         }
 
-        private void Close_Clicked(object sender, RoutedEventArgs e)
+        private void CloseClicked(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
-        [STAThread]
 
-        private void Import_File(object sender, RoutedEventArgs e)
+        private void OpenReportsPage(object sender, RoutedEventArgs e)
+        {
+            // Set the content of the MainWindow to be the Reports page
+            Main.Content = new Reports();
+        }
+
+        [STAThread]
+        private void ImportFile(object sender, RoutedEventArgs e)
         {
             string fileName = "";
             OpenFileDialog fileDia = new OpenFileDialog();
@@ -53,8 +61,7 @@ namespace KTReports
                 //Loop through each sheet in the file
                 for (int sheetNum = 1; sheetNum <= sheetCount; sheetNum++)
                 {
-                    file.IsEnabled = true;
-                    file.Visibility = Visibility.Visible;
+
                     Microsoft.Office.Interop.Excel._Worksheet xlWorksheet = xlWorkbook.Sheets[sheetNum];
                     Microsoft.Office.Interop.Excel.Range xlRange = xlWorksheet.UsedRange;
 
@@ -72,7 +79,7 @@ namespace KTReports
                             if (xlRange.Cells[i, j] != null && xlRange.Cells[i, j].Value2 != null)
                             {
                                 //string text = System.IO.File.ReadAllText(@fileName);
-                                textFile.AppendText(xlRange.Cells[i, j].Value2.ToString());
+
                                 //dataGridView1.Rows[i - 1].Cells[j - 1].Value = xlRange.Cells[i, j].Value2.ToString();
                             }
 
@@ -82,66 +89,13 @@ namespace KTReports
                                 //append to a string?
                             }
                             */
-        }
-        textFile.AppendText("\n");
-        //send list to Database?
-        }
-        /*
-        //cleanup  
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-        //release com objects to fully kill excel process from running in the background
-        X.ReleaseComObject(xlRange);
-        X.ReleaseComObject(xlWorksheet);
-        //close and release  
-        xlWorkbook.Close();
-        X.ReleaseComObject(xlWorkbook);
-        //quit and release  
-        xlApp.Quit();
-        X.ReleaseComObject(xlApp);
-        */
-        }
-        }
-        }
 
-       /* private void Import_File(object sender, RoutedEventArgs e)
-        {
-            String path;
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Excel/CSV Files|*.xls;*.xlsx;*.xlsm;*.csv";
-            openFileDialog.Title = "Select a file to import";
-            openFileDialog.ShowDialog();
-            path = openFileDialog.FileName;
-
-            if(path.Length > 2)
-            {
-                file.IsEnabled = true;
-                file.Visibility = Visibility.Visible;
-                string text = System.IO.File.ReadAllText(@path);
-                textFile.AppendText(text);
+                        }
+                        //send list to Database?
+                    }
+                }
             }
-
-            //string text = System.IO.File.ReadAllText(@path);
-            //System.Console.WriteLine("Contents of file = {0}", text);
-        }*/
-        
-
-        private void Report_Options(object sender, RoutedEventArgs e)
-        {
-            rOptions.IsEnabled = true;
-            rOptions.Visibility = Visibility.Visible;
         }
-
-        private void Generate_Report(object sender, RoutedEventArgs e)
-        {
-            rOptions.IsEnabled = false;
-            rOptions.Visibility = Visibility.Hidden;
-        }
-
-        private void Done_File(object sender, RoutedEventArgs e)
-        {
-            file.IsEnabled = false;
-            file.Visibility = Visibility.Hidden;
-        }
+    
     }
 }
