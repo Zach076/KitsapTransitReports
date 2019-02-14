@@ -1,0 +1,34 @@
+﻿<Window x:Class="KTReports.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:KTReports"
+        mc:Ignorable="d"
+        Title="Kitsap Transit Reports" Height="500" Width="1100" MinWidth="50" MinHeight="30" Visibility="Visible"
+    >
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Top">
+            <Menu>
+                <MenuItem Header="_File">
+                    <MenuItem Header="Import Files" 
+                              Margin="0,5,0,5"
+                              Click="ImportFile"/>
+                    <MenuItem Header="Close" 
+                              Margin="0,5,0,5"
+                              Click="CloseClicked"/>
+                </MenuItem>
+                <MenuItem Header="Create Report"
+                          Margin="0,5,0,5"
+                          Click="OpenReportsPage"/>
+                <MenuItem Header="View Visualizations" Margin="0,5,0,5"/>
+                <MenuItem Header="Update Route Info" Margin="0,5,0,5"/>
+                <MenuItem Header="Help" Margin="0,5,0,5"/>
+            </Menu>
+        </DockPanel>
+
+        <Grid>
+            <Frame x:Name="Main"/>
+        </Grid>
+    </DockPanel>
+</Window>
