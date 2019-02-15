@@ -112,7 +112,7 @@ namespace KTReports
                                             dict.Add(key.Value, xlRange.Cells[i, j].Value2.ToString());
                                             key = key.Next;
                                         }
-                                        else if (Regex.Match(xlRange.Cells[i, j].Value2.ToString(), @".*Subtotal.*").Success)
+                                        else if (xlRange.Cells[i, j] != null && xlRange.Cells[i, j].Value2 != null && Regex.Match(xlRange.Cells[i, j].Value2.ToString(), @".*Subtotal.*").Success)
                                         {
                                             // look x rows ahead for more then end while Loop if empty
                                             i = i + 2;
