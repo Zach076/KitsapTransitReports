@@ -15,7 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO;
 using Microsoft.Win32;
-//using System.Diagnostics;
+using System.Diagnostics;
 
 namespace KTReports
 {
@@ -161,7 +161,7 @@ namespace KTReports
                                 dict.Add("end_date", reportPeriod[2]);
                                 dict.Add("is_weekday", isWeekday);
 
-                                //Debug.WriteLine("insert");
+                                Debug.WriteLine("insert");
                                 if (isORCA)
                                 {
                                     file_id = databaseManager.InsertNewFile(fileName, fileInfo.FullName, DatabaseManager.FileType.FC, dateTime.ToString("MM/dd/yyyy"));
@@ -177,7 +177,8 @@ namespace KTReports
 
                                 dict.Clear();
                                 key = colNames.First;
-                            } else if (inTable == 3)
+                            }
+                            else if (inTable == 3)
                             {
                                 inTable = 2;
                                 key = colNames.First;
