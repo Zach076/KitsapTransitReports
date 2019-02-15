@@ -176,8 +176,8 @@ namespace KTReports
 
                 string holidays = @"CREATE TABLE IF NOT EXISTS Holidays (
 	                holiday_id integer PRIMARY KEY AUTOINCREMENT,
-                    month integer,
-	                day integer
+                    date text,
+                    service_type int
                 )";
 
                 commands.Add(holidays);
@@ -491,33 +491,36 @@ namespace KTReports
             return true;
         }
 
-        // Creates a brand new route stop (NOT an update to an existing route stop)
+        // Creates a holiday using the holiday's date and service type (1 == HOLIDAY SERVICE, 2 == NO SERVICE)
         public bool InsertHoliday(Dictionary<string, string> keyValuePairs)
         {
             string insertSQL =
                     @"INSERT INTO Holidays 
-                        (month, day) 
-                    VALUES (@month, @day)";
+                        (date, service_type) 
+                    VALUES (@date, @service_type)";
             using (SQLiteCommand command = new SQLiteCommand())
             {
                 command.CommandText = insertSQL;
                 command.Connection = sqliteConnection;
-                command.Parameters.Add(new SQLiteParameter("@month", keyValuePairs["month"]));
-                command.Parameters.Add(new SQLiteParameter("@day", keyValuePairs["day"]));
+                command.Parameters.Add(new SQLiteParameter("@date", keyValuePairs["date"]));
+                command.Parameters.Add(new SQLiteParameter("@service_type", keyValuePairs["service_type"]));
                 command.ExecuteNonQuery();
             }
             return true;
         }
 
-        public List<NameValueCollection> GetHolidaysInMonth(int month)
+        public List<NameValueCollection> GetHolidaysInRange(List<DateTime> range)
         {
             var results = new List<NameValueCollection>();
-            string query = @"SELECT days FROM Holidays WHERE @month == Holidays.month";
+            string query = @"SELECT date, service_type 
+                                FROM Holidays 
+                                WHERE @startDate <= Holidays.date AND @endDate >= Holidays.date";
             using (SQLiteCommand command = new SQLiteCommand())
             {
                 command.CommandText = query;
                 command.Connection = sqliteConnection;
-                command.Parameters.Add(new SQLiteParameter("@month", month));
+                command.Parameters.Add(new SQLiteParameter("@startDate", range[0]));
+                command.Parameters.Add(new SQLiteParameter("@endDate", range[1]));
                 using (SQLiteDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
@@ -550,6 +553,28 @@ namespace KTReports
             return results;
         }
 
+     /*   public List<NameValueCollection> GetNumHolidays(List<DateTime> reportRange)
+        {
+            string query = @"SELECT day FROM Holidays WHERE @month == Holidays.month";
+            var results = new List<NameValueCollection>();
+            using (var command = new SQLiteCommand(query, sqliteConnection))
+            {
+                command.CommandText = query;
+                command.Connection = sqliteConnection;
+                command.Parameters.Add(new SQLiteParameter("@report_start", reportRange[0]));
+                command.Parameters.Add(new SQLiteParameter("@report_end", reportRange[1]));
+                using (SQLiteDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        NameValueCollection row = reader.GetValues();
+                        results.Add(row);
+                    }
+                }
+            }
+            return results;
+        }*/
+
         // Given a district and a date range, return a list of all route id's associated with that district
         public List<NameValueCollection> GetDistrictRoutes(string district, List<DateTime> reportRange)
         {
@@ -575,8 +600,8 @@ namespace KTReports
             return results;
         }
 
-        // Given a district and a date range, return a list of all route id's associated with that district
-        public List<NameValueCollection> GetRouteRidership(int routeId, List<DateTime> reportRange, Boolean isWeekday)
+        // Given a routeId, report range, get the ridership for a route during weekdays or saturdays (specified by isWeekday)
+        public NameValueCollection GetRouteRidership(int routeId, List<DateTime> reportRange, Boolean isWeekday)
         {
             string query = @"SELECT nfc.total_ridership, nfc.total_nonridership, fc.boardings, 
                                     (nfc.total_ridership + nfc.total_nonridership + fc.boardings) as total
@@ -584,7 +609,7 @@ namespace KTReports
                                 WHERE start_date <= @report_start 
                                     AND end_date >= @report_end
                                     AND is_weekday == @is_weekday";
-            var results = new List<NameValueCollection>();
+            var results = new NameValueCollection();
             using (var command = new SQLiteCommand(query, sqliteConnection))
             {
                 command.CommandText = query;
@@ -596,8 +621,8 @@ namespace KTReports
                 {
                     while (reader.Read())
                     {
-                        NameValueCollection row = reader.GetValues();
-                        results.Add(row);
+                        // Return the first (and only) result
+                        return reader.GetValues();
                     }
                 }
             }

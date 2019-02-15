@@ -21,10 +21,12 @@ namespace KTReports
     /// </summary>
     public partial class Reports : Page
     {
+        DatabaseManager databaseManager;
         // Can make Reports a singleton
         public Reports()
         {
             InitializeComponent();
+            databaseManager = DatabaseManager.GetDBManager();
         }
 
         public void OnDataPointClick(object sender, RoutedEventArgs e)
@@ -73,7 +75,6 @@ namespace KTReports
         public void OnGenerateReportClick(object sender, RoutedEventArgs e)
         {
             Console.WriteLine("Generate Report Clicked");
-            DatabaseManager databaseManager = DatabaseManager.GetDBManager();
             // Get a list of Datapoints to include
             List<string> dataPoints = GetSelectedDataPoints();
             // Get a list of districts to include
@@ -92,8 +93,18 @@ namespace KTReports
                 return;
 
             }
+
+            // Get num trips from date range for weekdays and saturdays separately
+            // This requires counting (number of weekdays in date range - number of holidays on weekdays in day range) * num trips made per weekday
+            int weekdayCount = GetNumWeekdays(reportRange);
+            int weekdayHolidayCount = GetNumHolidays(reportRange, true, new List<int> { 1 });
+            int saturdayCount = GetNumSaturdays(reportRange);
+            int saturdayHolidayCount = GetNumHolidays(reportRange, false, new List<int> { 1 });
+
             // Get all routes per district
             var districtToRoutes = new Dictionary<string, List<NameValueCollection>>();
+            var weekRoutes = new Dictionary<int, NameValueCollection>();
+            var satRoutes = new Dictionary<int, NameValueCollection>();
             foreach (var district in districts)
             {
                 // Need to distinguish between weekday and non-weekday routes
@@ -117,36 +128,129 @@ namespace KTReports
                     int routeId = Convert.ToInt32(route["route_id"]);
                     // Get sum of ridership for each route between reportRange for weekdays
                     // routeTotal contains nfc.total_ridership, nfc.total_nonridership, fc.boardings and total
-                    List<NameValueCollection> routeTotalWeek = databaseManager.GetRouteRidership(routeId, reportRange, true);
+                    NameValueCollection routeTotalWeek = databaseManager.GetRouteRidership(routeId, reportRange, true);
 
                     // Get sum of ridership for each route between reportRange for saturdays
-                    List<NameValueCollection> routeTotalSat = databaseManager.GetRouteRidership(routeId, reportRange, false);
-                    // TODO: Store these lists or totals in association with their routes so that we can use them
-                    // Could use a Dictionary that maps route id to these lists
+                    NameValueCollection routeTotalSat = databaseManager.GetRouteRidership(routeId, reportRange, false);
+
+                    weekRoutes.Add(routeId, routeTotalWeek);
+                    satRoutes.Add(routeId, routeTotalSat);
+
+                    // Num trips on normal weekdays
+                    int numTripsWeek = Convert.ToInt32(route["num_trips_week"]) * weekdayCount;
+                    // Num trips on serviced holiday weekdays
+                    int numTripsHolidaysW = Convert.ToInt32(route["num_trips_hol"]) * weekdayHolidayCount;
+                    // Num trips on normal saturdays
+                    int numTripsSat = Convert.ToInt32(route["num_trips_sat"]) * saturdayCount;
+                    // Num trips on serviced holiday saturdays
+                    int numTripsHolidaysS = Convert.ToInt32(route["num_trips_hol"]) * saturdayHolidayCount;
+
+                    // Get revenue miles for a route (distance of trip * num trips during week (regardless of holiday or not))
+                    double routeDistance = Convert.ToDouble(route["distance"]);
+                    double revenueMilesWeek = routeDistance * (numTripsWeek + numTripsHolidaysW);
+                    double revenueMilesSat = routeDistance * (numTripsSat + numTripsHolidaysS);
+                    // Get revenue hours (num hours on weekday * number of weekdays excluding holidays)
+                    double revenueHoursWeek = Convert.ToDouble(route["weekday_hours"]) * weekdayCount;
+                    double revenueHoursHolidaysW = Convert.ToDouble(route["holiday_hours"]) * weekdayHolidayCount;
+                    double revenueHoursSat = Convert.ToDouble(route["saturday_hours"]) * saturdayCount;
+                    double revenueHoursHolidaysS = Convert.ToDouble(route["holiday_hours"]) * saturdayHolidayCount;
+                    // Get passengers per mile (total passengers on weekdays / revenue miles)
+                    int totalRidesWeek = Convert.ToInt32(routeTotalWeek["total"]);
+                    int totalRidesSat = Convert.ToInt32(routeTotalSat["total"]);
+                    double passPerMileW = totalRidesWeek / revenueMilesWeek;
+                    double passPerMileS = totalRidesSat / revenueMilesSat;
+                    // Get passengers per hour (using total passengers / revenue hours)
+                    double passPerHourW = totalRidesWeek / (revenueHoursWeek + revenueHoursHolidaysW);
+                    double passPerHourS = totalRidesSat / (revenueHoursSat + revenueHoursHolidaysS);
+
+
                 }
 
             }
-
-
-            // When making queries for FC data and NFC data, modify startDate to be the first day of that month
-            // and modify endDate to be the last date of that month because FC and NFC data are accumulated in months, not days
-
-            // Get num trips from date range for weekdays and saturdays separately
-            // This requires counting (number of weekdays in date range - number of holidays on weekdays in day range) * num trips made per weekday
-            // and (number of holidays on weekdays * number of trips made on holidays)
-            // The same logic applies for saturday calculations
-      
-
-            // Get revenue miles for a route (distance of trip * num trips during week (regardless of holiday or not))
-
-            // Get revenue hours (num hours on weekday * number of weekdays excluding holidays)
-
-            // Get passengers per mile (total passengers on weekdays / revenue miles)
-
-            // Get passengers per hour (using total passengers / revenue hours)
+            
         }
 
-        private Boolean IsValidRange(List<DateTime> reportRange)
+        private int GetNumWeekdays(List<DateTime> reportRange)
+        {
+            int weekdayCount = 0;
+            DateTime startDate = reportRange[0];
+            DateTime endDate = reportRange[1];
+            int totalDays = (int) (endDate - startDate).TotalDays + 1; // Add one so that we include the start date as a day
+            int weekendStart = 0;
+            double numWeekends = totalDays / 7.0;
+            int numFullWeekends = (int) Math.Floor(numWeekends);
+            if (numWeekends != numFullWeekends)
+            {
+                // If we haven't accounted for every pair of weekend days,
+                // we need to set weekendStart appropriately
+                if (startDate.DayOfWeek == DayOfWeek.Saturday)
+                {
+                    weekendStart = 2;
+                }
+                else if (startDate.DayOfWeek == DayOfWeek.Sunday)
+                {
+                    weekendStart = 1;
+                }
+            }
+            int numWeekendDays = (numFullWeekends * 2) + weekendStart;
+            weekdayCount -= numWeekendDays;
+
+            int weekdayHolidayCount = GetNumHolidays(reportRange, true, new List<int> { 1, 2 });
+            // Subtract number of holidays occurring on weekdays within range
+            weekdayCount -= weekdayHolidayCount;
+            return weekdayCount;
+        }
+
+        private int GetNumSaturdays(List<DateTime> reportRange)
+        {
+            DateTime startDate = reportRange[0];
+            DateTime endDate = reportRange[1];
+            int totalDays = (int)(endDate - startDate).TotalDays + 1; // Add one so that we include the start date as a day
+            int numFullWeekends = (int) Math.Floor(totalDays / 7.0);
+            DayOfWeek lastAccountedDOW = endDate.AddDays(-numFullWeekends).DayOfWeek;
+
+            int numSaturdays = numFullWeekends + (startDate.DayOfWeek <= DayOfWeek.Saturday && lastAccountedDOW >= DayOfWeek.Saturday ? 1 : 0);
+
+            int saturdayHolidayCount = GetNumHolidays(reportRange, false, new List<int> { 1, 2 });
+            // Subtract number of holidays occurring on saturdays within range
+            numSaturdays -= saturdayHolidayCount;
+            return numSaturdays;
+        }
+
+        // Gets number of holidays occurring within a range on weekdays or on saturdays (true/false respectively)
+        // serviceType: 1 == HOLIDAY SERVICE, 2 == NO SERVICE
+        private int GetNumHolidays(List<DateTime> reportRange, bool forWeekdays, List<int> serviceTypes)
+        {
+            List<NameValueCollection> holidays = databaseManager.GetHolidaysInRange(reportRange);
+            int holidayCount = 0;
+            foreach (var holiday in holidays)
+            {
+                int serviceType = Convert.ToInt32(holiday["service_type"]);
+                if (!serviceTypes.Contains(serviceType))
+                {
+                    continue;
+                }
+                DayOfWeek holidayDOW = Convert.ToDateTime(holiday["date"]).DayOfWeek;
+                bool onWeekday = holidayDOW > DayOfWeek.Sunday && holidayDOW < DayOfWeek.Saturday;
+                if (forWeekdays)
+                {
+                    if (onWeekday)
+                    {
+                        holidayCount++;
+                    }
+                }
+                else
+                {
+                    if (!onWeekday && holidayDOW == DayOfWeek.Saturday)
+                    {
+                        holidayCount++;
+                    }
+                }
+            }
+            return holidayCount;
+        }
+
+        private bool IsValidRange(List<DateTime> reportRange)
         {
             if (reportRange.Count != 2 || reportRange[0].CompareTo(reportRange[1]) > 0)
             {
