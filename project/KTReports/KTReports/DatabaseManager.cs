@@ -50,7 +50,7 @@ namespace KTReports
             return dbManagerInstance;
         }
 
-        // Current schema: https://i.imgur.com/ouJqLx0.png
+        // Current schema: https://i.imgur.com/zSqJlg4.png
         private void CreateTables()
         {
             // Complete all commands or none at all
@@ -533,48 +533,6 @@ namespace KTReports
             return results;
         }
 
-        // A generic method for querying data from the database
-        public List<NameValueCollection> Query(string[] selection, string[] tables, string expressions)
-        {
-            string query = "SELECT " + string.Join(", ", selection) + " FROM " + string.Join(", ", tables) + " WHERE " + expressions;
-            var results = new List<NameValueCollection>();
-            using (var command = new SQLiteCommand(query, sqliteConnection))
-            {
-                using (SQLiteDataReader reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        NameValueCollection row = reader.GetValues();
-                        results.Add(row);
-                    }
-                }
-            }
-            // Returns a list of NameValueCollections, which are like Dictionaries
-            return results;
-        }
-
-     /*   public List<NameValueCollection> GetNumHolidays(List<DateTime> reportRange)
-        {
-            string query = @"SELECT day FROM Holidays WHERE @month == Holidays.month";
-            var results = new List<NameValueCollection>();
-            using (var command = new SQLiteCommand(query, sqliteConnection))
-            {
-                command.CommandText = query;
-                command.Connection = sqliteConnection;
-                command.Parameters.Add(new SQLiteParameter("@report_start", reportRange[0]));
-                command.Parameters.Add(new SQLiteParameter("@report_end", reportRange[1]));
-                using (SQLiteDataReader reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        NameValueCollection row = reader.GetValues();
-                        results.Add(row);
-                    }
-                }
-            }
-            return results;
-        }*/
-
         // Given a district and a date range, return a list of all route id's associated with that district
         public List<NameValueCollection> GetDistrictRoutes(string district, List<DateTime> reportRange)
         {
@@ -626,6 +584,26 @@ namespace KTReports
                     }
                 }
             }
+            return results;
+        }
+
+        // A generic method for querying data from the database
+        public List<NameValueCollection> Query(string[] selection, string[] tables, string expressions)
+        {
+            string query = "SELECT " + string.Join(", ", selection) + " FROM " + string.Join(", ", tables) + " WHERE " + expressions;
+            var results = new List<NameValueCollection>();
+            using (var command = new SQLiteCommand(query, sqliteConnection))
+            {
+                using (SQLiteDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        NameValueCollection row = reader.GetValues();
+                        results.Add(row);
+                    }
+                }
+            }
+            // Returns a list of NameValueCollections, which are like Dictionaries
             return results;
         }
 

@@ -12,8 +12,8 @@
             <ColumnDefinition Name="OptionSelection" Width="1.25*" MinWidth="3in" MaxWidth="4in"/>
             <ColumnDefinition Name="ReportWindow" Width="3*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Name="OptionsStack" Grid.Column="0" Grid.Row="0" VerticalAlignment="Stretch">
-            <GroupBox Name="PropertiesBox">
+        <DockPanel Name="OptionsStack" Grid.Column="0" Grid.Row="0" VerticalAlignment="Stretch">
+            <GroupBox Name="PropertiesBox" DockPanel.Dock="Top">
                 <StackPanel VerticalAlignment="Stretch">
                     <TextBlock Margin="0, 5, 0, 3">Select the data points to include:</TextBlock>
                     <Grid Name="DataPointCheckBoxes">
@@ -36,7 +36,7 @@
                     </Grid>
                 </StackPanel>
             </GroupBox>
-            <GroupBox Name="DistrictBox">
+            <GroupBox Name="DistrictBox"  DockPanel.Dock="Top">
                 <StackPanel Name="DistrictCheckBoxes">
                     <TextBlock Margin="0, 5, 0, 3">Select the districts to include:</TextBlock>
                     <CheckBox Name="SelectAllDistricts" IsChecked="True" Click="OnDistictClick">Select All</CheckBox>
@@ -46,13 +46,16 @@
                     <CheckBox IsChecked="True" Click="OnDistictClick">North Kitsap</CheckBox>
                 </StackPanel>
             </GroupBox>
-            <TextBlock Margin="0,5,0,2" HorizontalAlignment="Center">Select a start date:</TextBlock>
-            <DatePicker Name="StartDatePicker" Margin="2,0,0,0"></DatePicker>
-            <TextBlock Margin="0,5,0,2" HorizontalAlignment="Center">Select an end date:</TextBlock>
-            <DatePicker Name="EndDatePicker" Margin="2,0,0,0"></DatePicker>
-            <Button Margin="10" Click="OnGenerateReportClick">Generate Report</Button>
-        </StackPanel>
+            <TextBlock  DockPanel.Dock="Top" Margin="0,5,0,2" HorizontalAlignment="Center">Select a start date:</TextBlock>
+            <DatePicker DockPanel.Dock="Top" Name="StartDatePicker" Margin="2,0,0,0"></DatePicker>
+            <TextBlock DockPanel.Dock="Top" Margin="0,5,0,2" HorizontalAlignment="Center">Select an end date:</TextBlock>
+            <DatePicker DockPanel.Dock="Top" Name="EndDatePicker" Margin="2,0,0,0"></DatePicker>
+            <Button DockPanel.Dock="Top" Margin="10" Click="OnGenerateReportClick" VerticalAlignment="Top">Generate Report</Button>
 
+            <!--<TextBlock Name="OptionsMessageBlock" DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Center">"TEST"</TextBlock>-->
+
+        </DockPanel>
+        
         <DockPanel Grid.Column="1">
             <Rectangle VerticalAlignment="Stretch" Width="1" Stroke="Gray" Margin="3"/>
             <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="5" FontSize="16">Past Reports</TextBlock>

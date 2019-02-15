@@ -77,8 +77,17 @@ namespace KTReports
             Console.WriteLine("Generate Report Clicked");
             // Get a list of Datapoints to include
             List<string> dataPoints = GetSelectedDataPoints();
+            if (dataPoints.Count == 0)
+            {
+                MessageBox.Show("Must select at least one data point.", "Report Generation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
             // Get a list of districts to include
             List<string> districts = GetSelectedDistricts();
+            if (districts.Count == 0) {
+                MessageBox.Show("Must select at least one district.", "Report Generation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
             /*foreach (string district in districts)
             {
                 Console.WriteLine(district);
@@ -90,6 +99,7 @@ namespace KTReports
             {
                 // Display error message and do not generate report
                 Console.WriteLine("Enter a valid report range.");
+                MessageBox.Show("Enter a valid report range.", "Report Generation Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
 
             }
