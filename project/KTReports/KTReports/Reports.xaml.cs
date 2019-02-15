@@ -100,7 +100,10 @@ namespace KTReports
             int weekdayHolidayCount = GetNumHolidays(reportRange, true, new List<int> { 1 });
             int saturdayCount = GetNumSaturdays(reportRange);
             int saturdayHolidayCount = GetNumHolidays(reportRange, false, new List<int> { 1 });
-
+            Console.WriteLine(weekdayCount);
+            Console.WriteLine(weekdayHolidayCount);
+            Console.WriteLine(saturdayCount);
+            Console.WriteLine(saturdayHolidayCount);
             // Get all routes per district
             var districtToRoutes = new Dictionary<string, List<NameValueCollection>>();
             var weekRoutes = new Dictionary<int, NameValueCollection>();
@@ -193,8 +196,9 @@ namespace KTReports
                 }
             }
             int numWeekendDays = (numFullWeekends * 2) + weekendStart;
-            weekdayCount -= numWeekendDays;
-
+            //Console.WriteLine("Before: " + weekdayCount);
+            weekdayCount = totalDays - numWeekendDays;
+            Console.WriteLine("After: " + weekdayCount);
             int weekdayHolidayCount = GetNumHolidays(reportRange, true, new List<int> { 1, 2 });
             // Subtract number of holidays occurring on weekdays within range
             weekdayCount -= weekdayHolidayCount;
