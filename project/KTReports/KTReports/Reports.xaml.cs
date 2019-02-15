@@ -100,10 +100,10 @@ namespace KTReports
             int weekdayHolidayCount = GetNumHolidays(reportRange, true, new List<int> { 1 });
             int saturdayCount = GetNumSaturdays(reportRange);
             int saturdayHolidayCount = GetNumHolidays(reportRange, false, new List<int> { 1 });
-            Console.WriteLine(weekdayCount);
-            Console.WriteLine(weekdayHolidayCount);
-            Console.WriteLine(saturdayCount);
-            Console.WriteLine(saturdayHolidayCount);
+            Console.WriteLine("Weekday count: " + weekdayCount);
+            Console.WriteLine("Weekday holiday count: " + weekdayHolidayCount);
+            Console.WriteLine("Saturday count: " + saturdayCount);
+            Console.WriteLine("Saturday holiday count: " + saturdayHolidayCount);
             // Get all routes per district
             var districtToRoutes = new Dictionary<string, List<NameValueCollection>>();
             var weekRoutes = new Dictionary<int, NameValueCollection>();
@@ -196,9 +196,7 @@ namespace KTReports
                 }
             }
             int numWeekendDays = (numFullWeekends * 2) + weekendStart;
-            //Console.WriteLine("Before: " + weekdayCount);
             weekdayCount = totalDays - numWeekendDays;
-            Console.WriteLine("After: " + weekdayCount);
             int weekdayHolidayCount = GetNumHolidays(reportRange, true, new List<int> { 1, 2 });
             // Subtract number of holidays occurring on weekdays within range
             weekdayCount -= weekdayHolidayCount;
@@ -312,31 +310,5 @@ namespace KTReports
             }
             return districts;
         }
-
-        // DateTime(Int32, Int32, Int32) Initializes a new instance of the DateTime structure to the specified year, month, and day.
-        // Use DaysInMonth() for constructing the end DateTime
-        // Get day of the week using DataTime property .DayOfWeek
-        // Get a list of all holidays in a month
-        // If holiday is on a weekday then decrement weekday count
-        // If holiday is on a saturday then decrement saturday count
-
-
-        // Get all districts
-
-        // Get all routes in district
-
-        // Get selected routes (all except what's unchecked)
-
-        // Get total ridership from NFC and FC
-
-        // Get num trips from date range and calendar
-
-        // Get revenue miles for a route
-
-        // Get revenue hours from db info and calendar
-
-        // Get passengers per mile
-
-        // Get passengers per hour (using total passengers / revenue hours)
     }
 }
