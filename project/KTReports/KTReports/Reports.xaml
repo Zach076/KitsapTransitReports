@@ -61,7 +61,6 @@
             <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="5" FontSize="16">Past Reports</TextBlock>
             <DataGrid Name="PastReportsGrid" DockPanel.Dock="Top">
                 <!-- TODO: Fill in with past reports-->
-
             </DataGrid>
             <Button DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="100" Name="OpenReportButton" Margin="0,0,10,10">Open Report</Button>
         </DockPanel>

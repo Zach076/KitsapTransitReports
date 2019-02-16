@@ -19,13 +19,13 @@ namespace KTReports
         {
             // Insert new file information into the database
             long? file_id = dbManager.InsertNewFile("AUGUST 2018 ORCA Boardings by Route BY TRIP.XLS",
-                "C:\\AUGUST 2018 ORCA Boardings by Route BY TRIP.XLS", DatabaseManager.FileType.FC, "2019-02-16", "2018-08-01", "2018-08-31");
+                "C:\\AUGUST 2018 ORCA Boardings by Route BY TRIP.XLS", DatabaseManager.FileType.FC, "2019-02-16");
             if (file_id == null)
             {
                 return;
             }
             dbManager.InsertNewFile("AUGUST 2018 Non-Fare Card Activity by Route WEEKDAY.XLS", "C:\\AUGUST 2018 Non-Fare Card Activity by Route WEEKDAY.XLS", 
-                DatabaseManager.FileType.FC, "2019-02-16", "2018-08-01", "2018-08-31");
+                DatabaseManager.FileType.FC, "2019-02-16");
 
             // Insert new routes into the database
             var route11 = new Dictionary<string, string>

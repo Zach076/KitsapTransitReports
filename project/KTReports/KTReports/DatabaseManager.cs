@@ -197,7 +197,7 @@ namespace KTReports
 
         public enum FileType { NFC, FC, RSD };
         // Insert brand new file information into the db (returns the file_id)
-        public long? InsertNewFile(string fileName, string fileLocation, FileType fileType, string importDate, string startDate, string endDate)
+        public long? InsertNewFile(string fileName, string fileLocation, FileType fileType, string importDate)
         {
             try
             {
