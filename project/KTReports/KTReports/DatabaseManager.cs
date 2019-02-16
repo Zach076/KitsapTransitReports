@@ -558,7 +558,7 @@ namespace KTReports
             GC.WaitForPendingFinalizers();
         }
 
-        /* Only use for testing purposes
+        // Only use for testing purposes
         public Boolean Insert(string table, string[] keys, string[] values)
         {
             try
@@ -578,9 +578,135 @@ namespace KTReports
                 return false;
             }
             return true;
-        } */
+        }
 
         // TODO: Methods to handle updates for information in tables, rather than only inserting
+
+        public void modifyRoute(string routeName, string option, string newTry)
+        {
+            var test = new Dictionary<string, string>
+            {
+                 { "route_name", "The Best Route" },
+            };
+            //string option = "route_name";
+            //string routeName = "The Best Route";
+            //string newTry = "Changed";
+
+            if(option == "route id")
+            {
+                option = "route_id";
+            }
+
+            else if (option == "start date")
+            {
+                option = "start_date";
+            }
+            else if (option == "end date")
+            {
+                option = "end_date";
+            }
+            else if (option == "route name")
+            {
+                option = "route_name";
+            }
+            else if (option == "district")
+            {
+                
+            }
+            else if (option == "distance")
+            {
+                
+            }
+            else if (option == "number of trips per week")
+            {
+                option = "num_trips_week";
+            }
+            else if (option == "number of saturday trips")
+            {
+                option = "num_trips_sat";
+            }
+            else if (option == "number of holiday trips")
+            {
+                option = "num_trips_hol";
+            }
+            else if (option == "weekday hours")
+            {
+                option = "weekday_hours";
+            }
+            else if (option == "saturday hours")
+            {
+                option = "saturday_hours";
+            }
+            else if (option == "holilday hours")
+            {
+                option = "holiday_hours";
+            }
+
+
+            try
+            {
+
+
+                string updateSQL = "UPDATE Routes SET " + option + " = " + "'" + newTry + "'" + " WHERE route_name = " + "'" + routeName + "'";
+                Console.WriteLine(updateSQL);
+                using (SQLiteCommand command = new SQLiteCommand(updateSQL, sqliteConnection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (SQLiteException sqle)
+            {
+                Console.WriteLine(sqle.StackTrace);
+            }
+        }
+
+        public void viewRoutes()
+        {
+            Console.WriteLine();
+            Console.WriteLine("ALL Routes and associated data");
+            var results = dbManagerInstance.Query(new string[] { "route_id", "start_date", "end_date", "master_route_id", "route_name", "district", "num_trips_week", "num_trips_sat",
+                "num_trips_hol", "weekday_hours", "saturday_hours", "holiday_hours" }, new string[] { "Routes" },
+                "distance > 0");
+            var resultStrs = new List<string>();
+            foreach (var row in results)
+            {
+                string rowStr = "";
+                foreach (string colName in row.AllKeys)
+                {
+                    if (rowStr.Length != 0)
+                    {
+                        rowStr += ", ";
+                    }
+                    rowStr += colName.ToString() + ": " + row[colName].ToString();
+                }
+                resultStrs.Add(rowStr);
+                Console.WriteLine(rowStr);
+            }
+            Console.WriteLine();
+        }
+
+        public List<String> getRoutes()
+        {
+            var results = dbManagerInstance.Query(new string[] { "route_name"}, new string[] { "Routes" },
+                           "route_id > 0");
+            var resultStrs = new List<string>();
+            foreach (var row in results)
+            {
+                string rowStr = "";
+                foreach (string colName in row.AllKeys)
+                {
+                    if (rowStr.Length != 0)
+                    {
+                        rowStr += "";
+                    }
+                    rowStr += row[colName].ToString();
+                }
+                resultStrs.Add(rowStr);
+            }
+            List<String> distinct = resultStrs.Distinct().ToList();
+            return distinct;
+        }
+
         // TODO: Methods to remove data from tables
         // TODO: Methods that handle specific queries rather than a generic method
     }

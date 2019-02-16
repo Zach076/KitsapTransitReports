@@ -10,6 +10,7 @@ namespace KTReports
     public class TestDB
     {
         DatabaseManager dbManager = null;
+        public static int routes = 0;
         public TestDB()
         {
             dbManager = DatabaseManager.GetDBManager("TestDatabase");
@@ -117,7 +118,8 @@ namespace KTReports
         {
             Test1();
             Test2();
-            Test3();
+            //Test3();
+            //displayRouteData();
         }
 
         public void CheckTestMatch(List<string> resultStrs, string[] truth, int testNum)
@@ -208,6 +210,60 @@ namespace KTReports
                                 "fc_id: 2, route_name: Route Num 50, boardings: 205"};
             CheckTestMatch(resultStrs, truth, 3);
         }
+
+        public void displayRouteData()
+        {
+            Console.WriteLine();
+            Console.WriteLine("All Routes and associated data");
+            var results = dbManager.Query(new string[] { "route_id", "start_date", "end_date", "master_route_id", "route_name", "district", "num_trips_week", "num_trips_sat",
+                "num_trips_hol", "weekday_hours", "saturday_hours", "holiday_hours" }, new string[] { "Routes" },
+                "distance > 0");
+            var resultStrs = new List<string>();
+            foreach (var row in results)
+            {
+                string rowStr = "";
+                foreach (string colName in row.AllKeys)
+                {
+                    if (rowStr.Length != 0)
+                    {
+                        rowStr += ", ";
+                    }
+                    rowStr += colName.ToString() + ": " + row[colName].ToString();
+                }
+                resultStrs.Add(rowStr);
+                routes++;
+                Console.WriteLine(rowStr);
+            }
+            Console.WriteLine();
+            string option = "route_name";
+            string routeName = "The Best Route";
+            string newTry = "Changed";
+
+            dbManager.modifyRoute(routeName, option, newTry);
+
+            Console.WriteLine();
+            Console.WriteLine("All Routes and associated data");
+            results = dbManager.Query(new string[] { "route_id", "start_date", "end_date", "master_route_id", "route_name", "district", "num_trips_week", "num_trips_sat",
+                "num_trips_hol", "weekday_hours", "saturday_hours", "holiday_hours" }, new string[] { "Routes" },
+                "distance > 0");
+            resultStrs = new List<string>();
+            foreach (var row in results)
+            {
+                string rowStr = "";
+                foreach (string colName in row.AllKeys)
+                {
+                    if (rowStr.Length != 0)
+                    {
+                        rowStr += ", ";
+                    }
+                    rowStr += colName.ToString() + ": " + row[colName].ToString();
+                }
+                resultStrs.Add(rowStr);
+                Console.WriteLine(rowStr);
+            }
+            Console.WriteLine();
+        }
+    
 
         public void RemoveDB()
         {

@@ -40,6 +40,61 @@ namespace KTReports
             Main.Content = new Reports();
         }
 
+        private void editPage(object sender, RoutedEventArgs e)
+        {
+            int num = TestDB.routes;
+            listRoutes.Visibility = Visibility.Visible;
+            
+            DatabaseManager dbManager = DatabaseManager.GetDBManager();
+            var routeList = dbManager.getRoutes();
+
+            foreach (String all in routeList)
+            {
+                listRoutes.Items.Add(all);
+            }
+
+            listAttributes.Visibility = Visibility.Visible;
+            listAttributes.Items.Add("route id");
+            listAttributes.Items.Add("start date");
+            listAttributes.Items.Add("end date");
+            listAttributes.Items.Add("route name");
+            listAttributes.Items.Add("district");
+            listAttributes.Items.Add("distance");
+            listAttributes.Items.Add("number of trips per week");
+            listAttributes.Items.Add("number of saturday trips");
+            listAttributes.Items.Add("number of holiday trips");
+            listAttributes.Items.Add("weekday hours");
+            listAttributes.Items.Add("saturday hours");
+            listAttributes.Items.Add("holilday hours");
+
+            updateButton.Visibility = Visibility.Visible;
+            newField.Visibility = Visibility.Visible;
+
+        }
+
+        private void update(object sender, RoutedEventArgs e)
+        {
+            string selectedRoute = listRoutes.SelectedItem.ToString();
+            string selectedAttribute = listAttributes.SelectedItem.ToString();
+            string input = newField.Text;
+
+            Console.WriteLine(selectedRoute);
+            Console.WriteLine(selectedAttribute);
+            Console.WriteLine(input);
+
+            DatabaseManager dbManager = DatabaseManager.GetDBManager();
+            dbManager.viewRoutes();
+
+            dbManager.modifyRoute(selectedRoute, selectedAttribute, input);
+
+            dbManager.viewRoutes();
+
+            listRoutes.Visibility = Visibility.Hidden;
+            listAttributes.Visibility = Visibility.Hidden;
+            newField.Visibility = Visibility.Hidden;
+            updateButton.Visibility = Visibility.Hidden;
+        }
+
         [STAThread]
         private void ImportFile(object sender, RoutedEventArgs e)
         {
@@ -96,6 +151,23 @@ namespace KTReports
                 }
             }
         }
-    
+
+        [STAThread]
+        private void ImportRoutes(object sender, RoutedEventArgs e)
+        {
+            string fileName = "";
+            OpenFileDialog fileDia = new OpenFileDialog();
+            fileDia.Title = "Select a file to import";
+            fileDia.FilterIndex = 2;
+            fileDia.ShowDialog();
+            //fileDia.RestoreDirectory = true;
+            fileName = fileDia.FileName;
+
+            //if (fileName.Length > 2)
+            //{
+             
+            //}
+        }
+
     }
 }
