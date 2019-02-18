@@ -123,7 +123,8 @@ namespace KTReports
                 // Need to distinguish between weekday and non-weekday routes
                 List<NameValueCollection> routes = databaseManager.GetDistrictRoutes(district, reportRange);
                 districtToRoutes.Add(district, routes);
-                /*foreach (var row in routes)
+                Console.WriteLine($"Printing routes in district: {district}");
+               /* foreach (var row in routes)
                 {
                     string rowStr = "";
                     foreach (string colName in row.AllKeys)
@@ -135,46 +136,86 @@ namespace KTReports
                         rowStr += colName.ToString() + ": " + row[colName].ToString();
                     }
                     Console.WriteLine(rowStr);
-                }*/
+                }
+                Console.WriteLine($"Printing routes in district: {district}");*/
                 foreach (var route in routes)
                 {
-                    int routeId = Convert.ToInt32(route["route_id"]);
+                    int routeId = Convert.ToInt32(route["assigned_route_id"]);
+                    Console.WriteLine($"Route id: {routeId}");
                     // Get sum of ridership for each route between reportRange for weekdays
                     // routeTotal contains nfc.total_ridership, nfc.total_nonridership, fc.boardings and total
                     NameValueCollection routeTotalWeek = databaseManager.GetRouteRidership(routeId, reportRange, true);
 
                     // Get sum of ridership for each route between reportRange for saturdays
                     NameValueCollection routeTotalSat = databaseManager.GetRouteRidership(routeId, reportRange, false);
-
+                        /*string rowStr = "";
+                        foreach (string colName in routeTotalSat.AllKeys)
+                        {
+                            if (rowStr.Length != 0)
+                            {
+                                rowStr += ", ";
+                            }
+                            rowStr += colName.ToString() + ": " + routeTotalSat[colName].ToString();
+                        }
+                        Console.WriteLine(rowStr);*/
                     weekRoutes.Add(routeId, routeTotalWeek);
                     satRoutes.Add(routeId, routeTotalSat);
 
                     // Num trips on normal weekdays
-                    int numTripsWeek = Convert.ToInt32(route["num_trips_week"]) * weekdayCount;
+                    double numTripsWeek = Convert.ToDouble(route["num_trips_week"]) * weekdayCount;
+                    Console.WriteLine($"\tNum trips on normal weekdays: {numTripsWeek}");
                     // Num trips on serviced holiday weekdays
-                    int numTripsHolidaysW = Convert.ToInt32(route["num_trips_hol"]) * weekdayHolidayCount;
+                    double numTripsHolidaysW = Convert.ToDouble(route["num_trips_hol"]) * weekdayHolidayCount;
+                    Console.WriteLine($"\tNum trips on serviced holiday weekdays: {numTripsHolidaysW}");
                     // Num trips on normal saturdays
-                    int numTripsSat = Convert.ToInt32(route["num_trips_sat"]) * saturdayCount;
+                    double numTripsSat = Convert.ToDouble(route["num_trips_sat"]) * saturdayCount;
+                    Console.WriteLine($"\tNum trips on normal saturdays: {numTripsSat}");
                     // Num trips on serviced holiday saturdays
-                    int numTripsHolidaysS = Convert.ToInt32(route["num_trips_hol"]) * saturdayHolidayCount;
+                    double numTripsHolidaysS = Convert.ToDouble(route["num_trips_hol"]) * saturdayHolidayCount;
+                    Console.WriteLine($"\tNum trips on holiday saturdays: {numTripsHolidaysS}");
 
                     // Get revenue miles for a route (distance of trip * num trips during week (regardless of holiday or not))
                     double routeDistance = Convert.ToDouble(route["distance"]);
                     double revenueMilesWeek = routeDistance * (numTripsWeek + numTripsHolidaysW);
+                    Console.WriteLine($"\tRevenue miles weekdays: {revenueMilesWeek}");
                     double revenueMilesSat = routeDistance * (numTripsSat + numTripsHolidaysS);
+                    Console.WriteLine($"\tRevenue miles saturdays: {revenueMilesSat}");
                     // Get revenue hours (num hours on weekday * number of weekdays excluding holidays)
                     double revenueHoursWeek = Convert.ToDouble(route["weekday_hours"]) * weekdayCount;
+                    Console.WriteLine($"\tRevenue hours normal weekdays: {revenueHoursWeek}");
                     double revenueHoursHolidaysW = Convert.ToDouble(route["holiday_hours"]) * weekdayHolidayCount;
+                    Console.WriteLine($"\tRevenue hours holiday weekdays: {revenueHoursHolidaysW}");
                     double revenueHoursSat = Convert.ToDouble(route["saturday_hours"]) * saturdayCount;
+                    Console.WriteLine($"\tRevenue hours normal saturdays: {revenueHoursSat}");
                     double revenueHoursHolidaysS = Convert.ToDouble(route["holiday_hours"]) * saturdayHolidayCount;
+                    Console.WriteLine($"\tRevenue hours holiday saturdays: {revenueHoursHolidaysS}");
+
+                    // Get total ridership during weekdays and saturdays
+                    string routeTotalWeekStr = routeTotalWeek["fc_boardings"];
+                    int totalRidesWeek = 0;
+                    if (!string.IsNullOrEmpty(routeTotalWeekStr))
+                    {
+                        totalRidesWeek = Convert.ToInt32(routeTotalWeekStr);
+                    }
+                    Console.WriteLine($"\tTotal ridership weekdays: {totalRidesWeek}");
+                    string routeTotalSatStr = routeTotalSat["fc_boardings"];
+                    int totalRidesSat = 0;
+                    if (!string.IsNullOrEmpty(routeTotalSatStr))
+                    {
+                        totalRidesSat = Convert.ToInt32(routeTotalSatStr);
+                    }
+                    Console.WriteLine($"\tTotal ridership saturdays: {totalRidesSat}");
+
                     // Get passengers per mile (total passengers on weekdays / revenue miles)
-                    int totalRidesWeek = Convert.ToInt32(routeTotalWeek["total"]);
-                    int totalRidesSat = Convert.ToInt32(routeTotalSat["total"]);
                     double passPerMileW = totalRidesWeek / revenueMilesWeek;
+                    Console.WriteLine($"\tPassengers per mile weekdays: {passPerMileW}");
                     double passPerMileS = totalRidesSat / revenueMilesSat;
+                    Console.WriteLine($"\tPassengers per mile saturdays: {passPerMileS}");
                     // Get passengers per hour (using total passengers / revenue hours)
                     double passPerHourW = totalRidesWeek / (revenueHoursWeek + revenueHoursHolidaysW);
+                    Console.WriteLine($"\tPassengers per hour weekdays: {passPerHourW}");
                     double passPerHourS = totalRidesSat / (revenueHoursSat + revenueHoursHolidaysS);
+                    Console.WriteLine($"\tPassengers per hour saturdays: {passPerHourS}");
 
 
                 }

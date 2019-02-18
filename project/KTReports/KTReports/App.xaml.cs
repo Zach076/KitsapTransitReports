@@ -23,7 +23,7 @@ namespace KTReports
             TestDB test = new TestDB();
             test.TestInsertions();
             test.TestQueries();
-           // test.RemoveDB();
+            //test.RemoveDB();
         }
 
     }

@@ -476,21 +476,21 @@ namespace KTReports
                     command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
                     keyValuePairs.TryGetValue("route_name", out string route_name);
                     command.Parameters.Add(new SQLiteParameter("@route_name", route_name));
-                    keyValuePairs.TryGetValue("route_name", out string district);
+                    keyValuePairs.TryGetValue("district", out string district);
                     command.Parameters.Add(new SQLiteParameter("@district", district));
-                    keyValuePairs.TryGetValue("route_name", out string distance);
+                    keyValuePairs.TryGetValue("distance", out string distance);
                     command.Parameters.Add(new SQLiteParameter("@distance", distance));
-                    keyValuePairs.TryGetValue("route_name", out string num_trips_week);
+                    keyValuePairs.TryGetValue("num_trips_week", out string num_trips_week);
                     command.Parameters.Add(new SQLiteParameter("@num_trips_week",num_trips_week));
-                    keyValuePairs.TryGetValue("route_name", out string num_trips_sat);
+                    keyValuePairs.TryGetValue("num_trips_sat", out string num_trips_sat);
                     command.Parameters.Add(new SQLiteParameter("@num_trips_sat", num_trips_sat));
-                    keyValuePairs.TryGetValue("route_name", out string num_trips_hol);
+                    keyValuePairs.TryGetValue("num_trips_hol", out string num_trips_hol);
                     command.Parameters.Add(new SQLiteParameter("@num_trips_hol", num_trips_hol));
-                    keyValuePairs.TryGetValue("route_name", out string weekday_hours);
+                    keyValuePairs.TryGetValue("weekday_hours", out string weekday_hours);
                     command.Parameters.Add(new SQLiteParameter("@weekday_hours", weekday_hours));
-                    keyValuePairs.TryGetValue("route_name", out string saturday_hours);
+                    keyValuePairs.TryGetValue("saturday_hours", out string saturday_hours);
                     command.Parameters.Add(new SQLiteParameter("@saturday_hours", saturday_hours));
-                    keyValuePairs.TryGetValue("route_name", out string holiday_hours);
+                    keyValuePairs.TryGetValue("holiday_hours", out string holiday_hours);
                     command.Parameters.Add(new SQLiteParameter("@holiday_hours", holiday_hours));
                     command.ExecuteNonQuery();
                 }
@@ -634,12 +634,13 @@ namespace KTReports
         {
             string query = @"SELECT * 
                                 FROM Routes 
-                                WHERE start_date <= @report_start AND NOT start_date > @report_end";
+                                WHERE district == @district AND start_date <= @report_start AND NOT start_date > @report_end";
             var results = new List<NameValueCollection>();
             using (var command = new SQLiteCommand(query, sqliteConnection))
             {
                 command.CommandText = query;
                 command.Connection = sqliteConnection;
+                command.Parameters.Add(new SQLiteParameter("@district", district));
                 command.Parameters.Add(new SQLiteParameter("@report_start", reportRange[0]));
                 command.Parameters.Add(new SQLiteParameter("@report_end", reportRange[1]));
                 using (SQLiteDataReader reader = command.ExecuteReader())
@@ -658,20 +659,20 @@ namespace KTReports
         public NameValueCollection GetRouteRidership(int routeId, List<DateTime> reportRange, Boolean isWeekday)
         {
             // NEED TO FIX QUERY
-            string query = @"SELECT nfc.total_ridership, nfc.total_non_ridership, fc.boardings, 
-                                    (nfc.total_ridership + nfc.total_non_ridership + fc.boardings) as total
-                                FROM FareCardData as fc, NonFareCardData as nfc
-                                WHERE fc.assigned_route_id == @route_id OR start_date <= @report_start 
-                                    AND NOT start_date > @report_end
-                                    AND is_weekday == @is_weekday";
+            string query = @"SELECT SUM(fc.boardings) AS fc_boardings 
+                                FROM FareCardData as fc
+                                WHERE fc.assigned_route_id == @route_id AND fc.start_date <= @report_start 
+                                    AND fc.start_date <= @report_end
+                                    AND fc.is_weekday == @is_weekday";
             var results = new NameValueCollection();
             using (var command = new SQLiteCommand(query, sqliteConnection))
             {
                 command.CommandText = query;
                 command.Connection = sqliteConnection;
-                command.Parameters.Add(new SQLiteParameter("@report_start", reportRange[0]));
-                command.Parameters.Add(new SQLiteParameter("@report_end", reportRange[1]));
-                command.Parameters.Add(new SQLiteParameter("@is_weekday", isWeekday));
+                command.Parameters.Add(new SQLiteParameter("@route_id", routeId));
+                command.Parameters.Add(new SQLiteParameter("@report_start", reportRange[0].ToString("yyyyMMdd")));
+                command.Parameters.Add(new SQLiteParameter("@report_end", reportRange[1].ToString("yyyyMMdd")));
+                command.Parameters.Add(new SQLiteParameter("@is_weekday", isWeekday.ToString()));
                 using (SQLiteDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
