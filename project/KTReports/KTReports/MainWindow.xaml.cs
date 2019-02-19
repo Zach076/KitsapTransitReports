@@ -72,6 +72,10 @@ namespace KTReports
                 if (Regex.Match(xlWorkbook.Name, @".*ORCA.*") != null)
                 {
                     isORCA = true;
+                    file_id = databaseManager.InsertNewFile(fileName, fileInfo.FullName, DatabaseManager.FileType.FC, dateTime.ToString("yyyy-MM-dd"));
+                } else
+                {
+                    file_id = databaseManager.InsertNewFile(fileName, fileInfo.FullName, DatabaseManager.FileType.NFC, dateTime.ToString("yyyy-MM-dd"));
                 }
                 int sheetCount = xlWorkbook.Sheets.Count;
                 //Loop through each sheet in the file
@@ -112,7 +116,7 @@ namespace KTReports
                                             dict.Add(key.Value, xlRange.Cells[i, j].Value2.ToString());
                                             key = key.Next;
                                         }
-                                        else if (Regex.Match(xlRange.Cells[i, j].Value2.ToString(), @".*Subtotal.*").Success)
+                                        else if (xlRange.Cells[i, j] != null && xlRange.Cells[i, j].Value2 != null && Regex.Match(xlRange.Cells[i, j].Value2.ToString(), @".*Subtotal.*").Success)
                                         {
                                             // look x rows ahead for more then end while Loop if empty
                                             i = i + 2;
@@ -160,18 +164,14 @@ namespace KTReports
                                 dict.Add("start_date", reportPeriod[0]);
                                 dict.Add("end_date", reportPeriod[2]);
                                 dict.Add("is_weekday", isWeekday);
-
+                                dict.Add("file_id", file_id.ToString());
                                 Debug.WriteLine("insert");
                                 if (isORCA)
                                 {
-                                    file_id = databaseManager.InsertNewFile(fileName, fileInfo.FullName, DatabaseManager.FileType.FC, dateTime.ToString("MM/dd/yyyy"));
-                                    dict.Add("file_id", file_id.ToString());
                                     databaseManager.InsertFCD(dict);
                                 }
                                 else
                                 {
-                                    file_id = databaseManager.InsertNewFile(fileName, fileInfo.FullName, DatabaseManager.FileType.NFC, dateTime.ToString("MM/dd/yyyy"));
-                                    dict.Add("file_id", file_id.ToString());
                                     databaseManager.InsertNFC(dict);
                                 }
 
