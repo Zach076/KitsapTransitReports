@@ -22,7 +22,7 @@ namespace KTReports
     public partial class Reports : Page
     {
         DatabaseManager databaseManager;
-        // Can make Reports a singleton
+
         public Reports()
         {
             InitializeComponent();
@@ -200,12 +200,22 @@ namespace KTReports
             int numFullWeeks = (int) Math.Floor(numWeekends);
             DateTime lastAccountedDay = startDate.AddDays(numFullWeeks * 7);
             int additionalWeekdays = 0;
-            if (lastAccountedDay.DayOfWeek > endDate.DayOfWeek)
+            if (DateTime.Compare(lastAccountedDay, endDate) <= 0)
             {
                 // Calculate the number of remaining weekdays after accounting for full weeks
-                int numTilWeekend = DayOfWeek.Saturday - lastAccountedDay.DayOfWeek;
-                int numTilEndDate = endDate.DayOfWeek - DayOfWeek.Sunday;
-                additionalWeekdays = numTilWeekend + numTilEndDate;
+                // First calculate how many days to reach the weekend
+                int numTilWeekend = lastAccountedDay.DayOfWeek > DayOfWeek.Sunday ? 
+                        (DayOfWeek.Saturday - lastAccountedDay.DayOfWeek) : 0;
+                // Next calculate how many days to reach the end date if the end date is during the weekdays
+                int numTilEndDate = 0;
+                if (endDate.DayOfWeek < DayOfWeek.Saturday && endDate.DayOfWeek > DayOfWeek.Sunday)
+                {
+                    numTilEndDate = endDate.DayOfWeek - DayOfWeek.Sunday;
+                }
+                // A possibility is that the last accounted day and the end date both take place during the week
+                int dateDiff = (int) (endDate - lastAccountedDay).TotalDays + 1;
+                // The min of the two possibilities is the number of weekdays we did not account for with full weeks
+                additionalWeekdays = Math.Min(numTilWeekend + numTilEndDate, dateDiff);
             }
             weekdayCount = (numFullWeeks * 5) + additionalWeekdays;
             int weekdayHolidayCount = GetNumHolidays(reportRange, true, new List<int> { 1, 2 });
@@ -221,8 +231,16 @@ namespace KTReports
             int totalDays = (int)(endDate - startDate).TotalDays; 
             int numFullWeeks = (int) Math.Floor(totalDays / 7.0);
             DateTime lastAccountedDay = startDate.AddDays(numFullWeeks * 7);
-            // If the start date is a saturday, we must account for it by adding 1
-            int numSaturdays = numFullWeeks + (startDate.DayOfWeek == DayOfWeek.Saturday ? 1 : 0);
+            int additionalSaturday = 0;
+            int dateDiff = (int) (endDate - lastAccountedDay).TotalDays;
+            if (lastAccountedDay.DayOfWeek + dateDiff >= DayOfWeek.Saturday)
+            {
+                // If adding the difference between the lastAccountedDay and the endDate
+                // equals or goes past saturday, that means that we must account for an additional saturday
+                additionalSaturday++;
+            }
+
+            int numSaturdays = numFullWeeks + additionalSaturday;
             int saturdayHolidayCount = GetNumHolidays(reportRange, false, new List<int> { 1, 2 });
             // Subtract number of holidays occurring on saturdays within range
             numSaturdays -= saturdayHolidayCount;
@@ -238,6 +256,7 @@ namespace KTReports
             foreach (var holiday in holidays)
             {
                 int serviceType = Convert.ToInt32(holiday["service_type"]);
+                // Only examine holidays with the specified service type
                 if (!serviceTypes.Contains(serviceType))
                 {
                     continue;
@@ -274,6 +293,7 @@ namespace KTReports
 
         private List<DateTime> GetReportRange()
         {
+            // Get the DateTimes from each of the date pickers and return them in a list
             List<DateTime> reportRange = new List<DateTime>();
             if (StartDatePicker.SelectedDate != null)
             {
@@ -290,6 +310,7 @@ namespace KTReports
 
         private List<string> GetSelectedDataPoints()
         {
+            // Iterate through each of the Data Point checkboxes and return the selected data points
             var dataPoints = new List<string>();
             foreach (var uiElem in DataPointCheckBoxes.Children)
             {
@@ -308,6 +329,7 @@ namespace KTReports
 
         private List<string> GetSelectedDistricts()
         {
+            // Iterate through each of the District checkboxes and return the selected districts
             var districts = new List<string>();
             foreach (var uiElem in DistrictCheckBoxes.Children)
             {
