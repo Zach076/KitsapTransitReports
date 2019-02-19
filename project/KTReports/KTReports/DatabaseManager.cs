@@ -762,6 +762,5 @@ namespace KTReports
 
             // TODO: Methods to handle updates for information in tables, rather than only inserting
             // TODO: Methods to remove data from tables
-            // TODO: Methods that handle specific queries rather than a generic method
         }
     }
