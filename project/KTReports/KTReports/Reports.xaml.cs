@@ -88,10 +88,7 @@ namespace KTReports
                 MessageBox.Show("Must select at least one district.", "Report Generation Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            /*foreach (string district in districts)
-            {
-                Console.WriteLine(district);
-            }*/
+
             // Get the start and end dates and validate
             List<DateTime> reportRange = GetReportRange();
             // Validate the start and end dates
@@ -197,25 +194,20 @@ namespace KTReports
             int weekdayCount = 0;
             DateTime startDate = reportRange[0];
             DateTime endDate = reportRange[1];
-            int totalDays = (int) (endDate - startDate).TotalDays + 1; // Add one so that we include the start date as a day
-            int weekendStart = 0;
+            // Add one so that we include the start date as a day
+            int totalDays = (int) (endDate - startDate).TotalDays; 
             double numWeekends = totalDays / 7.0;
-            int numFullWeekends = (int) Math.Floor(numWeekends);
-            if (numWeekends != numFullWeekends)
+            int numFullWeeks = (int) Math.Floor(numWeekends);
+            DateTime lastAccountedDay = startDate.AddDays(numFullWeeks * 7);
+            int additionalWeekdays = 0;
+            if (lastAccountedDay.DayOfWeek > endDate.DayOfWeek)
             {
-                // If we haven't accounted for every pair of weekend days,
-                // we need to set weekendStart appropriately
-                if (startDate.DayOfWeek == DayOfWeek.Saturday)
-                {
-                    weekendStart = 2;
-                }
-                else if (startDate.DayOfWeek == DayOfWeek.Sunday)
-                {
-                    weekendStart = 1;
-                }
+                // Calculate the number of remaining weekdays after accounting for full weeks
+                int numTilWeekend = DayOfWeek.Saturday - lastAccountedDay.DayOfWeek;
+                int numTilEndDate = endDate.DayOfWeek - DayOfWeek.Sunday;
+                additionalWeekdays = numTilWeekend + numTilEndDate;
             }
-            int numWeekendDays = (numFullWeekends * 2) + weekendStart;
-            weekdayCount = totalDays - numWeekendDays;
+            weekdayCount = (numFullWeeks * 5) + additionalWeekdays;
             int weekdayHolidayCount = GetNumHolidays(reportRange, true, new List<int> { 1, 2 });
             // Subtract number of holidays occurring on weekdays within range
             weekdayCount -= weekdayHolidayCount;
@@ -226,12 +218,11 @@ namespace KTReports
         {
             DateTime startDate = reportRange[0];
             DateTime endDate = reportRange[1];
-            int totalDays = (int)(endDate - startDate).TotalDays + 1; // Add one so that we include the start date as a day
-            int numFullWeekends = (int) Math.Floor(totalDays / 7.0);
-            DayOfWeek lastAccountedDOW = endDate.AddDays(-numFullWeekends).DayOfWeek;
-
-            int numSaturdays = numFullWeekends + (startDate.DayOfWeek <= DayOfWeek.Saturday && lastAccountedDOW >= DayOfWeek.Saturday ? 1 : 0);
-
+            int totalDays = (int)(endDate - startDate).TotalDays; 
+            int numFullWeeks = (int) Math.Floor(totalDays / 7.0);
+            DateTime lastAccountedDay = startDate.AddDays(numFullWeeks * 7);
+            // If the start date is a saturday, we must account for it by adding 1
+            int numSaturdays = numFullWeeks + (startDate.DayOfWeek == DayOfWeek.Saturday ? 1 : 0);
             int saturdayHolidayCount = GetNumHolidays(reportRange, false, new List<int> { 1, 2 });
             // Subtract number of holidays occurring on saturdays within range
             numSaturdays -= saturdayHolidayCount;

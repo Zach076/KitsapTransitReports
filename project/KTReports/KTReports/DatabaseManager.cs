@@ -50,7 +50,7 @@ namespace KTReports
             return dbManagerInstance;
         }
 
-        // Current schema: https://i.imgur.com/zSqJlg4.png
+        // Current schema: https://i.imgur.com/4eerugA.png
         private void CreateTables()
         {
             // Complete all commands or none at all
@@ -598,8 +598,8 @@ namespace KTReports
             {
                 command.CommandText = query;
                 command.Connection = sqliteConnection;
-                command.Parameters.Add(new SQLiteParameter("@startDate", range[0]));
-                command.Parameters.Add(new SQLiteParameter("@endDate", range[1]));
+                command.Parameters.Add(new SQLiteParameter("@startDate", range[0].ToString("yyyy-MM-dd")));
+                command.Parameters.Add(new SQLiteParameter("@endDate", range[1].ToString("yyyy-MM-dd")));
                 using (SQLiteDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
