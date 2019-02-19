@@ -72,6 +72,10 @@ namespace KTReports
                 if (Regex.Match(xlWorkbook.Name, @".*ORCA.*") != null)
                 {
                     isORCA = true;
+                    file_id = databaseManager.InsertNewFile(fileName, fileInfo.FullName, DatabaseManager.FileType.FC, dateTime.ToString("yyyy-MM-dd"));
+                } else
+                {
+                    file_id = databaseManager.InsertNewFile(fileName, fileInfo.FullName, DatabaseManager.FileType.NFC, dateTime.ToString("yyyy-MM-dd"));
                 }
                 int sheetCount = xlWorkbook.Sheets.Count;
                 //Loop through each sheet in the file
@@ -160,18 +164,14 @@ namespace KTReports
                                 dict.Add("start_date", reportPeriod[0]);
                                 dict.Add("end_date", reportPeriod[2]);
                                 dict.Add("is_weekday", isWeekday);
-
+                                dict.Add("file_id", file_id.ToString());
                                 Debug.WriteLine("insert");
                                 if (isORCA)
                                 {
-                                    file_id = databaseManager.InsertNewFile(fileName, fileInfo.FullName, DatabaseManager.FileType.FC, dateTime.ToString("MM/dd/yyyy"));
-                                    dict.Add("file_id", file_id.ToString());
                                     databaseManager.InsertFCD(dict);
                                 }
                                 else
                                 {
-                                    file_id = databaseManager.InsertNewFile(fileName, fileInfo.FullName, DatabaseManager.FileType.NFC, dateTime.ToString("MM/dd/yyyy"));
-                                    dict.Add("file_id", file_id.ToString());
                                     databaseManager.InsertNFC(dict);
                                 }
 

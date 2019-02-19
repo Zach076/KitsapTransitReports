@@ -18,72 +18,17 @@ namespace KTReports
         public void TestInsertions()
         {
             // Insert new file information into the database
-            long? file_id = dbManager.InsertNewFile("test_file_name.csv", "C:\\folder\\kt", DatabaseManager.FileType.FC, "1980-02-03");
-            if (file_id == null)
-            {
-                return;
-            }
-            dbManager.InsertNewFile("no_data_file.csv", "C:\\random\\dir", DatabaseManager.FileType.FC, "1980-02-07");
-
-            // Insert new fare card data into the database
-            var fcd1 = new Dictionary<string, string>
-                {
-                    { "route_id", 90.ToString() },
-                    { "start_date", "1980-01-01" },
-                    { "end_date", "1980-01-31" },
-                    { "is_weekday", false.ToString() },
-                    { "transit_operator", "Kitsap Transit" },
-                    { "source_participant", "Kitsap Transit" },
-                    { "service_participant", "Kitsap Transit" },
-                    { "mode", "Bus" },
-                    { "route_direction", "Inbound" },
-                    { "trip_start", "10:00" },
-                    { "boardings", 536.ToString() },
-                    { "file_id", file_id.ToString() }
-                };
-            dbManager.InsertFCD(fcd1);
-
-            var fcd2 = new Dictionary<string, string>
-                {
-                    { "route_id", 50.ToString() },
-                    { "start_date", "1980-01-01" },
-                    { "end_date", "1980-01-31" },
-                    { "is_weekday", true.ToString() },
-                    { "transit_operator", "Kitsap Transit" },
-                    { "source_participant", "Kitsap Transit" },
-                    { "service_participant", "Kitsap Transit" },
-                    { "mode", "Bus" },
-                    { "route_direction", "Outbound" },
-                    { "trip_start", "14:00" },
-                    { "boardings", 205.ToString() },
-                    { "file_id", file_id.ToString() }
-                };
-            dbManager.InsertFCD(fcd2);
-
-            var fcd3 = new Dictionary<string, string>
-                {
-                    { "route_id", 90.ToString() },
-                    { "start_date", "1980-01-01" },
-                    { "end_date", "1980-01-31" },
-                    { "is_weekday", false.ToString() },
-                    { "transit_operator", "Kitsap Transit" },
-                    { "source_participant", "Kitsap Transit" },
-                    { "service_participant", "Kitsap Transit" },
-                    { "mode", "Bus" },
-                    { "route_direction", "Outbound" },
-                    { "trip_start", "12:00" },
-                    { "boardings", 170.ToString() },
-                    { "file_id", file_id.ToString() }
-                };
-            dbManager.InsertFCD(fcd3);
+            long fc_file_id = dbManager.InsertNewFile("AUGUST 2018 ORCA Boardings by Route BY TRIP.XLS",
+                "C:\\AUGUST 2018 ORCA Boardings by Route BY TRIP.XLS", DatabaseManager.FileType.FC, "2019-02-16");
+            long nfc_file_id = dbManager.InsertNewFile("AUGUST 2018 Non-Fare Card Activity by Route WEEKDAY.XLS", "C:\\AUGUST 2018 Non-Fare Card Activity by Route WEEKDAY.XLS", 
+                DatabaseManager.FileType.NFC, "2019-02-16");
 
             // Insert new routes into the database
-            var route90 = new Dictionary<string, string>
+            var route11 = new Dictionary<string, string>
                 {
-                    { "route_id", 90.ToString() },
-                    { "start_date", "1975-01-01" },
-                    // Leave out end_date
-                    { "route_name", "The Best Route" },
+                    { "route_id", 11.ToString() },
+                    { "start_date", "2017-01-01" },
+                    { "route_name", "Crosstown Limited" },
                     { "district", "Bremerton" },
                     { "distance", 9.45.ToString() },
                     { "num_trips_week", 8.ToString() },
@@ -93,15 +38,30 @@ namespace KTReports
                     { "saturday_hours", 2.5.ToString() },
                     { "holiday_hours", 0.ToString() }
                 };
-            dbManager.InsertNewRoute(route90);
+            long route11PathId = dbManager.InsertPath(route11);
 
-            var route50 = new Dictionary<string, string>
+            var route20 = new Dictionary<string, string>
                 {
-                    { "route_id", 50.ToString() },
-                    { "start_date", "1975-01-01" },
-                    // Leave out end_date
-                    { "route_name", "Route Num 50" },
-                    { "district", "Poulsbo" },
+                    { "route_id", 20.ToString() },
+                    { "start_date", "2017-01-01" },
+                    { "route_name", "Navy Yard City" },
+                    { "district", "Bremerton" },
+                    { "distance", 20.ToString() },
+                    { "num_trips_week", 11.ToString() },
+                    { "num_trips_sat", 9.ToString() },
+                    { "num_trips_hol", 2.ToString() },
+                    { "weekday_hours", 5.5.ToString() },
+                    { "saturday_hours", 4.5.ToString() },
+                    { "holiday_hours", 2.5.ToString() }
+                };
+            long route20PathId = dbManager.InsertPath(route20);
+
+            var route12 = new Dictionary<string, string>
+                {
+                    { "route_id", 12.ToString() },
+                    { "start_date", "2017-01-01" },
+                    { "route_name", "Silverdale West" },
+                    { "district", "Central Kitsap" },
                     { "distance", 5.5.ToString() },
                     { "num_trips_week", 9.ToString() },
                     { "num_trips_sat", 7.ToString() },
@@ -110,105 +70,120 @@ namespace KTReports
                     { "saturday_hours", 3.5.ToString() },
                     { "holiday_hours", 3.ToString() }
                 };
-            dbManager.InsertNewRoute(route50);
-        }
+            long route12PathId = dbManager.InsertPath(route12);
 
-        public void TestQueries()
-        {
-            Test1();
-            Test2();
-            Test3();
-        }
-
-        public void CheckTestMatch(List<string> resultStrs, string[] truth, int testNum)
-        {
-            if (!Enumerable.SequenceEqual(resultStrs, truth))
-            {
-                string expectedStr = "Expected: ";
-                foreach (var truthStr in truth)
+            var route12Future = new Dictionary<string, string>
                 {
-                    expectedStr += truthStr + "\n";
-                }
-                throw new Exception("Failed Test" + testNum + "\n" + expectedStr);
-            }
-            else
-            {
-                Console.WriteLine($"Passed Test{testNum}!");
-            }
-        }
+                    { "path_id",  route12PathId.ToString()},
+                    { "route_id", 12.ToString() },
+                    { "start_date", "2019-05-01" },
+                    { "route_name", "Silverdale West" },
+                    { "district", "Central Kitsap" },
+                    { "distance", 10.5.ToString() },
+                    { "num_trips_week", 15.ToString() },
+                    { "num_trips_sat", 8.ToString() },
+                    { "num_trips_hol", 5.ToString() },
+                    { "weekday_hours", 6.ToString() },
+                    { "saturday_hours", 5.5.ToString() },
+                    { "holiday_hours", 3.ToString() }
+                };
+            dbManager.InsertRoute(route12Future);
 
-        public void Test1()
-        {
-            Console.WriteLine("Starting Test1...");
-            var results = dbManager.Query(new string[] { "*" }, new string[] { "ImportedFiles" }, "date(\"1980-02-05\") > import_date AND file_type == \"FC\"");
-            var resultStrs = new List<string>();
-            foreach (var row in results)
-            {
-                string rowStr = "";
-                foreach (string colName in row.AllKeys)
+            // Insert new fare card data into the database
+            var fcd1 = new Dictionary<string, string>
                 {
-                    if (rowStr.Length != 0)
-                    {
-                        rowStr += ", ";
-                    }
-                    rowStr += colName.ToString() + ": " + row[colName].ToString();
-                }
-                resultStrs.Add(rowStr);
-                Console.WriteLine(rowStr);
-            }
-            // truth is the expected results from the query
-            string[] truth = { "file_id: 1, name: test_file_name.csv, dir_location: C:\\folder\\kt, file_type: FC, import_date: 1980-02-03" };
-            CheckTestMatch(resultStrs, truth, 1);
-        }
+                    { "route_id", 11.ToString() },
+                    { "is_weekday", false.ToString() },
+                    { "start_date", "2019-02-01" },
+                    { "end_date", "2019-02-28" },
+                    { "transit_operator", "Kitsap Transit" },
+                    { "source_participant", "Kitsap Transit" },
+                    { "service_participant", "Kitsap Transit" },
+                    { "mode", "Bus" },
+                    { "route_direction", "Inbound" },
+                    { "trip_start", "10:00AM" },
+                    { "boardings", 36.ToString() },
+                    { "file_id", fc_file_id.ToString() }
+                };
+            dbManager.InsertFCD(fcd1);
 
-        public void Test2()
-        {
-            Console.WriteLine("Starting Test2...");
-            var results = dbManager.Query(new string[] { "*" }, new string[] { "ImportedFiles" }, "date(\"1980-01-15\") > import_date");
-            var resultStrs = new List<string>();
-            foreach (var row in results)
-            {
-                string rowStr = "";
-                foreach (string colName in row.AllKeys)
+            var fcd2 = new Dictionary<string, string>
                 {
-                    if (rowStr.Length != 0)
-                    {
-                        rowStr += ", ";
-                    }
-                    rowStr += colName.ToString() + ": " + row[colName].ToString();
-                }
-                resultStrs.Add(rowStr);
-                Console.WriteLine(rowStr);
-            }
-            string[] truth = { };
-            CheckTestMatch(resultStrs, truth, 2);
-        }
+                    { "route_id", 11.ToString() },
+                    { "is_weekday", false.ToString() },
+                    { "start_date", "2019-02-01" },
+                    { "end_date", "2019-02-28" },
+                    { "transit_operator", "Kitsap Transit" },
+                    { "source_participant", "Kitsap Transit" },
+                    { "service_participant", "Kitsap Transit" },
+                    { "mode", "Bus" },
+                    { "route_direction", "Inbound" },
+                    { "trip_start", "11:00AM" },
+                    { "boardings", 42.ToString() },
+                    { "file_id", fc_file_id.ToString() }
+                };
+            dbManager.InsertFCD(fcd2);
 
-        public void Test3()
-        {
-            Console.WriteLine("Starting Test3...");
-            var results = dbManager.Query(new string[] { "fc_id", "route_name", "boardings" }, new string[] { "FareCardData as f, Routes as r" }, 
-                "boardings > 200 AND f.route_id == r.route_id");
-            var resultStrs = new List<string>();
-            foreach (var row in results)
-            {
-                string rowStr = "";
-                foreach (string colName in row.AllKeys)
+            var fcd3 = new Dictionary<string, string>
                 {
-                    if (rowStr.Length != 0)
-                    {
-                        rowStr += ", ";
-                    }
-                    rowStr += colName.ToString() + ": " + row[colName].ToString();
-                }
-                resultStrs.Add(rowStr);
-                Console.WriteLine(rowStr);
-            }
-            string[] truth = { "fc_id: 1, route_name: The Best Route, boardings: 536",
-                                "fc_id: 2, route_name: Route Num 50, boardings: 205"};
-            CheckTestMatch(resultStrs, truth, 3);
-        }
+                    { "route_id", 12.ToString() },
+                    { "is_weekday", false.ToString() },
+                    { "start_date", "2019-02-01" },
+                    { "end_date", "2019-02-28" },
+                    { "transit_operator", "Kitsap Transit" },
+                    { "source_participant", "Kitsap Transit" },
+                    { "service_participant", "Kitsap Transit" },
+                    { "mode", "Bus" },
+                    { "route_direction", "Outbound" },
+                    { "trip_start", "10:30AM" },
+                    { "boardings", 14.ToString() },
+                    { "file_id", fc_file_id.ToString() }
+                };
+            dbManager.InsertFCD(fcd3);
 
+            var fcd4 = new Dictionary<string, string>
+                {
+                    { "route_id", 11.ToString() },
+                    { "is_weekday", true.ToString() },
+                    { "start_date", "2019-02-01" },
+                    { "end_date", "2019-02-28" },
+                    { "transit_operator", "Kitsap Transit" },
+                    { "source_participant", "Kitsap Transit" },
+                    { "service_participant", "Kitsap Transit" },
+                    { "mode", "Bus" },
+                    { "route_direction", "Outbound" },
+                    { "trip_start", "10:30AM" },
+                    { "boardings", 1000.ToString() },
+                    { "file_id", fc_file_id.ToString() }
+                };
+            dbManager.InsertFCD(fcd4);
+
+            var nfc1 = new Dictionary<string, string>
+                {
+                    { "route_id", 11.ToString() },
+                    { "is_weekday", true.ToString() },
+                    { "start_date", "2019-02-01" },
+                    { "end_date", "2019-02-28" },
+                    { "route_direction", "Inbound" },
+                    { "total_ridership", 1047.ToString() },
+                    { "total_non_ridership", 512.ToString() },
+                    { "adult_cash_fare", 800.ToString() },
+                    { "youth_cash_fare", 12.ToString() },
+                    { "reduced_cash_fare", 321.ToString() },
+                    { "paper_transfer", 123.ToString() },
+                    { "free_ride", 2.ToString() },
+                    { "personal_care_attendant", 78.ToString() },
+                    { "passenger_headcount", 546.ToString() },
+                    { "cash_fare_underpmnt", 0.ToString() },
+                    { "cash_upgrade", 44.ToString() },
+                    { "special_survey", 1.ToString() },
+                    { "wheelchair", 23.ToString() },
+                    { "bicycle", 9.ToString() },
+                    { "ferry_passenger_headcount", 7.ToString() },
+                    { "file_id", nfc_file_id.ToString() }
+                };
+            dbManager.InsertNFC(nfc1);
+        }
         public void RemoveDB()
         {
             dbManager.CloseDatabase();
