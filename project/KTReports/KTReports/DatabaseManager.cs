@@ -197,34 +197,21 @@ namespace KTReports
 
         public enum FileType { NFC, FC, RSD };
         // Insert brand new file information into the db (returns the file_id)
-        public long? InsertNewFile(string fileName, string fileLocation, FileType fileType, string importDate)
+        public long InsertNewFile(string fileName, string fileLocation, FileType fileType, string importDate)
         {
-            try
+            string insertSQL =
+                @"INSERT INTO ImportedFiles 
+                    (name, dir_location, file_type, import_date) 
+                VALUES (@fileName, @fileLocation, @fileType, @import_date)";
+            using (SQLiteCommand command = new SQLiteCommand())
             {
-                string insertSQL =
-                    @"INSERT INTO ImportedFiles 
-                        (name, dir_location, file_type, import_date) 
-                    VALUES (@fileName, @fileLocation, @fileType, @import_date)";
-                using (SQLiteCommand command = new SQLiteCommand())
-                {
-                    command.CommandText = insertSQL;
-                    command.Connection = sqliteConnection;
-                    command.Parameters.Add(new SQLiteParameter("@fileName", fileName));
-                    command.Parameters.Add(new SQLiteParameter("@fileLocation", fileLocation));
-                    command.Parameters.Add(new SQLiteParameter("@fileType", fileType.ToString()));
-                    command.Parameters.Add(new SQLiteParameter("@import_date", importDate));
-                    command.ExecuteNonQuery();
-                }
-            }
-            catch (SQLiteException sqle)
-            {
-                Console.WriteLine(sqle.StackTrace);
-                return null;
-            }
-            catch (IndexOutOfRangeException ie)
-            {
-                Console.WriteLine(ie.StackTrace);
-                return null;
+                command.CommandText = insertSQL;
+                command.Connection = sqliteConnection;
+                command.Parameters.Add(new SQLiteParameter("@fileName", fileName));
+                command.Parameters.Add(new SQLiteParameter("@fileLocation", fileLocation));
+                command.Parameters.Add(new SQLiteParameter("@fileType", fileType.ToString()));
+                command.Parameters.Add(new SQLiteParameter("@import_date", importDate));
+                command.ExecuteNonQuery();
             }
             // Return file id here
             return sqliteConnection.LastInsertRowId;
@@ -252,16 +239,6 @@ namespace KTReports
                         pathId = Convert.ToInt64(row["path_id"]);
                     }
                 }
-            }
-            if (pathId == null)
-            {
-                Console.WriteLine("FAILED");
-                // If no result, then create entries in Paths and Routes and return the created path_id
-                pathId = InsertPath(keyValuePairs);
-                Console.WriteLine("FAILED PATH ID " + pathId);
-            } else
-            {
-                Console.WriteLine("GOOD " + pathId);
             }
             return pathId;
         }
@@ -307,10 +284,15 @@ namespace KTReports
                 long? pathId = GetPathId(keyValuePairs);
                 if (pathId == null)
                 {
-                    Console.WriteLine("Path Id NULL");
-                    return false;
+                    // If no result, then create entries in Paths and Routes and return the created path_id
+                    pathId = InsertPath(keyValuePairs);
+                    Console.WriteLine($"Created path ID: {pathId}");
                 }
-                string insertSQL =
+                else
+                {
+                    Console.WriteLine($"Path ID match: {pathId}");
+                }
+            string insertSQL =
                     @"INSERT INTO FareCardData 
                         (path_id, assigned_route_id, start_date, end_date, is_weekday, transit_operator, source_participant, service_participant, mode, route_direction, trip_start, boardings, file_id)
                     VALUES (@path_id, @route_id, @start_date, @end_date, @is_weekday, @transit_operator, @source_participant, @service_participant, @mode, @route_direction, @trip_start, @boardings, @file_id)";
@@ -348,7 +330,16 @@ namespace KTReports
         {
             // Get the path_id associated with this NonFareCard data using the file's start date and the assigned_route_id
             long? pathId = GetPathId(keyValuePairs);
-            if (pathId == null) return false;
+            if (pathId == null)
+            {
+                // If no result, then create entries in Paths and Routes and return the created path_id
+                pathId = InsertPath(keyValuePairs);
+                Console.WriteLine($"Created path ID: {pathId}");
+            }
+            else
+            {
+                Console.WriteLine($"Path ID match: {pathId}");
+            }
             try
             {
                 string insertSQL =
@@ -362,7 +353,7 @@ namespace KTReports
                 {
                     command.CommandText = insertSQL;
                     command.Connection = sqliteConnection;
-                    command.Parameters.Add(new SQLiteParameter("@path_id", keyValuePairs["path_id"]));
+                    command.Parameters.Add(new SQLiteParameter("@path_id", pathId));
                     command.Parameters.Add(new SQLiteParameter("@route_id", keyValuePairs["route_id"]));
                     command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
                     command.Parameters.Add(new SQLiteParameter("@end_date", keyValuePairs["end_date"]));
@@ -372,7 +363,8 @@ namespace KTReports
                     command.Parameters.Add(new SQLiteParameter("@total_non_ridership", keyValuePairs["total_non_ridership"]));
                     command.Parameters.Add(new SQLiteParameter("@adult_cash_fare", keyValuePairs["adult_cash_fare"]));
                     command.Parameters.Add(new SQLiteParameter("@youth_cash_fare", keyValuePairs["youth_cash_fare"]));
-                    command.Parameters.Add(new SQLiteParameter("@reduced_cash_fare", keyValuePairs["paper_transfer"]));
+                    command.Parameters.Add(new SQLiteParameter("@reduced_cash_fare", keyValuePairs["reduced_cash_fare"]));
+                    command.Parameters.Add(new SQLiteParameter("@paper_transfer", keyValuePairs["paper_transfer"]));
                     command.Parameters.Add(new SQLiteParameter("@free_ride", keyValuePairs["free_ride"]));
                     command.Parameters.Add(new SQLiteParameter("@personal_care_attendant", keyValuePairs["personal_care_attendant"]));
                     command.Parameters.Add(new SQLiteParameter("@passenger_headcount", keyValuePairs["passenger_headcount"]));
@@ -388,7 +380,8 @@ namespace KTReports
             }
             catch (SQLiteException sqle)
             {
-                Console.WriteLine(sqle.StackTrace);
+                throw sqle;
+                // Handle in future
                 return false;
             }
             return true;
@@ -540,22 +533,20 @@ namespace KTReports
             return true;
         }
 
-        // Creates a brand new path (NOT an update to an existing path)
-        public long? InsertPath(Dictionary<string, string> keyValuePairs)
+        // Creates a brand new path using available route information (NOT an update to an existing path)
+        public long InsertPath(Dictionary<string, string> keyValuePairs)
         {
-            try
+            // If route already exists (route_id and start_date already in Routes), then get the Path id and return it
+            long? pathId = GetPathId(keyValuePairs);
+            if (pathId != null)
             {
-                // Paths PK is set to auto increment
-                string addToPaths = @"INSERT INTO Paths (path_id) VALUES (null)";
-                using (SQLiteCommand masterCommand = new SQLiteCommand(addToPaths, sqliteConnection))
-                {
-                    masterCommand.ExecuteNonQuery();
-                }
+                return (long) pathId;
             }
-            catch (SQLiteException sqle)
+            // Paths PK is set to auto increment
+            string addToPaths = @"INSERT INTO Paths (path_id) VALUES (null)";
+            using (SQLiteCommand masterCommand = new SQLiteCommand(addToPaths, sqliteConnection))
             {
-                Console.WriteLine(sqle.StackTrace);
-                return null;
+                masterCommand.ExecuteNonQuery();
             }
             // Use the new master route id when inserting a route into the Routes table
             long path_id = sqliteConnection.LastInsertRowId;
@@ -565,20 +556,12 @@ namespace KTReports
         }
 
         // Creates a brand new stop location (NOT an update to an existing stop location)
-        public long? InsertStopLocation(Dictionary<string, string> keyValuePairs)
+        public long InsertStopLocation(Dictionary<string, string> keyValuePairs)
         {
-            try
+            string addToStopLocs = @"INSERT INTO StopLocations (location_id) VALUES (null)";
+            using (SQLiteCommand masterCommand = new SQLiteCommand(addToStopLocs, sqliteConnection))
             {
-                string addToStopLocs = @"INSERT INTO StopLocations (location_id) VALUES (null)";
-                using (SQLiteCommand masterCommand = new SQLiteCommand(addToStopLocs, sqliteConnection))
-                {
-                    masterCommand.ExecuteNonQuery();
-                }
-            }
-            catch (SQLiteException sqle)
-            {
-                Console.WriteLine(sqle.StackTrace);
-                return null;
+                masterCommand.ExecuteNonQuery();
             }
             // Use the new master route stop id when inserting a route stop into the RouteStops table
             long location_id = sqliteConnection.LastInsertRowId;
@@ -656,32 +639,74 @@ namespace KTReports
         }
 
         // Given a routeId, report range, get the ridership for a route during weekdays or saturdays (specified by isWeekday)
-        public NameValueCollection GetRouteRidership(int routeId, List<DateTime> reportRange, Boolean isWeekday)
+        public Dictionary<string, int> GetRouteRidership(int routeId, List<DateTime> reportRange, Boolean isWeekday)
         {
-            // NEED TO FIX QUERY
-            string query = @"SELECT SUM(fc.boardings) AS fc_boardings 
+            var results = new Dictionary<string, int>();
+            int fcTotal = 0;
+            string fcQuery = @"SELECT SUM(fc.boardings) as fc_boardings  
                                 FROM FareCardData as fc
-                                WHERE fc.assigned_route_id == @route_id AND fc.start_date <= @report_start 
-                                    AND fc.start_date <= @report_end
+                                WHERE fc.assigned_route_id == @route_id 
+                                    AND fc.start_date >= @report_start 
+                                    AND fc.end_date <= @report_end
                                     AND fc.is_weekday == @is_weekday";
-            var results = new NameValueCollection();
-            using (var command = new SQLiteCommand(query, sqliteConnection))
+            using (var command = new SQLiteCommand(fcQuery, sqliteConnection))
             {
-                command.CommandText = query;
+                command.CommandText = fcQuery;
                 command.Connection = sqliteConnection;
                 command.Parameters.Add(new SQLiteParameter("@route_id", routeId));
-                command.Parameters.Add(new SQLiteParameter("@report_start", reportRange[0].ToString("yyyyMMdd")));
-                command.Parameters.Add(new SQLiteParameter("@report_end", reportRange[1].ToString("yyyyMMdd")));
+                command.Parameters.Add(new SQLiteParameter("@report_start", reportRange[0].ToString("yyyy-MM-dd")));
+                command.Parameters.Add(new SQLiteParameter("@report_end", reportRange[1].ToString("yyyy-MM-dd")));
                 command.Parameters.Add(new SQLiteParameter("@is_weekday", isWeekday.ToString()));
                 using (SQLiteDataReader reader = command.ExecuteReader())
                 {
-                    while (reader.Read())
+                    if (reader.Read())
                     {
-                        // Return the first (and only) result
-                        return reader.GetValues();
+                        var values = reader.GetValues();
+                        string fcBoardingsStr = values["fc_boardings"];
+                        if (!string.IsNullOrEmpty(fcBoardingsStr))
+                        {
+                            fcTotal += Convert.ToInt32(fcBoardingsStr);
+                        }
                     }
                 }
             }
+            results.Add("fc_total", fcTotal);
+
+            int nfcTotal = 0;
+            string nfcQuery = @"SELECT SUM(nfc.total_ridership) as nfc_ridership, SUM(nfc.total_non_ridership) as nfc_non_ridership  
+                                FROM NonFareCardData as nfc
+                                WHERE nfc.assigned_route_id == @route_id 
+                                    AND nfc.start_date >= @report_start 
+                                    AND nfc.end_date <= @report_end
+                                    AND nfc.is_weekday == @is_weekday";
+            using (var command = new SQLiteCommand(nfcQuery, sqliteConnection))
+            {
+                command.CommandText = nfcQuery;
+                command.Connection = sqliteConnection;
+                command.Parameters.Add(new SQLiteParameter("@route_id", routeId));
+                command.Parameters.Add(new SQLiteParameter("@report_start", reportRange[0].ToString("yyyy-MM-dd")));
+                command.Parameters.Add(new SQLiteParameter("@report_end", reportRange[1].ToString("yyyy-MM-dd")));
+                command.Parameters.Add(new SQLiteParameter("@is_weekday", isWeekday.ToString()));
+                using (SQLiteDataReader reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        var values = reader.GetValues();
+                        string ridershipStr = values["nfc_ridership"];
+                        if (!string.IsNullOrEmpty(ridershipStr))
+                        {
+                            nfcTotal += Convert.ToInt32(ridershipStr);
+                        }
+                        string nonRidershipStr = values["nfc_non_ridership"];
+                        if (!string.IsNullOrEmpty(nonRidershipStr))
+                        {
+                            nfcTotal += Convert.ToInt32(nonRidershipStr);
+                        }
+                    }
+                }
+            }
+            results.Add("nfc_total", nfcTotal);
+            results.Add("total", fcTotal + nfcTotal);
             return results;
         }
 
@@ -735,8 +760,8 @@ namespace KTReports
             return true;
         } */
 
-        // TODO: Methods to handle updates for information in tables, rather than only inserting
-        // TODO: Methods to remove data from tables
-        // TODO: Methods that handle specific queries rather than a generic method
+            // TODO: Methods to handle updates for information in tables, rather than only inserting
+            // TODO: Methods to remove data from tables
+            // TODO: Methods that handle specific queries rather than a generic method
+        }
     }
-}

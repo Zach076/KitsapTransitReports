@@ -22,7 +22,6 @@ namespace KTReports
             // Run tests on insertions and queries for a test database
             TestDB test = new TestDB();
             test.TestInsertions();
-            test.TestQueries();
             //test.RemoveDB();
         }
 
