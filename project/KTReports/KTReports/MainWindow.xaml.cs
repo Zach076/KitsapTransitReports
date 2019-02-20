@@ -27,8 +27,8 @@ namespace KTReports
         public MainWindow()
         {
             InitializeComponent();
-            // Set the Reports page as content by default
-            //Main.Content = new Reports();
+            // Set the Delete Imports page as default
+            Main.Content = DeleteImports.GetDeleteImports();
         }
 
         private void CloseClicked(object sender, RoutedEventArgs e)
