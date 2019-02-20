@@ -203,16 +203,16 @@ namespace KTReports
                 @"INSERT INTO ImportedFiles 
                     (name, dir_location, file_type, import_date) 
                 VALUES (@fileName, @fileLocation, @fileType, @import_date)";
-            using (SQLiteCommand command = new SQLiteCommand())
+            using (SQLiteCommand command = new SQLiteCommand(insertSQL, sqliteConnection))
             {
-                command.CommandText = insertSQL;
-                command.Connection = sqliteConnection;
                 command.Parameters.Add(new SQLiteParameter("@fileName", fileName));
                 command.Parameters.Add(new SQLiteParameter("@fileLocation", fileLocation));
                 command.Parameters.Add(new SQLiteParameter("@fileType", fileType.ToString()));
                 command.Parameters.Add(new SQLiteParameter("@import_date", importDate));
                 command.ExecuteNonQuery();
             }
+            DeleteImports deleteImports = DeleteImports.GetDeleteImports();
+            deleteImports.SetupPage();
             // Return file id here
             return sqliteConnection.LastInsertRowId;
         }
@@ -225,10 +225,8 @@ namespace KTReports
                                 FROM Routes as r 
                                 WHERE @start_date >= r.start_date AND r.assigned_route_id == @route_id
                                 ORDER BY r.start_date";
-            using (SQLiteCommand command = new SQLiteCommand())
+            using (SQLiteCommand command = new SQLiteCommand(query, sqliteConnection))
             {
-                command.CommandText = query;
-                command.Connection = sqliteConnection;
                 command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
                 command.Parameters.Add(new SQLiteParameter("@route_id", keyValuePairs["route_id"]));
                 using (SQLiteDataReader reader = command.ExecuteReader())
@@ -251,10 +249,8 @@ namespace KTReports
                                 FROM Stops as s
                                 WHERE @start_date >= s.start_date AND s.assigned_stop_id == @stop_id
                                 ORDER BY s.start_date";
-            using (SQLiteCommand command = new SQLiteCommand())
+            using (SQLiteCommand command = new SQLiteCommand(query, sqliteConnection))
             {
-                command.CommandText = query;
-                command.Connection = sqliteConnection;
                 command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
                 command.Parameters.Add(new SQLiteParameter("@stop_id", keyValuePairs["stop_id"]));
                 using (SQLiteDataReader reader = command.ExecuteReader())
@@ -278,49 +274,39 @@ namespace KTReports
         // Returns bool based on success of insertion
         public bool InsertFCD(Dictionary<string, string> keyValuePairs)
         {
-         //   try
-         //   {
-                // Get the path_id associated with this FareCardData using the file's start date and the assigned_route_id
-                long? pathId = GetPathId(keyValuePairs);
-                if (pathId == null)
-                {
-                    // If no result, then create entries in Paths and Routes and return the created path_id
-                    pathId = InsertPath(keyValuePairs);
-                    Console.WriteLine($"Created path ID: {pathId}");
-                }
-                else
-                {
-                    Console.WriteLine($"Path ID match: {pathId}");
-                }
-            string insertSQL =
-                    @"INSERT INTO FareCardData 
-                        (path_id, assigned_route_id, start_date, end_date, is_weekday, transit_operator, source_participant, service_participant, mode, route_direction, trip_start, boardings, file_id)
-                    VALUES (@path_id, @route_id, @start_date, @end_date, @is_weekday, @transit_operator, @source_participant, @service_participant, @mode, @route_direction, @trip_start, @boardings, @file_id)";
-                using (SQLiteCommand command = new SQLiteCommand())
-                {
-                    command.CommandText = insertSQL;
-                    command.Connection = sqliteConnection;
-                    command.Parameters.Add(new SQLiteParameter("@path_id", pathId));
-                    command.Parameters.Add(new SQLiteParameter("@route_id", keyValuePairs["route_id"]));
-                    command.Parameters.Add(new SQLiteParameter("@is_weekday", keyValuePairs["is_weekday"]));
-                    command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
-                    command.Parameters.Add(new SQLiteParameter("@end_date", keyValuePairs["end_date"]));
-                    command.Parameters.Add(new SQLiteParameter("@transit_operator", keyValuePairs["transit_operator"]));
-                    command.Parameters.Add(new SQLiteParameter("@source_participant", keyValuePairs["source_participant"]));
-                    command.Parameters.Add(new SQLiteParameter("@service_participant", keyValuePairs["service_participant"]));
-                    command.Parameters.Add(new SQLiteParameter("@mode", keyValuePairs["mode"]));
-                    command.Parameters.Add(new SQLiteParameter("@route_direction", keyValuePairs["route_direction"]));
-                    command.Parameters.Add(new SQLiteParameter("@trip_start", keyValuePairs["trip_start"]));
-                    command.Parameters.Add(new SQLiteParameter("@boardings", keyValuePairs["boardings"]));
-                    command.Parameters.Add(new SQLiteParameter("@file_id", keyValuePairs["file_id"]));
-                    command.ExecuteNonQuery();
-                }
-           // }
-           // catch (SQLiteException sqle)
-          //  {
-         //       Console.WriteLine(sqle.StackTrace);
-         //       return false;
-         //   }
+            // Get the path_id associated with this FareCardData using the file's start date and the assigned_route_id
+            long? pathId = GetPathId(keyValuePairs);
+            if (pathId == null)
+            {
+                // If no result, then create entries in Paths and Routes and return the created path_id
+                pathId = InsertPath(keyValuePairs);
+                Console.WriteLine($"Created path ID: {pathId}");
+            }
+            else
+            {
+                Console.WriteLine($"Path ID match: {pathId}");
+            }
+        string insertSQL =
+                @"INSERT INTO FareCardData 
+                    (path_id, assigned_route_id, start_date, end_date, is_weekday, transit_operator, source_participant, service_participant, mode, route_direction, trip_start, boardings, file_id)
+                VALUES (@path_id, @route_id, @start_date, @end_date, @is_weekday, @transit_operator, @source_participant, @service_participant, @mode, @route_direction, @trip_start, @boardings, @file_id)";
+            using (SQLiteCommand command = new SQLiteCommand(insertSQL, sqliteConnection))
+            {
+                command.Parameters.Add(new SQLiteParameter("@path_id", pathId));
+                command.Parameters.Add(new SQLiteParameter("@route_id", keyValuePairs["route_id"]));
+                command.Parameters.Add(new SQLiteParameter("@is_weekday", keyValuePairs["is_weekday"]));
+                command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
+                command.Parameters.Add(new SQLiteParameter("@end_date", keyValuePairs["end_date"]));
+                command.Parameters.Add(new SQLiteParameter("@transit_operator", keyValuePairs["transit_operator"]));
+                command.Parameters.Add(new SQLiteParameter("@source_participant", keyValuePairs["source_participant"]));
+                command.Parameters.Add(new SQLiteParameter("@service_participant", keyValuePairs["service_participant"]));
+                command.Parameters.Add(new SQLiteParameter("@mode", keyValuePairs["mode"]));
+                command.Parameters.Add(new SQLiteParameter("@route_direction", keyValuePairs["route_direction"]));
+                command.Parameters.Add(new SQLiteParameter("@trip_start", keyValuePairs["trip_start"]));
+                command.Parameters.Add(new SQLiteParameter("@boardings", keyValuePairs["boardings"]));
+                command.Parameters.Add(new SQLiteParameter("@file_id", keyValuePairs["file_id"]));
+                command.ExecuteNonQuery();
+            }
             return true;
         }
 
@@ -340,49 +326,38 @@ namespace KTReports
             {
                 Console.WriteLine($"Path ID match: {pathId}");
             }
-            try
+            string insertSQL =
+                @"INSERT INTO NonFareCardData 
+                    (path_id, assigned_route_id, start_date, end_date, is_weekday, route_direction, total_ridership, total_non_ridership, adult_cash_fare, youth_cash_fare, reduced_cash_fare, paper_transfer,
+                    free_ride, personal_care_attendant, passenger_headcount, cash_fare_underpmnt, cash_upgrade, special_survey, wheelchair, bicycle, ferry_passenger_headcount, file_id) 
+                VALUES (@path_id, @route_id, @start_date, @end_date, @is_weekday, @route_direction, @total_ridership, @total_non_ridership, @adult_cash_fare, @youth_cash_fare, 
+                    @reduced_cash_fare, @paper_transfer, @free_ride, @personal_care_attendant, @passenger_headcount, @cash_fare_underpmnt, @cash_upgrade, @special_survey,
+                    @wheelchair, @bicycle, @ferry_passenger_headcount, @file_id)";
+            using (SQLiteCommand command = new SQLiteCommand(insertSQL, sqliteConnection))
             {
-                string insertSQL =
-                    @"INSERT INTO NonFareCardData 
-                        (path_id, assigned_route_id, start_date, end_date, is_weekday, route_direction, total_ridership, total_non_ridership, adult_cash_fare, youth_cash_fare, reduced_cash_fare, paper_transfer,
-                        free_ride, personal_care_attendant, passenger_headcount, cash_fare_underpmnt, cash_upgrade, special_survey, wheelchair, bicycle, ferry_passenger_headcount, file_id) 
-                    VALUES (@path_id, @route_id, @start_date, @end_date, @is_weekday, @route_direction, @total_ridership, @total_non_ridership, @adult_cash_fare, @youth_cash_fare, 
-                        @reduced_cash_fare, @paper_transfer, @free_ride, @personal_care_attendant, @passenger_headcount, @cash_fare_underpmnt, @cash_upgrade, @special_survey,
-                        @wheelchair, @bicycle, @ferry_passenger_headcount, @file_id)";
-                using (SQLiteCommand command = new SQLiteCommand())
-                {
-                    command.CommandText = insertSQL;
-                    command.Connection = sqliteConnection;
-                    command.Parameters.Add(new SQLiteParameter("@path_id", pathId));
-                    command.Parameters.Add(new SQLiteParameter("@route_id", keyValuePairs["route_id"]));
-                    command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
-                    command.Parameters.Add(new SQLiteParameter("@end_date", keyValuePairs["end_date"]));
-                    command.Parameters.Add(new SQLiteParameter("@is_weekday", keyValuePairs["is_weekday"]));
-                    command.Parameters.Add(new SQLiteParameter("@route_direction", keyValuePairs["route_direction"]));
-                    command.Parameters.Add(new SQLiteParameter("@total_ridership", keyValuePairs["total_ridership"]));
-                    command.Parameters.Add(new SQLiteParameter("@total_non_ridership", keyValuePairs["total_non_ridership"]));
-                    command.Parameters.Add(new SQLiteParameter("@adult_cash_fare", keyValuePairs["adult_cash_fare"]));
-                    command.Parameters.Add(new SQLiteParameter("@youth_cash_fare", keyValuePairs["youth_cash_fare"]));
-                    command.Parameters.Add(new SQLiteParameter("@reduced_cash_fare", keyValuePairs["reduced_cash_fare"]));
-                    command.Parameters.Add(new SQLiteParameter("@paper_transfer", keyValuePairs["paper_transfer"]));
-                    command.Parameters.Add(new SQLiteParameter("@free_ride", keyValuePairs["free_ride"]));
-                    command.Parameters.Add(new SQLiteParameter("@personal_care_attendant", keyValuePairs["personal_care_attendant"]));
-                    command.Parameters.Add(new SQLiteParameter("@passenger_headcount", keyValuePairs["passenger_headcount"]));
-                    command.Parameters.Add(new SQLiteParameter("@cash_fare_underpmnt", keyValuePairs["cash_fare_underpmnt"]));
-                    command.Parameters.Add(new SQLiteParameter("@cash_upgrade", keyValuePairs["cash_upgrade"]));
-                    command.Parameters.Add(new SQLiteParameter("@special_survey", keyValuePairs["special_survey"]));
-                    command.Parameters.Add(new SQLiteParameter("@wheelchair", keyValuePairs["wheelchair"]));
-                    command.Parameters.Add(new SQLiteParameter("@bicycle", keyValuePairs["bicycle"]));
-                    command.Parameters.Add(new SQLiteParameter("@ferry_passenger_headcount", keyValuePairs["ferry_passenger_headcount"]));
-                    command.Parameters.Add(new SQLiteParameter("@file_id", keyValuePairs["file_id"]));
-                    command.ExecuteNonQuery();
-                }
-            }
-            catch (SQLiteException sqle)
-            {
-                throw sqle;
-                // Handle in future
-                return false;
+                command.Parameters.Add(new SQLiteParameter("@path_id", pathId));
+                command.Parameters.Add(new SQLiteParameter("@route_id", keyValuePairs["route_id"]));
+                command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
+                command.Parameters.Add(new SQLiteParameter("@end_date", keyValuePairs["end_date"]));
+                command.Parameters.Add(new SQLiteParameter("@is_weekday", keyValuePairs["is_weekday"]));
+                command.Parameters.Add(new SQLiteParameter("@route_direction", keyValuePairs["route_direction"]));
+                command.Parameters.Add(new SQLiteParameter("@total_ridership", keyValuePairs["total_ridership"]));
+                command.Parameters.Add(new SQLiteParameter("@total_non_ridership", keyValuePairs["total_non_ridership"]));
+                command.Parameters.Add(new SQLiteParameter("@adult_cash_fare", keyValuePairs["adult_cash_fare"]));
+                command.Parameters.Add(new SQLiteParameter("@youth_cash_fare", keyValuePairs["youth_cash_fare"]));
+                command.Parameters.Add(new SQLiteParameter("@reduced_cash_fare", keyValuePairs["reduced_cash_fare"]));
+                command.Parameters.Add(new SQLiteParameter("@paper_transfer", keyValuePairs["paper_transfer"]));
+                command.Parameters.Add(new SQLiteParameter("@free_ride", keyValuePairs["free_ride"]));
+                command.Parameters.Add(new SQLiteParameter("@personal_care_attendant", keyValuePairs["personal_care_attendant"]));
+                command.Parameters.Add(new SQLiteParameter("@passenger_headcount", keyValuePairs["passenger_headcount"]));
+                command.Parameters.Add(new SQLiteParameter("@cash_fare_underpmnt", keyValuePairs["cash_fare_underpmnt"]));
+                command.Parameters.Add(new SQLiteParameter("@cash_upgrade", keyValuePairs["cash_upgrade"]));
+                command.Parameters.Add(new SQLiteParameter("@special_survey", keyValuePairs["special_survey"]));
+                command.Parameters.Add(new SQLiteParameter("@wheelchair", keyValuePairs["wheelchair"]));
+                command.Parameters.Add(new SQLiteParameter("@bicycle", keyValuePairs["bicycle"]));
+                command.Parameters.Add(new SQLiteParameter("@ferry_passenger_headcount", keyValuePairs["ferry_passenger_headcount"]));
+                command.Parameters.Add(new SQLiteParameter("@file_id", keyValuePairs["file_id"]));
+                command.ExecuteNonQuery();
             }
             return true;
         }
@@ -397,10 +372,8 @@ namespace KTReports
                     @"INSERT INTO RouteStopData 
                         (location_id, assigned_stop_id, start_date, end_date, route_name, minus_door_1_person, minus_door_2_person, door_1_person, door_2_person, file_id) 
                     VALUES (@location_id, @stop_id, @start_date, @end_date, @route_name, @minus_door_1_person, @minus_door_2_person, @door_1_person, @door_2_person, @file_id)";
-                using (SQLiteCommand command = new SQLiteCommand())
+                using (SQLiteCommand command = new SQLiteCommand(insertSQL, sqliteConnection))
                 {
-                    command.CommandText = insertSQL;
-                    command.Connection = sqliteConnection;
                     command.Parameters.Add(new SQLiteParameter("@location_id", keyValuePairs["location_id"]));
                     command.Parameters.Add(new SQLiteParameter("@stop_id", keyValuePairs["stop_id"]));
                     command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
@@ -431,10 +404,8 @@ namespace KTReports
                     @"INSERT INTO ReportHistory 
                         (report_location, datetime_created, report_range) 
                     VALUES (@report_location, @datetime_created, @report_range)";
-                using (SQLiteCommand command = new SQLiteCommand())
+                using (SQLiteCommand command = new SQLiteCommand(insertSQL, sqliteConnection))
                 {
-                    command.CommandText = insertSQL;
-                    command.Connection = sqliteConnection;
                     command.Parameters.Add(new SQLiteParameter("@report_location", keyValuePairs["report_location"]));
                     command.Parameters.Add(new SQLiteParameter("@datetime_created", keyValuePairs["datetime_created"]));
                     command.Parameters.Add(new SQLiteParameter("@report_range", keyValuePairs["report_range"]));
@@ -452,48 +423,36 @@ namespace KTReports
         // Insert a route (either new or a change to a route using an existing path)
         public bool InsertRoute(Dictionary<string, string> keyValuePairs)
         {
-            try
+            string insertSQL =
+                @"INSERT INTO Routes 
+                    (path_id, assigned_route_id, start_date, route_name, district, distance, num_trips_week, 
+                    num_trips_sat, num_trips_hol, weekday_hours, saturday_hours, holiday_hours) 
+                VALUES (@path_id, @assigned_route_id, @start_date, @route_name, @district, @distance, @num_trips_week,
+                        @num_trips_sat, @num_trips_hol, @weekday_hours, @saturday_hours, @holiday_hours)";
+            using (SQLiteCommand command = new SQLiteCommand(insertSQL, sqliteConnection))
             {
-                string insertSQL =
-                    @"INSERT INTO Routes 
-                        (path_id, assigned_route_id, start_date, route_name, district, distance, num_trips_week, 
-                        num_trips_sat, num_trips_hol, weekday_hours, saturday_hours, holiday_hours) 
-                    VALUES (@path_id, @assigned_route_id, @start_date, @route_name, @district, @distance, @num_trips_week,
-                         @num_trips_sat, @num_trips_hol, @weekday_hours, @saturday_hours, @holiday_hours)";
-                using (SQLiteCommand command = new SQLiteCommand())
-                {
-                    command.CommandText = insertSQL;
-                    command.Connection = sqliteConnection;
-                    command.Parameters.Add(new SQLiteParameter("@path_id", keyValuePairs["path_id"]));
-                    command.Parameters.Add(new SQLiteParameter("@assigned_route_id", keyValuePairs["route_id"]));
-                    command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
-                    keyValuePairs.TryGetValue("route_name", out string route_name);
-                    command.Parameters.Add(new SQLiteParameter("@route_name", route_name));
-                    keyValuePairs.TryGetValue("district", out string district);
-                    command.Parameters.Add(new SQLiteParameter("@district", district));
-                    keyValuePairs.TryGetValue("distance", out string distance);
-                    command.Parameters.Add(new SQLiteParameter("@distance", distance));
-                    keyValuePairs.TryGetValue("num_trips_week", out string num_trips_week);
-                    command.Parameters.Add(new SQLiteParameter("@num_trips_week",num_trips_week));
-                    keyValuePairs.TryGetValue("num_trips_sat", out string num_trips_sat);
-                    command.Parameters.Add(new SQLiteParameter("@num_trips_sat", num_trips_sat));
-                    keyValuePairs.TryGetValue("num_trips_hol", out string num_trips_hol);
-                    command.Parameters.Add(new SQLiteParameter("@num_trips_hol", num_trips_hol));
-                    keyValuePairs.TryGetValue("weekday_hours", out string weekday_hours);
-                    command.Parameters.Add(new SQLiteParameter("@weekday_hours", weekday_hours));
-                    keyValuePairs.TryGetValue("saturday_hours", out string saturday_hours);
-                    command.Parameters.Add(new SQLiteParameter("@saturday_hours", saturday_hours));
-                    keyValuePairs.TryGetValue("holiday_hours", out string holiday_hours);
-                    command.Parameters.Add(new SQLiteParameter("@holiday_hours", holiday_hours));
-                    command.ExecuteNonQuery();
-                }
-            }
-            catch (SQLiteException sqle)
-            {
-                Console.WriteLine(sqle.StackTrace);
-                throw sqle;
-                // Throw for now, handle in future
-                //return false;
+                command.Parameters.Add(new SQLiteParameter("@path_id", keyValuePairs["path_id"]));
+                command.Parameters.Add(new SQLiteParameter("@assigned_route_id", keyValuePairs["route_id"]));
+                command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
+                keyValuePairs.TryGetValue("route_name", out string route_name);
+                command.Parameters.Add(new SQLiteParameter("@route_name", route_name));
+                keyValuePairs.TryGetValue("district", out string district);
+                command.Parameters.Add(new SQLiteParameter("@district", district));
+                keyValuePairs.TryGetValue("distance", out string distance);
+                command.Parameters.Add(new SQLiteParameter("@distance", distance));
+                keyValuePairs.TryGetValue("num_trips_week", out string num_trips_week);
+                command.Parameters.Add(new SQLiteParameter("@num_trips_week",num_trips_week));
+                keyValuePairs.TryGetValue("num_trips_sat", out string num_trips_sat);
+                command.Parameters.Add(new SQLiteParameter("@num_trips_sat", num_trips_sat));
+                keyValuePairs.TryGetValue("num_trips_hol", out string num_trips_hol);
+                command.Parameters.Add(new SQLiteParameter("@num_trips_hol", num_trips_hol));
+                keyValuePairs.TryGetValue("weekday_hours", out string weekday_hours);
+                command.Parameters.Add(new SQLiteParameter("@weekday_hours", weekday_hours));
+                keyValuePairs.TryGetValue("saturday_hours", out string saturday_hours);
+                command.Parameters.Add(new SQLiteParameter("@saturday_hours", saturday_hours));
+                keyValuePairs.TryGetValue("holiday_hours", out string holiday_hours);
+                command.Parameters.Add(new SQLiteParameter("@holiday_hours", holiday_hours));
+                command.ExecuteNonQuery();
             }
             return true;
         }
@@ -501,34 +460,24 @@ namespace KTReports
         // Insert a route stop (either new or a change to a route stop using an existing master key) into the DB
         public bool InsertStop(Dictionary<string, string> keyValuePairs)
         {
-            try
+            string insertSQL =
+                @"INSERT INTO RouteStops 
+                    (location_id, path_id, start_date, stop_name, assigned_stop_id) 
+                VALUES (@stop_id, @start_date, @end_date, @stop_name, @assigned_stop_id)";
+            using (SQLiteCommand command = new SQLiteCommand(insertSQL, sqliteConnection))
             {
-                string insertSQL =
-                    @"INSERT INTO RouteStops 
-                        (location_id, path_id, start_date, stop_name, assigned_stop_id) 
-                    VALUES (@stop_id, @start_date, @end_date, @stop_name, @assigned_stop_id)";
-                using (SQLiteCommand command = new SQLiteCommand())
-                {
-                    command.CommandText = insertSQL;
-                    command.Connection = sqliteConnection;
-                    command.Parameters.Add(new SQLiteParameter("@location_id", keyValuePairs["location_id"]));
-                    command.Parameters.Add(new SQLiteParameter("@path_id", keyValuePairs["path_id"]));
-                    command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
-                    try { 
-                        command.Parameters.Add(new SQLiteParameter("@stop_name", keyValuePairs["stop_name"]));
-                        command.Parameters.Add(new SQLiteParameter("@assigned_stop_id", keyValuePairs["stop_id"]));
-                    }
-                    catch (KeyNotFoundException knfe)
-                    {
-                        // Acceptable to not have this data
-                    }
-                    command.ExecuteNonQuery();
+                command.Parameters.Add(new SQLiteParameter("@location_id", keyValuePairs["location_id"]));
+                command.Parameters.Add(new SQLiteParameter("@path_id", keyValuePairs["path_id"]));
+                command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
+                try { 
+                    command.Parameters.Add(new SQLiteParameter("@stop_name", keyValuePairs["stop_name"]));
+                    command.Parameters.Add(new SQLiteParameter("@assigned_stop_id", keyValuePairs["stop_id"]));
                 }
-            }
-            catch (SQLiteException sqle)
-            {
-                Console.WriteLine(sqle.StackTrace);
-                return false;
+                catch (KeyNotFoundException knfe)
+                {
+                    // Acceptable to not have this data
+                }
+                command.ExecuteNonQuery();
             }
             return true;
         }
@@ -577,10 +526,8 @@ namespace KTReports
                     @"INSERT INTO Holidays 
                         (date, service_type) 
                     VALUES (@date, @service_type)";
-            using (SQLiteCommand command = new SQLiteCommand())
+            using (SQLiteCommand command = new SQLiteCommand(insertSQL, sqliteConnection))
             {
-                command.CommandText = insertSQL;
-                command.Connection = sqliteConnection;
                 command.Parameters.Add(new SQLiteParameter("@date", keyValuePairs["date"]));
                 command.Parameters.Add(new SQLiteParameter("@service_type", keyValuePairs["service_type"]));
                 command.ExecuteNonQuery();
@@ -594,10 +541,8 @@ namespace KTReports
             string query = @"SELECT date, service_type 
                                 FROM Holidays 
                                 WHERE @startDate <= Holidays.date AND @endDate >= Holidays.date";
-            using (SQLiteCommand command = new SQLiteCommand())
+            using (SQLiteCommand command = new SQLiteCommand(query, sqliteConnection))
             {
-                command.CommandText = query;
-                command.Connection = sqliteConnection;
                 command.Parameters.Add(new SQLiteParameter("@startDate", range[0].ToString("yyyy-MM-dd")));
                 command.Parameters.Add(new SQLiteParameter("@endDate", range[1].ToString("yyyy-MM-dd")));
                 using (SQLiteDataReader reader = command.ExecuteReader())
@@ -621,8 +566,6 @@ namespace KTReports
             var results = new List<NameValueCollection>();
             using (var command = new SQLiteCommand(query, sqliteConnection))
             {
-                command.CommandText = query;
-                command.Connection = sqliteConnection;
                 command.Parameters.Add(new SQLiteParameter("@district", district));
                 command.Parameters.Add(new SQLiteParameter("@report_start", reportRange[0]));
                 command.Parameters.Add(new SQLiteParameter("@report_end", reportRange[1]));
@@ -651,8 +594,6 @@ namespace KTReports
                                     AND fc.is_weekday == @is_weekday";
             using (var command = new SQLiteCommand(fcQuery, sqliteConnection))
             {
-                command.CommandText = fcQuery;
-                command.Connection = sqliteConnection;
                 command.Parameters.Add(new SQLiteParameter("@route_id", routeId));
                 command.Parameters.Add(new SQLiteParameter("@report_start", reportRange[0].ToString("yyyy-MM-dd")));
                 command.Parameters.Add(new SQLiteParameter("@report_end", reportRange[1].ToString("yyyy-MM-dd")));
@@ -681,8 +622,6 @@ namespace KTReports
                                     AND nfc.is_weekday == @is_weekday";
             using (var command = new SQLiteCommand(nfcQuery, sqliteConnection))
             {
-                command.CommandText = nfcQuery;
-                command.Connection = sqliteConnection;
                 command.Parameters.Add(new SQLiteParameter("@route_id", routeId));
                 command.Parameters.Add(new SQLiteParameter("@report_start", reportRange[0].ToString("yyyy-MM-dd")));
                 command.Parameters.Add(new SQLiteParameter("@report_end", reportRange[1].ToString("yyyy-MM-dd")));
@@ -708,6 +647,54 @@ namespace KTReports
             results.Add("nfc_total", nfcTotal);
             results.Add("total", fcTotal + nfcTotal);
             return results;
+        }
+
+        public List<NameValueCollection> GetImportedFiles()
+        {
+            string query = "SELECT * FROM ImportedFiles";
+            var importedFiles = new List<NameValueCollection>();
+            using (var command = new SQLiteCommand(query, sqliteConnection))
+            {
+                using (SQLiteDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        NameValueCollection row = reader.GetValues();
+                        importedFiles.Add(row);
+                    }
+                }
+            }
+            return importedFiles;
+        }
+
+        public void DeleteImportedFile(long fileId, FileType fileType)
+        {
+            // Based on fileId, remove the file's entry from the ImportedFiles table
+            string deleteFromFiles = $"DELETE FROM ImportedFiles WHERE file_id == @fileId";
+            using (var command = new SQLiteCommand(deleteFromFiles, sqliteConnection))
+            {
+                command.Parameters.Add(new SQLiteParameter("@fileId", fileId));
+                command.ExecuteNonQuery();
+            }
+            // Based on the fileId and fileType, remove all data related to the file from the appropriate data table
+            string deleteFromData = string.Empty;
+            switch (fileType)
+            {
+                case FileType.FC:
+                    deleteFromData = $"DELETE FROM FareCardData WHERE file_id == @fileId";
+                    break;
+                case FileType.NFC:
+                    deleteFromData = $"DELETE FROM NonFareCardData WHERE file_id == @fileId";
+                    break;
+                case FileType.RSD:
+                    deleteFromData = $"DELETE FROM RouteStopData WHERE file_id == @fileId";
+                    break;
+            }
+            using (var deleteDataCommand = new SQLiteCommand(deleteFromData, sqliteConnection))
+            {
+                deleteDataCommand.Parameters.Add(new SQLiteParameter("@fileId", fileId));
+                deleteDataCommand.ExecuteNonQuery();
+            }
         }
 
         // A generic method for querying data from the database

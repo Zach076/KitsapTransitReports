@@ -42,6 +42,12 @@ namespace KTReports
             Main.Content = new Reports();
         }
 
+        private void OpenDeleteFiles(object sender, RoutedEventArgs e)
+        {
+            // Set the content of the MainWindow to be the Reports page
+            Main.Content = DeleteImports.GetDeleteImports();
+        }
+
         [STAThread]
 
         private void ImportFile(object sender, RoutedEventArgs e)

@@ -18,9 +18,9 @@ namespace KTReports
         public void TestInsertions()
         {
             // Insert new file information into the database
-            long fc_file_id = dbManager.InsertNewFile("AUGUST 2018 ORCA Boardings by Route BY TRIP.XLS",
+            long fc_file_id = dbManager.InsertNewFile("AUGUST 2018 ORCA Boardings by Route BY TRIP",
                 "C:\\AUGUST 2018 ORCA Boardings by Route BY TRIP.XLS", DatabaseManager.FileType.FC, "2019-02-16");
-            long nfc_file_id = dbManager.InsertNewFile("AUGUST 2018 Non-Fare Card Activity by Route WEEKDAY.XLS", "C:\\AUGUST 2018 Non-Fare Card Activity by Route WEEKDAY.XLS", 
+            long nfc_file_id = dbManager.InsertNewFile("AUGUST 2018 Non-Fare Card Activity by Route WEEKDAY", "C:\\AUGUST 2018 Non-Fare Card Activity by Route WEEKDAY.XLS", 
                 DatabaseManager.FileType.NFC, "2019-02-16");
 
             // Insert new routes into the database
