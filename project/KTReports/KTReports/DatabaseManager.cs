@@ -585,22 +585,28 @@ namespace KTReports
         public Dictionary<string, int> GetRouteRidership(int routeId, List<DateTime> reportRange, Boolean isWeekday)
         {
             var results = new Dictionary<string, int>();
+            long? pathId = GetPathId(
+                new Dictionary<string, string>{
+                        { "route_id", routeId.ToString() },
+                        { "start_date", reportRange[0].ToString("yyyy-MM-dd") }
+                }
+            );
             int fcTotal = 0;
             string fcQuery = @"SELECT SUM(fc.boardings) as fc_boardings  
                                 FROM FareCardData as fc
-                                WHERE fc.assigned_route_id == @route_id 
+                                WHERE fc.path_id == @path_id 
                                     AND fc.start_date >= @report_start 
                                     AND fc.end_date <= @report_end
                                     AND fc.is_weekday == @is_weekday";
             using (var command = new SQLiteCommand(fcQuery, sqliteConnection))
             {
-                command.Parameters.Add(new SQLiteParameter("@route_id", routeId));
+                command.Parameters.Add(new SQLiteParameter("@path_id", pathId));
                 command.Parameters.Add(new SQLiteParameter("@report_start", reportRange[0].ToString("yyyy-MM-dd")));
                 command.Parameters.Add(new SQLiteParameter("@report_end", reportRange[1].ToString("yyyy-MM-dd")));
                 command.Parameters.Add(new SQLiteParameter("@is_weekday", isWeekday.ToString()));
                 using (SQLiteDataReader reader = command.ExecuteReader())
                 {
-                    if (reader.Read())
+                    while (reader.Read())
                     {
                         var values = reader.GetValues();
                         string fcBoardingsStr = values["fc_boardings"];
@@ -616,19 +622,19 @@ namespace KTReports
             int nfcTotal = 0;
             string nfcQuery = @"SELECT SUM(nfc.total_ridership) as nfc_ridership, SUM(nfc.total_non_ridership) as nfc_non_ridership  
                                 FROM NonFareCardData as nfc
-                                WHERE nfc.assigned_route_id == @route_id 
+                                WHERE nfc.path_id == @path_id 
                                     AND nfc.start_date >= @report_start 
                                     AND nfc.end_date <= @report_end
                                     AND nfc.is_weekday == @is_weekday";
             using (var command = new SQLiteCommand(nfcQuery, sqliteConnection))
             {
-                command.Parameters.Add(new SQLiteParameter("@route_id", routeId));
+                command.Parameters.Add(new SQLiteParameter("@path_id", pathId));
                 command.Parameters.Add(new SQLiteParameter("@report_start", reportRange[0].ToString("yyyy-MM-dd")));
                 command.Parameters.Add(new SQLiteParameter("@report_end", reportRange[1].ToString("yyyy-MM-dd")));
                 command.Parameters.Add(new SQLiteParameter("@is_weekday", isWeekday.ToString()));
                 using (SQLiteDataReader reader = command.ExecuteReader())
                 {
-                    if (reader.Read())
+                    while (reader.Read())
                     {
                         var values = reader.GetValues();
                         string ridershipStr = values["nfc_ridership"];
