@@ -711,3 +711,4 @@ namespace KTReports
         // TODO: Methods that handle specific queries rather than a generic method
     }
 }
+

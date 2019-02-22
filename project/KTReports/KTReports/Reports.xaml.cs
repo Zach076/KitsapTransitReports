@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -65,3 +65,4 @@ namespace KTReports
         // Get passengers per hour (using total passengers / revenue hours)
     }
 }
+
