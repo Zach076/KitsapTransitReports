@@ -16,6 +16,7 @@ using System.Windows.Shapes;
 using System.IO;
 using Microsoft.Win32;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace KTReports
 {
@@ -75,7 +76,7 @@ namespace KTReports
             {
                 Microsoft.Office.Interop.Excel.Application xlApp = new Microsoft.Office.Interop.Excel.Application();
                 Microsoft.Office.Interop.Excel.Workbook xlWorkbook = xlApp.Workbooks.Open(fileName);
-                if (Regex.Match(xlWorkbook.Name, @".*ORCA.*") != null)
+                if (Regex.Match(xlWorkbook.Name, @".*ORCA.*").Success)
                 {
                     isORCA = true;
                     file_id = databaseManager.InsertNewFile(fileName, fileInfo.FullName, DatabaseManager.FileType.FC, dateTime.ToString("yyyy-MM-dd"));
@@ -99,64 +100,90 @@ namespace KTReports
 
                         int rowCount = xlRange.Rows.Count;
                         int colCount = xlRange.Columns.Count;
-                        int colLim = 2;
+                        object[,] values = (object[,])xlRange.Value2;
+                        
+                        //cleanup worksheet
+                        GC.Collect();
+                        GC.WaitForPendingFinalizers();
+                        //release com objects to fully kill excel process from running in the background
+                        Marshal.ReleaseComObject(xlRange);
+                        Marshal.ReleaseComObject(xlWorksheet);
+
+                        //Debug.WriteLine(rowCount);
+                        //Debug.WriteLine(colCount);
+
+                        int colLim = 1;
                         int rowLim = rowCount;
                         int i = 1;
                         int j = 1;
                         LinkedListNode<string> key = colNames.First;
-                        string reportVal = xlRange.Cells[1, 6].Value2;
+                        string reportVal = values[1, 6].ToString();
                         reportPeriod = reportVal.Split(' ');
 
-                        //0 means hasnt hit table, 1 means reading columns, 2 means hit end of columns, 3 means just found column names
+                        //0 means hasnt hit table, 1 means reading columns, 2 means hit end of columns
                         int inTable = 0;
 
-                        while (i < rowLim)
+                        while (i <= rowLim)
                         {
-                            while (j < colLim)
+                            while (j <= colLim)
                             {
+                                //Debug.WriteLine("i:" + i + " j:" + j);
                                 switch (inTable)
                                 {
                                     case 2:
-                                        if (xlRange.Cells[i, j] != null && xlRange.Cells[i, j].Value2 != null && !Regex.Match(xlRange.Cells[i, j].Value2.ToString(), @".*Subtotal.*").Success && !Regex.Match(xlRange.Cells[i, j].Value2.ToString(), @".*Page.*").Success)
+                                        //Debug.WriteLine("case 2:");
+                                        if (values[i, j] != null && !Regex.Match(values[i, j].ToString(), @".*Subtotal.*").Success && !Regex.Match(values[i, j].ToString(), @".*Page.*").Success)
                                         {
-                                            dict.Add(key.Value, xlRange.Cells[i, j].Value2.ToString());
+                                            //Debug.WriteLine("Key: " + key.Value);
+                                            dict.Add(key.Value, values[i, j].ToString());
                                             key = key.Next;
                                         }
-                                        else if (xlRange.Cells[i, j] != null && xlRange.Cells[i, j].Value2 != null && Regex.Match(xlRange.Cells[i, j].Value2.ToString(), @".*Subtotal.*").Success)
+                                        else if (values[i, j] != null && Regex.Match(values[i, j].ToString(), @".*Subtotal.*").Success)
                                         {
+                                            //Debug.WriteLine("subtotal");
                                             // look x rows ahead for more then end while Loop if empty
                                             i = i + 2;
                                             j = colLim;
+                                            inTable = 1;
                                         }
                                         else
                                         {
-                                            rowLim = i;
+                                            j = colLim;
+                                            inTable = 1;
                                         }
                                         break;
                                     case 1:
-                                        if (xlRange.Cells[i, j] == null || xlRange.Cells[i, j].Value2 == null)
+                                        //Debug.WriteLine("case 1:");
+                                        if (values[i, j] == null)
                                         {
-                                            colLim = j;
-                                            inTable = 3;
+                                            colLim = j - 1;
+                                            inTable = 1;
                                         }
                                         else
                                         {
-                                            string value = xlRange.Cells[i, j].Value2.ToString();
+                                            string value = values[i, j].ToString();
                                             value = value.ToLower();
                                             value = value.Replace(' ', '_');
+                                            value = value.Replace('\n', '_');
+                                            value = value.TrimStart('_');
+                                            //Debug.WriteLine("newKey: " + value);
                                             colNames.AddLast(value);
                                         }
                                         break;
                                     case 0:
-                                        if (xlRange.Cells[i, j] != null && xlRange.Cells[i, j].Value2 != null)
+                                        //Debug.WriteLine("case 0:");
+                                        if (values[i, j] != null)
                                         {
-                                            if (Regex.Match(xlRange.Cells[i, j].Value2.ToString(), @".*Transit.*Operator.*").Success || Regex.Match(xlRange.Cells[i, j].Value2.ToString(), @".*Route.*ID.*").Success)
+                                            if (Regex.Match(values[i, j].ToString(), @".*Transit.*Operator.*").Success || Regex.Match(values[i, j].ToString(), @".*Route.*ID.*").Success)
                                             {
                                                 inTable = 1;
                                                 colLim = colCount;
-                                                string value = xlRange.Cells[i, j].Value2.ToString();
+                                                string value = values[i, j].ToString();
                                                 value = value.ToLower();
                                                 value = value.Replace(' ', '_');
+                                                value = value.Replace('\n', '_');
+                                                value = value.TrimStart('_');
+                                                //Debug.WriteLine("newKey: " + value);
                                                 colNames.AddLast(value);
                                             }
                                         }
@@ -165,13 +192,14 @@ namespace KTReports
                                 j++;
                             }
 
+                            //Debug.WriteLine("inTable = " + inTable);
                             if (inTable == 2)
                             {
                                 dict.Add("start_date", reportPeriod[0]);
                                 dict.Add("end_date", reportPeriod[2]);
                                 dict.Add("is_weekday", isWeekday);
                                 dict.Add("file_id", file_id.ToString());
-                                Debug.WriteLine("insert");
+                                //Debug.WriteLine("insert");
                                 if (isORCA)
                                 {
                                     databaseManager.InsertFCD(dict);
@@ -184,7 +212,7 @@ namespace KTReports
                                 dict.Clear();
                                 key = colNames.First;
                             }
-                            else if (inTable == 3)
+                            else if (inTable == 1)
                             {
                                 inTable = 2;
                                 key = colNames.First;
@@ -192,23 +220,17 @@ namespace KTReports
                             j = 1;
                             i++;
                         }
-
-                        /*
-                        //cleanup
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
-                        //release com objects to fully kill excel process from running in the background
-                        Marshal.ReleaseComObject(xlRange);
-                        Marshal.ReleaseComObject(xlWorksheet);
-                        //close and release
-                        xlWorkbook.Close();
-                        Marshal.ReleaseComObject(xlWorkbook);
-                        //quit and release
-                        xlApp.Quit();
-                        Marshal.ReleaseComObject(xlApp);
-                        */
                     }
                 }
+
+                //cleanup workbook
+                //close and release
+                xlWorkbook.Close(false);
+                Marshal.ReleaseComObject(xlWorkbook);
+                //quit and release
+                xlApp.Quit();
+                Marshal.ReleaseComObject(xlApp);
+
             }
         }
 
