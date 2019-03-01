@@ -30,7 +30,7 @@
             <Rectangle VerticalAlignment="Stretch" Width="1" Stroke="Gray" Margin="3"/>
             <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="5" FontSize="16">Data to add:</TextBlock>
             <DataGrid Name="dataGrid" DockPanel.Dock="Top" />
-            <Button DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="110" Name="AddToDatabase" Margin="0,0,10,10">Add to database</Button>
+            <Button DockPanel.Dock="Bottom" Click="AddToDatabase" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="110" Name="AddToDatabaseButton" Margin="0,0,10,10">Add to database</Button>
         </DockPanel>
     </Grid>
 </Page>
