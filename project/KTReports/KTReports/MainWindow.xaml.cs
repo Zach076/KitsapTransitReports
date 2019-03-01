@@ -49,6 +49,11 @@ namespace KTReports
             Main.Content = DeleteImports.GetDeleteImports();
         }
 
+        private void OpenManualAddData(object sender, RoutedEventArgs e)
+        {
+            Main.Content = new ManualDataEntry();
+        }
+
         [STAThread]
 
         private void ImportFile(object sender, RoutedEventArgs e)
