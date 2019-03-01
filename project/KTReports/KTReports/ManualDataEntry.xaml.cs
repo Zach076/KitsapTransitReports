@@ -82,11 +82,13 @@ namespace KTReports
             {
                 dataTable.Columns["Route ID"].SetOrdinal(0);
                 dataTable.Columns["Boardings"].SetOrdinal(1);
+                dataTable.Columns["Is Weekday"].SetOrdinal(2);
             } else if (dataType == FileType.NFC)
             {
                 dataTable.Columns["Route ID"].SetOrdinal(0);
                 dataTable.Columns["Total Ridership"].SetOrdinal(1);
                 dataTable.Columns["Total Non Ridership"].SetOrdinal(2);
+                dataTable.Columns["Is Weekday"].SetOrdinal(3);
             }
             dataGrid.ItemsSource = dataTable.DefaultView;
             dataGrid.AutoGenerateColumns = true;
@@ -143,9 +145,14 @@ namespace KTReports
                     string columnName = column.ColumnName;
                     string dbColumnName = columnName.ToLower().Replace(" ", "_");
                     string enteredData = row[columnName].ToString();
-                    if (columnName.Equals("Is Weekday") && String.IsNullOrEmpty(enteredData))
+                    if (columnName.Equals("Is Weekday"))
                     {
-                        enteredData = true.ToString();
+                        if (String.IsNullOrEmpty(enteredData))
+                        {
+                            enteredData = true.ToString();
+                        }
+                        TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+                        enteredData = textInfo.ToTitleCase(enteredData);
                     }
                     keyValuePairs.Add(dbColumnName, enteredData);
                    // Console.Write(row[columnName].ToString() + " ");
