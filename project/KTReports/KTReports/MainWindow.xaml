@@ -17,6 +17,9 @@
                     <MenuItem Header="Delete Imports"
                               Margin="0,5,0,5"
                               Click="OpenDeleteFiles"/>
+                    <MenuItem Header="Manually Add Data"
+                              Margin="0,5,0,5"
+                              Click="OpenManualAddData"/>
                     <MenuItem Header="Close" 
                               Margin="0,5,0,5"
                               Click="CloseClicked"/>

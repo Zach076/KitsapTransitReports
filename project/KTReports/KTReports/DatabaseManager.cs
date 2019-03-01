@@ -703,6 +703,39 @@ namespace KTReports
             }
         }
 
+        public List<string> GetTableInfo(FileType fileType)
+        {
+            string tableInfoCmd;
+            switch (fileType)
+            {
+                case FileType.FC:
+                    tableInfoCmd = $"PRAGMA table_info(FareCardData)";
+                    break;
+                case FileType.NFC:
+                    tableInfoCmd = $"PRAGMA table_info(NonFareCardData)";
+                    break;
+                case FileType.RSD:
+                    tableInfoCmd = $"PRAGMA table_info(RouteStopData)";
+                    break;
+                default:
+                    tableInfoCmd = $"PRAGMA table_info(FareCardData)";
+                    break;
+            }
+            var columnNames = new List<string>();
+            using (var command = new SQLiteCommand(tableInfoCmd, sqliteConnection))
+            {
+                using (SQLiteDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        //Console.WriteLine("Table Column: " + reader.GetString(1));
+                        columnNames.Add(reader.GetString(1));
+                    }
+                }
+            }
+            return columnNames;
+        }
+
         // A generic method for querying data from the database
         public List<NameValueCollection> Query(string[] selection, string[] tables, string expressions)
         {
