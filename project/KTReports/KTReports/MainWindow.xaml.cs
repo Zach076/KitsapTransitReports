@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +19,6 @@ using Microsoft.Win32;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-
 namespace KTReports
 {
     /// <summary>
@@ -29,8 +29,8 @@ namespace KTReports
         public MainWindow()
         {
             InitializeComponent();
-            // Set the Reports page as content by default
-            //Main.Content = new Reports();
+            // Set the Delete Imports page as default
+            Main.Content = DeleteImports.GetDeleteImports();
         }
 
         private void CloseClicked(object sender, RoutedEventArgs e)
@@ -44,6 +44,17 @@ namespace KTReports
             Main.Content = new Reports();
         }
 
+        private void OpenDeleteFiles(object sender, RoutedEventArgs e)
+        {
+            // Set the content of the MainWindow to be the Reports page
+            Main.Content = DeleteImports.GetDeleteImports();
+        }
+
+        private void OpenManualAddData(object sender, RoutedEventArgs e)
+        {
+            Main.Content = new ManualDataEntry();
+        }
+        
         private void editPage(object sender, RoutedEventArgs e)
         {
             Main.Content = new updateRouteInfo();
@@ -107,7 +118,6 @@ namespace KTReports
             fileDia.ShowDialog();
             //fileDia.RestoreDirectory = true;
             fileName = fileDia.FileName;
-            //Console.WriteLine(fileName);
             FileInfo fileInfo = new FileInfo(fileName);
             //TODO: use PST unstead of UTC?
             DateTime dateTime = DateTime.UtcNow.Date;
@@ -127,8 +137,7 @@ namespace KTReports
                 {
                     isORCA = true;
                     file_id = databaseManager.InsertNewFile(fileName, fileInfo.FullName, DatabaseManager.FileType.FC, dateTime.ToString("yyyy-MM-dd"));
-                }
-                else
+                } else
                 {
                     file_id = databaseManager.InsertNewFile(fileName, fileInfo.FullName, DatabaseManager.FileType.NFC, dateTime.ToString("yyyy-MM-dd"));
                 }
@@ -149,7 +158,7 @@ namespace KTReports
                         int rowCount = xlRange.Rows.Count;
                         int colCount = xlRange.Columns.Count;
                         object[,] values = (object[,])xlRange.Value2;
-
+                        
                         //cleanup worksheet
                         GC.Collect();
                         GC.WaitForPendingFinalizers();
@@ -278,18 +287,37 @@ namespace KTReports
                 //quit and release
                 xlApp.Quit();
                 Marshal.ReleaseComObject(xlApp);
-                if (isORCA)
-                {
-                    ImportKnownRoutes();
-                }
-                else
-                {
-                    ImportKnownRoutesNFC();
-                }
-                
 
             }
         }
+
+        private void CreateReport(object sender, RoutedEventArgs e)
+        {
+            var excel = new Microsoft.Office.Interop.Excel.Application();
+            excel.Visible = false;
+            excel.DisplayAlerts = false;
+            var xlWorkbook = excel.Workbooks.Add(Type.Missing);
+
+            var xlWorksheet = (Microsoft.Office.Interop.Excel.Worksheet)xlWorkbook.ActiveSheet;
+            xlWorksheet.Name = "Report";
+
+            /*
+            xlWorksheet.Range[xlWorksheet.Cells[1, 1], xlWorksheet.Cells[1, 8]].Merge();
+            xlWorksheet.Cells[1, 1] = "Report Name";
+            xlWorksheet.Cells.Font.Size = 15;
+            */
+
+            int rowcount = 2;
+            bool done = false;
+            while (!done)
+            {
+                //Add a line with a query
+                rowcount = rowcount + 1;
+            }
+
+            xlWorkbook.SaveAs();
+            xlWorkbook.Close();
+            excel.Quit();
+        }
     }
 }
-

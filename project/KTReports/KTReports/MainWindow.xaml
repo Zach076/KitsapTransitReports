@@ -14,9 +14,12 @@
                     <MenuItem Header="Import Files" 
                               Margin="0,5,0,5"
                               Click="ImportFile"/>
-                    <MenuItem Header="Import Route Data"
+                    <MenuItem Header="Delete Imports"
                               Margin="0,5,0,5"
-                              Click="ImportRoutes"/>
+                              Click="OpenDeleteFiles"/>
+                    <MenuItem Header="Manually Add Data"
+                              Margin="0,5,0,5"
+                              Click="OpenManualAddData"/>
                     <MenuItem Header="Close" 
                               Margin="0,5,0,5"
                               Click="CloseClicked"/>
