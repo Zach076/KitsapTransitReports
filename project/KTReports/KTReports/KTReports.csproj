@@ -92,13 +92,40 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="addStop.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="updateStop.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="deleteRoute.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Compile Include="addStop.xaml.cs">
+      <DependentUpon>addStop.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="updateStop.xaml.cs">
+      <DependentUpon>updateStop.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="deleteRoute.xaml.cs">
+      <DependentUpon>deleteRoute.xaml</DependentUpon>
+    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="addRoute.xaml.cs">
+      <DependentUpon>addRoute.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="updateRouteInfo.xaml.cs">
+      <DependentUpon>updateRouteInfo.xaml</DependentUpon>
     </Compile>
     <Compile Include="Reports.xaml.cs">
       <DependentUpon>Reports.xaml</DependentUpon>
@@ -109,6 +136,14 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="addRoute.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="updateRouteInfo.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Reports.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

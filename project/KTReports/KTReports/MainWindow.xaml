@@ -28,6 +28,15 @@
                 <MenuItem Header="Update Route Info" 
                           Margin="0,5,0,5"
                           Click="editPage"/>
+                <MenuItem Header="Add Route"
+                          Margin="0,5,0,5"
+                          Click="addRoute"/>
+                <MenuItem Header="Delete Route" Margin="0,5,0,5"
+                          Click="deleteRoute"/>
+                <MenuItem Header="Update Route Stop" Margin="0,5,0,5"
+                          Click="updateStop"/>
+                <MenuItem Header="Add Route Stop" Margin="0,5,0,5"
+                          Click="addStop"/>
                 <MenuItem Header="Help" Margin="0,5,0,5"/>
             </Menu>
         </DockPanel>
@@ -35,48 +44,6 @@
         <Grid>
             <Frame x:Name="Main"/>
         </Grid>
-        <Canvas x:Name="URI" Height="299" VerticalAlignment="Top" Width="176" Margin="0,142,0,0"/>
-        <ListBox x:Name="listRoutes" Width="250" Height="300" RenderTransformOrigin="0.5,0.5" Visibility="Hidden">
-            <ListBox.RenderTransform>
-                <TransformGroup>
-                    <ScaleTransform/>
-                    <SkewTransform/>
-                    <RotateTransform/>
-                    <TranslateTransform X="-150"/>
-                </TransformGroup>
-            </ListBox.RenderTransform>
-        </ListBox>
-        <ListBox x:Name="listAttributes" Height="300" VerticalAlignment="Top" Width="250" RenderTransformOrigin="0.5,0.5" Visibility="Hidden">
-            <ListBox.RenderTransform>
-                <TransformGroup>
-                    <ScaleTransform/>
-                    <SkewTransform/>
-                    <RotateTransform/>
-                    <TranslateTransform Y="69"/>
-                </TransformGroup>
-            </ListBox.RenderTransform>
-        </ListBox>
-        <TextBox x:Name="newField" Height="25" TextWrapping="Wrap" VerticalAlignment="Top" Width="200" RenderTransformOrigin="0.5,0.5" FontSize="14" Visibility="Hidden">
-            <TextBox.RenderTransform>
-                <TransformGroup>
-                    <ScaleTransform/>
-                    <SkewTransform/>
-                    <RotateTransform/>
-                    <TranslateTransform Y="200" X="100"/>
-                </TransformGroup>
-            </TextBox.RenderTransform>
-        </TextBox>
-        <Button x:Name="updateButton" Content="Update" Height="20" VerticalAlignment="Top" Width="75" RenderTransformOrigin="0.5,0.5" Click="update" Visibility="Hidden">
-            <Button.RenderTransform>
-                <TransformGroup>
-                    <ScaleTransform/>
-                    <SkewTransform/>
-                    <RotateTransform/>
-                    <TranslateTransform Y="350"/>
-                </TransformGroup>
-            </Button.RenderTransform>
-        </Button>
-
     </DockPanel>
 </Window>
 
