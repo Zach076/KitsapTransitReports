@@ -88,19 +88,42 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="DeleteImports.xaml">
-      <SubType>Designer</SubType>
+    <Page Include="addStop.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="updateStop.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="deleteRoute.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Compile Include="addStop.xaml.cs">
+      <DependentUpon>addStop.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="updateStop.xaml.cs">
+      <DependentUpon>updateStop.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="deleteRoute.xaml.cs">
+      <DependentUpon>deleteRoute.xaml</DependentUpon>
+    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DeleteImports.xaml.cs">
       <DependentUpon>DeleteImports.xaml</DependentUpon>
+    <Compile Include="addRoute.xaml.cs">
+      <DependentUpon>addRoute.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="updateRouteInfo.xaml.cs">
+      <DependentUpon>updateRouteInfo.xaml</DependentUpon>
     </Compile>
     <Compile Include="ManualDataEntry.xaml.cs">
       <DependentUpon>ManualDataEntry.xaml</DependentUpon>
@@ -114,6 +137,13 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="addRoute.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="updateRouteInfo.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     <Page Include="ManualDataEntry.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
