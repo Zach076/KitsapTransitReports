@@ -7,9 +7,6 @@ using System.Threading.Tasks;
 
 namespace KTReports
 {
-    
-    ////////////////////////
-
     public class TestDB
     {
         DatabaseManager dbManager = null;
@@ -23,7 +20,7 @@ namespace KTReports
             // Insert new file information into the database
             long fc_file_id = dbManager.InsertNewFile("AUGUST 2018 ORCA Boardings by Route BY TRIP",
                 "C:\\AUGUST 2018 ORCA Boardings by Route BY TRIP.XLS", DatabaseManager.FileType.FC, "2019-02-16");
-            long nfc_file_id = dbManager.InsertNewFile("AUGUST 2018 Non-Fare Card Activity by Route WEEKDAY", "C:\\AUGUST 2018 Non-Fare Card Activity by Route WEEKDAY.XLS",
+            long nfc_file_id = dbManager.InsertNewFile("AUGUST 2018 Non-Fare Card Activity by Route WEEKDAY", "C:\\AUGUST 2018 Non-Fare Card Activity by Route WEEKDAY.XLS", 
                 DatabaseManager.FileType.NFC, "2019-02-16");
 
             // Insert new routes into the database
@@ -41,7 +38,7 @@ namespace KTReports
                     { "saturday_hours", 2.5.ToString() },
                     { "holiday_hours", 0.ToString() }
                 };
-            //long route11PathId = dbManager.InsertPath(route11);
+            long route11PathId = dbManager.InsertPath(route11);
 
             var route20 = new Dictionary<string, string>
                 {
@@ -57,7 +54,7 @@ namespace KTReports
                     { "saturday_hours", 4.5.ToString() },
                     { "holiday_hours", 2.5.ToString() }
                 };
-            //long route20PathId = dbManager.InsertPath(route20);
+            long route20PathId = dbManager.InsertPath(route20);
 
             var route12 = new Dictionary<string, string>
                 {
@@ -73,11 +70,11 @@ namespace KTReports
                     { "saturday_hours", 3.5.ToString() },
                     { "holiday_hours", 3.ToString() }
                 };
-            //long route12PathId = dbManager.InsertPath(route12);
+            long route12PathId = dbManager.InsertPath(route12);
 
             var route12Future = new Dictionary<string, string>
                 {
-                    { "path_id",  12.ToString()},    //
+                    { "path_id",  route12PathId.ToString()},
                     { "route_id", 12.ToString() },
                     { "start_date", "2019-05-01" },
                     { "route_name", "Silverdale West" },
@@ -90,7 +87,7 @@ namespace KTReports
                     { "saturday_hours", 5.5.ToString() },
                     { "holiday_hours", 3.ToString() }
                 };
-            //dbManager.InsertRoute(route12Future);
+            dbManager.InsertRoute(route12Future);
 
             // Insert new fare card data into the database
             var fcd1 = new Dictionary<string, string>
@@ -108,7 +105,7 @@ namespace KTReports
                     { "boardings", 36.ToString() },
                     { "file_id", fc_file_id.ToString() }
                 };
-            //dbManager.InsertFCD(fcd1);
+            dbManager.InsertFCD(fcd1);
 
             var fcd2 = new Dictionary<string, string>
                 {
@@ -125,7 +122,7 @@ namespace KTReports
                     { "boardings", 42.ToString() },
                     { "file_id", fc_file_id.ToString() }
                 };
-            //dbManager.InsertFCD(fcd2);
+            dbManager.InsertFCD(fcd2);
 
             var fcd3 = new Dictionary<string, string>
                 {
@@ -142,7 +139,7 @@ namespace KTReports
                     { "boardings", 14.ToString() },
                     { "file_id", fc_file_id.ToString() }
                 };
-            //dbManager.InsertFCD(fcd3);
+            dbManager.InsertFCD(fcd3);
 
             var fcd4 = new Dictionary<string, string>
                 {
@@ -159,7 +156,7 @@ namespace KTReports
                     { "boardings", 1000.ToString() },
                     { "file_id", fc_file_id.ToString() }
                 };
-            //dbManager.InsertFCD(fcd4);
+            dbManager.InsertFCD(fcd4);
 
             var nfc1 = new Dictionary<string, string>
                 {
@@ -185,37 +182,12 @@ namespace KTReports
                     { "ferry_passenger_headcount", 7.ToString() },
                     { "file_id", nfc_file_id.ToString() }
                 };
-            //dbManager.InsertNFC(nfc1);
-
-            var stop1 = new Dictionary<string, string>
-                {
-                    { "sd_id", 1.ToString() },
-                    { "location_id", 3.ToString() },
-                    { "assigned_stop_id", 3.ToString() },
-                    { "minus_door_1_person", 3.ToString() },
-                    { "minus_door_2_person", 3.ToString() },
-                    { "door_1_person", 9.ToString() },
-                    { "door_2_person", 7.ToString() },
-                    { "file_id", nfc_file_id.ToString() }
-                };
-            dbManager.InsertRSD(stop1);
-
-            var stops1 = new Dictionary<string, string>
-                {
-                    { "stop_id", 10.ToString() },
-                    { "location_id", 10.ToString() },
-                    { "path_id", 10.ToString() },
-                    { "start_date", "1999" },
-                    { "stop_name", "stop 1" },
-                    { "assigned_stop_id", 11.ToString() }
-                };
-            //dbManager.InsertStopLocation(stops1);
+            dbManager.InsertNFC(nfc1);
         }
         public void RemoveDB()
         {
-            //dbManager.CloseDatabase();
+            dbManager.CloseDatabase();
             File.Delete("TestDatabase.sqlite3");
-            
         }
     }
 }
