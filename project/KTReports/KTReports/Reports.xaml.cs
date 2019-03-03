@@ -74,6 +74,8 @@ namespace KTReports
 
         public void OnGenerateReportClick(object sender, RoutedEventArgs e)
         {
+            var location = "NULL";
+
             Console.WriteLine("Generate Report Clicked");
             // Get a list of Datapoints to include
             List<string> dataPoints = GetSelectedDataPoints();
@@ -101,6 +103,39 @@ namespace KTReports
 
             }
 
+            //insert new report into data table
+            DateTime dateTime = DateTime.UtcNow.Date;
+            Dictionary<string, string> dict = new Dictionary<string, string>();
+            DatabaseManager databaseManager = DatabaseManager.GetDBManager();
+            dict.Add("report_location", location);
+            dict.Add("datetime_created", dateTime.ToString("yyyy-MM-dd"));
+            dict.Add("report_range", reportRange[0].ToString("yyyy-MM-dd") + " - " + reportRange[1].ToString("yyyy-MM-dd"));
+            databaseManager.InsertReportHistory(dict);
+
+            //creating excel file
+            var excel = new Microsoft.Office.Interop.Excel.Application();
+            excel.Visible = false;
+            excel.DisplayAlerts = false;
+            var xlWorkbook = excel.Workbooks.Add(Type.Missing);
+            int x = 1;
+            int y = 1;
+
+            var xlWeeksheet = (Microsoft.Office.Interop.Excel.Worksheet)xlWorkbook.ActiveSheet;
+            xlWeeksheet.Name = "FR WEEK";
+
+            var xlWEndsheet = (Microsoft.Office.Interop.Excel.Worksheet)xlWorkbook.Sheets.Add();
+            xlWEndsheet.Name = "FR SAT";
+
+            xlWEndsheet.Range[xlWEndsheet.Cells[1, 1], xlWEndsheet.Cells[1, 8]].Merge();
+            xlWEndsheet.Cells[1, 1] = "SAT REPORT";
+
+            xlWeeksheet.Range[xlWeeksheet.Cells[1, 1], xlWeeksheet.Cells[1, 8]].Merge();
+            xlWeeksheet.Cells[1, 1] = "WEEK REPORT";
+
+            x = 4;
+            y = 4;
+
+
             // Get num trips from date range for weekdays and saturdays separately
             // This requires counting (number of weekdays in date range - number of holidays on weekdays in day range) * num trips made per weekday
             int weekdayCount = GetNumWeekdays(reportRange);
@@ -111,6 +146,28 @@ namespace KTReports
             Console.WriteLine("Weekday holiday count: " + weekdayHolidayCount);
             Console.WriteLine("Saturday count: " + saturdayCount);
             Console.WriteLine("Saturday holiday count: " + saturdayHolidayCount);
+
+            //write days
+            xlWEndsheet.Range[xlWEndsheet.Cells[x, 6], xlWEndsheet.Cells[x, 7]].Merge();
+            xlWEndsheet.Cells[x, 6] = "SATURDAY";
+            xlWEndsheet.Cells[x++, 8] = saturdayCount;
+            xlWEndsheet.Range[xlWEndsheet.Cells[x, 6], xlWEndsheet.Cells[x, 7]].Merge();
+            xlWEndsheet.Cells[x, 6] = "HOLIDAY";
+            xlWEndsheet.Cells[x++, 8] = saturdayHolidayCount;
+            xlWEndsheet.Range[xlWEndsheet.Cells[x, 6], xlWEndsheet.Cells[x, 7]].Merge();
+            xlWEndsheet.Cells[x, 6] = "TOTAL SATURDAY";
+            xlWEndsheet.Cells[x++, 8] = saturdayCount + saturdayHolidayCount;
+
+            xlWeeksheet.Range[xlWeeksheet.Cells[y, 6], xlWeeksheet.Cells[y, 7]].Merge();
+            xlWeeksheet.Cells[y, 6] = "WEEKDAY";
+            xlWeeksheet.Cells[y++, 8] = weekdayCount;
+            xlWeeksheet.Range[xlWeeksheet.Cells[y, 6], xlWeeksheet.Cells[y, 7]].Merge();
+            xlWeeksheet.Cells[y, 6] = "HOLIDAY";
+            xlWeeksheet.Cells[y++, 8] = weekdayHolidayCount;
+            xlWeeksheet.Range[xlWeeksheet.Cells[y, 6], xlWeeksheet.Cells[y, 7]].Merge();
+            xlWeeksheet.Cells[y, 6] = "TOTAL WEEKDAY";
+            xlWeeksheet.Cells[y++, 8] = weekdayCount + weekdayHolidayCount;
+
             // Get all routes per district
             var districtToRoutes = new Dictionary<string, List<NameValueCollection>>();
             var weekRoutes = new Dictionary<int, Dictionary<string, int>>();
@@ -121,10 +178,38 @@ namespace KTReports
                 List<NameValueCollection> routes = databaseManager.GetDistrictRoutes(district, reportRange);
                 districtToRoutes.Add(district, routes);
                 Console.WriteLine($"Printing routes in district: {district}");
+
+                //write district name
+                xlWEndsheet.Range[xlWEndsheet.Cells[x, 1], xlWEndsheet.Cells[x, 8]].Merge();
+                xlWEndsheet.Cells[x++, 1] = district;
+
+                xlWeeksheet.Range[xlWeeksheet.Cells[y, 1], xlWeeksheet.Cells[y, 8]].Merge();
+                xlWeeksheet.Cells[y++, 1] = district;
+
+                //write titles
+                xlWEndsheet.Cells[x, 1] = "ROUTE\nNO.";
+                xlWEndsheet.Cells[x, 2] = "ROUTE NAME";
+                xlWEndsheet.Cells[x, 3] = "TOTAL\nPASSENGERS";
+                xlWEndsheet.Cells[x, 4] = "NO.\nTRIPS";
+                xlWEndsheet.Cells[x, 5] = "REVENUE\nMILES";
+                xlWEndsheet.Cells[x, 6] = "REVENUE\nHOURS";
+                xlWEndsheet.Cells[x, 7] = "PASSENGERS\nPER MILE";
+                xlWEndsheet.Cells[x++, 8] = "PASSENGERS\nPER HOUR";
+
+                xlWeeksheet.Cells[y, 1] = "ROUTE\nNO.";
+                xlWeeksheet.Cells[y, 2] = "ROUTE NAME";
+                xlWeeksheet.Cells[y, 3] = "TOTAL\nPASSENGERS";
+                xlWeeksheet.Cells[y, 4] = "NO.\nTRIPS";
+                xlWeeksheet.Cells[y, 5] = "REVENUE\nMILES";
+                xlWeeksheet.Cells[y, 6] = "REVENUE\nHOURS";
+                xlWeeksheet.Cells[y, 7] = "PASSENGERS\nPER MILE";
+                xlWeeksheet.Cells[y++, 8] = "PASSENGERS\nPER HOUR";
+
                 foreach (var route in routes)
                 {
                     int routeId = Convert.ToInt32(route["assigned_route_id"]);
                     Console.WriteLine($"\tRoute id: {routeId}");
+
                     // Get sum of ridership for each route between reportRange for weekdays
                     // routeTotal contains nfc.total_ridership, nfc.total_nonridership, fc.boardings and total
                     Dictionary<string, int> routeTotalWeek = databaseManager.GetRouteRidership(routeId, reportRange, true);
@@ -185,8 +270,31 @@ namespace KTReports
                     Console.WriteLine($"\t\tPassengers per hour weekdays: {passPerHourW}");
                     double passPerHourS = totalRidesSat / (revenueHoursSat + revenueHoursHolidaysS);
                     Console.WriteLine($"\t\tPassengers per hour saturdays: {passPerHourS}");
+
+                    //write values
+                    xlWEndsheet.Cells[x, 1] = routeId;
+                    xlWeeksheet.Cells[y, 1] = routeId;
+                    xlWEndsheet.Cells[x, 3] = totalRidesSat;
+                    xlWeeksheet.Cells[y, 3] = totalRidesWeek;
+                    xlWEndsheet.Cells[x, 4] = numTripsSat + numTripsHolidaysS;
+                    xlWeeksheet.Cells[y, 4] = numTripsWeek + numTripsHolidaysW;
+                    xlWEndsheet.Cells[x, 5] = revenueMilesSat;
+                    xlWeeksheet.Cells[y, 5] = revenueMilesWeek;
+                    xlWEndsheet.Cells[x, 6] = revenueHoursSat + revenueHoursHolidaysS;
+                    xlWeeksheet.Cells[y, 6] = revenueHoursWeek + revenueHoursHolidaysW;
+                    xlWEndsheet.Cells[x, 7] = passPerMileS;
+                    xlWeeksheet.Cells[y, 7] = passPerMileW;
+                    xlWEndsheet.Cells[x++, 8] = passPerHourS;
+                    xlWeeksheet.Cells[y++, 8] = passPerHourW;
                 }
+                x++;
+                y++;
             }
+
+            xlWorkbook.SaveAs();
+            xlWorkbook.Close();
+            excel.Quit();
+
         }
 
         private int GetNumWeekdays(List<DateTime> reportRange)
