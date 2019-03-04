@@ -44,6 +44,7 @@ namespace KTReports
 
             DatabaseManager dbManager = DatabaseManager.GetDBManager();
             dbManager.viewRouteStops();
+
             if(locationId.Length > 0)
             {
                 dbManager.addStop(stopName, locationName, locationId, stopId, pathId, startDate, minusDoor1, minusDoor2,
@@ -61,6 +62,7 @@ namespace KTReports
                 door1TextBox.Text = "";
                 door2TextBox.Text = "";
             }
+            
         }
     }
 }

@@ -12,8 +12,6 @@ using System.Transactions;
 
 namespace KTReports
 {
-    
-    /////////////////////////////
 
     public class DatabaseManager
     {
@@ -1022,6 +1020,7 @@ namespace KTReports
                     { "assigned_stop_id", stopId }
                 };
             //InsertStop(stop2);
+
         }
 
         public void viewRouteStops()
