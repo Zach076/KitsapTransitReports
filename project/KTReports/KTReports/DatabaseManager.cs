@@ -371,14 +371,15 @@ namespace KTReports
             {
                 string insertSQL =
                     @"INSERT INTO RouteStopData 
-                        (location_id, assigned_stop_id, minus_door_1_person, minus_door_2_person, door_1_person, door_2_person, file_id, start_date, end_date) 
-                    VALUES (@location_id, @stop_id, @minus_door_1_person, @minus_door_2_person, @door_1_person, @door_2_person, @file_id, @start_date, @end_date)";
+                        (location_id, assigned_stop_id, minus_door_1_person, minus_door_2_person, door_1_person, door_2_person, file_id) 
+                    VALUES (@location_id, @stop_id, @minus_door_1_person, @minus_door_2_person, @door_1_person, @door_2_person, @file_id)";
                 using (SQLiteCommand command = new SQLiteCommand(insertSQL, sqliteConnection))
                 {
                     command.Parameters.Add(new SQLiteParameter("@location_id", keyValuePairs["location_id"]));
                     command.Parameters.Add(new SQLiteParameter("@stop_id", keyValuePairs["assigned_stop_id"]));
-                    command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
-                    command.Parameters.Add(new SQLiteParameter("@end_date", keyValuePairs["end_date"]));
+                    //command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
+                    //command.Parameters.Add(new SQLiteParameter("@end_date", keyValuePairs["end_date"]));
+                    //command.Parameters.Add(new SQLiteParameter("@route_name", keyValuePairs["route_name"]));
                     command.Parameters.Add(new SQLiteParameter("@minus_door_1_person", keyValuePairs["minus_door_1_person"]));
                     command.Parameters.Add(new SQLiteParameter("@minus_door_2_person", keyValuePairs["minus_door_2_person"]));
                     command.Parameters.Add(new SQLiteParameter("@door_1_person", keyValuePairs["door_1_person"]));
@@ -1018,7 +1019,8 @@ namespace KTReports
                     { "stop_name", stopName },
                     { "assigned_stop_id", stopId }
                 };
-            InsertStop(stop2);
+            //InsertStop(stop2);
+
         }
 
         public void viewRouteStops()
