@@ -189,7 +189,7 @@ namespace KTReports
             xlWeeksheet.Range[xlWeeksheet.Cells[rowWeek, 7], xlWeeksheet.Cells[rowWeek, 7]].Merge();
             xlWeeksheet.Cells[rowWeek, 7] = "TOTAL WEEKDAYS";
             xlWeeksheet.Cells[rowWeek, 8] = weekdayCount + weekdayHolidayCount;
-            xlWeeksheet.Cells[rowWeek, 8].HorizontalAlignment = XlHAlign.xlHAlignLeft;
+            xlWeeksheet.Cells[rowWeek++, 8].HorizontalAlignment = XlHAlign.xlHAlignLeft;
 
             // Get all routes per district
             var districtToRoutes = new Dictionary<string, List<NameValueCollection>>();
