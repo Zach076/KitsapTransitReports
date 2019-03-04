@@ -88,6 +88,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="DeleteImports.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="addStop.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -119,6 +122,7 @@
     </Compile>
     <Compile Include="DeleteImports.xaml.cs">
       <DependentUpon>DeleteImports.xaml</DependentUpon>
+    </Compile>
     <Compile Include="addRoute.xaml.cs">
       <DependentUpon>addRoute.xaml</DependentUpon>
     </Compile>
@@ -144,6 +148,7 @@
     <Page Include="updateRouteInfo.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
     <Page Include="ManualDataEntry.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -221,3 +226,4 @@
     <Error Condition="!Exists('..\packages\System.Data.SQLite.Core.1.0.109.2\build\net46\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.Data.SQLite.Core.1.0.109.2\build\net46\System.Data.SQLite.Core.targets'))" />
   </Target>
 </Project>
+

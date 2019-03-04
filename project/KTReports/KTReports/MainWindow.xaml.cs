@@ -279,7 +279,14 @@ namespace KTReports
                         }
                     }
                 }
-
+                if (isORCA)
+                {
+                    ImportKnownRoutes();
+                }
+                else
+                {
+                    ImportKnownRoutesNFC();
+                }
                 //cleanup workbook
                 //close and release
                 xlWorkbook.Close(false);

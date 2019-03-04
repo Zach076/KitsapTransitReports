@@ -62,6 +62,14 @@ namespace KTReports
                 dbManager.modifyStop(selectedStop, selectedInfo, input);
                 dbManager.viewRouteStops();
 
+                var stopList = dbManager.getStops();
+
+                listStops.Items.Clear();
+                foreach (String all in stopList)
+                {
+                    listStops.Items.Add(all);
+                }
+
                 listStops.SelectedItem = -1;
                 listStopInfo.SelectedItem = -1;
                 change.Text = "";

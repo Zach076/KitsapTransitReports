@@ -1021,7 +1021,7 @@ namespace KTReports
                     { "stop_name", stopName },
                     { "assigned_stop_id", stopId }
                 };
-            InsertStop(stop2);
+            //InsertStop(stop2);
         }
 
         public void viewRouteStops()

@@ -44,20 +44,23 @@ namespace KTReports
 
             DatabaseManager dbManager = DatabaseManager.GetDBManager();
             dbManager.viewRouteStops();
-            dbManager.addStop(stopName, locationName, locationId, stopId, pathId, startDate, minusDoor1, minusDoor2,
+            if(locationId.Length > 0)
+            {
+                dbManager.addStop(stopName, locationName, locationId, stopId, pathId, startDate, minusDoor1, minusDoor2,
                 door1, door2);
-            dbManager.viewRouteStops();
+                dbManager.viewRouteStops();
 
-            stopNameTextBox.Text = "";
-            locationNameTextBox.Text = "";
-            locationIdTextBox.Text = "";
-            stopIdTextBox.Text = "";
-            pathIdTextBox.Text = "";
-            startDateTextBox.Text = "";
-            minusdoor1TextBox.Text = "";
-            minusdoor2personTextBox.Text = "";
-            door1TextBox.Text = "";
-            door2TextBox.Text = "";
+                stopNameTextBox.Text = "";
+                locationNameTextBox.Text = "";
+                locationIdTextBox.Text = "";
+                stopIdTextBox.Text = "";
+                pathIdTextBox.Text = "";
+                startDateTextBox.Text = "";
+                minusdoor1TextBox.Text = "";
+                minusdoor2personTextBox.Text = "";
+                door1TextBox.Text = "";
+                door2TextBox.Text = "";
+            }
         }
     }
 }
