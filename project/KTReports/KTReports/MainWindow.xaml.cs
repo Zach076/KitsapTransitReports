@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,6 +53,57 @@ namespace KTReports
         private void OpenManualAddData(object sender, RoutedEventArgs e)
         {
             Main.Content = new ManualDataEntry();
+        }
+        
+        private void editPage(object sender, RoutedEventArgs e)
+        {
+            Main.Content = new updateRouteInfo();
+        }
+
+        private void addRoute(object sender, RoutedEventArgs e)
+        {
+            Main.Content = new addRoute();
+        }
+
+        private void deleteRoute(object sender, RoutedEventArgs e)
+        {
+            Main.Content = new deleteRoute();
+        }
+
+        private void updateStop(object sender, RoutedEventArgs e)
+        {
+            Main.Content = new updateStop();
+        }
+
+        private void addStop(object sender, RoutedEventArgs e)
+        {
+            Main.Content = new addStop();
+        }
+
+        [STAThread]
+        private void ImportRoutes(object sender, RoutedEventArgs e)
+        {
+            string fileName = "";
+            OpenFileDialog fileDia = new OpenFileDialog();
+            fileDia.Title = "Select a file to import";
+            fileDia.FilterIndex = 2;
+            fileDia.ShowDialog();
+            fileName = fileDia.FileName;
+            
+        }
+
+        private void ImportKnownRoutes()
+        {
+            DatabaseManager databaseManager = DatabaseManager.GetDBManager();
+            databaseManager.viewFCD();
+            databaseManager.getFCDRoutes();
+        }
+
+        private void ImportKnownRoutesNFC()
+        {
+            DatabaseManager databaseManager = DatabaseManager.GetDBManager();
+            databaseManager.viewNFC();
+            databaseManager.getNFCRoutes();
         }
 
         [STAThread]
@@ -227,7 +279,14 @@ namespace KTReports
                         }
                     }
                 }
-
+                if (isORCA)
+                {
+                    ImportKnownRoutes();
+                }
+                else
+                {
+                    ImportKnownRoutesNFC();
+                }
                 //cleanup workbook
                 //close and release
                 xlWorkbook.Close(false);
