@@ -27,9 +27,11 @@
                             <CheckBox IsChecked="True" Click="OnDataPointClick">Route number</CheckBox>
                             <CheckBox IsChecked="True" Click="OnDataPointClick">Route name</CheckBox>
                             <CheckBox IsChecked="True" Click="OnDataPointClick">Total passengers</CheckBox>
+                            <CheckBox IsChecked="True" Click="OnDataPointClick">Number of Trips</CheckBox>
                         </StackPanel>
                         <StackPanel Name="DataPointsRight" Grid.Column="1">
                             <CheckBox IsChecked="True" Click="OnDataPointClick">Revenue miles</CheckBox>
+                            <CheckBox IsChecked="True" Click="OnDataPointClick">Revenue hours</CheckBox>
                             <CheckBox IsChecked="True" Click="OnDataPointClick">Passengers per mile</CheckBox>
                             <CheckBox IsChecked="True" Click="OnDataPointClick">Passengers per hour</CheckBox>
                         </StackPanel>

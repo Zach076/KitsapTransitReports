@@ -28,7 +28,7 @@
         <TextBox x:Name="door2TextBox" Height="23" Canvas.Left="554" TextWrapping="Wrap" Canvas.Top="276" Width="120"/>
         <TextBlock Canvas.Left="99" TextWrapping="Wrap" Text="Stop name:" Canvas.Top="92" Height="23" Width="62" TextAlignment="Right"/>
         <TextBlock Canvas.Left="64" TextWrapping="Wrap" Text="Location name:" Canvas.Top="140" Width="97" Height="23" TextAlignment="Right"/>
-        <TextBlock Canvas.Left="81" TextWrapping="Wrap" Text="Location id:" Canvas.Top="184" Height="23" Width="80" TextAlignment="Right"/>
+        <TextBlock Canvas.Left="81" TextWrapping="Wrap" Text="*Location id:" Canvas.Top="184" Height="23" Width="80" TextAlignment="Right"/>
         <TextBlock Canvas.Left="81" TextWrapping="Wrap" Text="Stop id:" Canvas.Top="229" Height="23" Width="80" TextAlignment="Right"/>
         <TextBlock Canvas.Left="99" TextWrapping="Wrap" Text="Path id:" Canvas.Top="276" Height="23" Width="62" TextAlignment="Right"/>
         <TextBlock Canvas.Left="468" TextWrapping="Wrap" Text="Start date:" Canvas.Top="92" Height="23" Width="81" TextAlignment="Right"/>
