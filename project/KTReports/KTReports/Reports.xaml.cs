@@ -168,28 +168,34 @@ namespace KTReports
             xlWEndsheet.Range[xlWEndsheet.Cells[rowSat, 7], xlWEndsheet.Cells[rowSat, 7]].Merge();
             xlWEndsheet.Cells[rowSat, 7] = "SATURDAY";
             xlWEndsheet.Cells[rowSat, 8] = saturdayCount;
-            xlWEndsheet.Cells[rowSat++, 8].HorizontalAlignment = XlHAlign.xlHAlignLeft;
             xlWEndsheet.Range[xlWEndsheet.Cells[rowSat, 7], xlWEndsheet.Cells[rowSat, 7]].Merge();
             xlWEndsheet.Cells[rowSat, 7] = "HOLIDAY";
             xlWEndsheet.Cells[rowSat, 8] = saturdayHolidayCount;
-            xlWEndsheet.Cells[rowSat++, 8].HorizontalAlignment = XlHAlign.xlHAlignLeft;
             xlWEndsheet.Range[xlWEndsheet.Cells[rowSat, 7], xlWEndsheet.Cells[rowSat, 7]].Merge();
             xlWEndsheet.Cells[rowSat, 7] = "TOTAL SATURDAYS";
             xlWEndsheet.Cells[rowSat, 8] = saturdayCount + saturdayHolidayCount;
-            xlWEndsheet.Cells[rowSat++, 8].HorizontalAlignment = XlHAlign.xlHAlignLeft;
 
             xlWeeksheet.Range[xlWeeksheet.Cells[rowWeek, 7], xlWeeksheet.Cells[rowWeek, 7]].Merge();
             xlWeeksheet.Cells[rowWeek, 7] = "WEEKDAY";
             xlWeeksheet.Cells[rowWeek, 8] = weekdayCount;
-            xlWeeksheet.Cells[rowWeek++, 8].HorizontalAlignment = XlHAlign.xlHAlignLeft;
             xlWeeksheet.Range[xlWeeksheet.Cells[rowWeek, 7], xlWeeksheet.Cells[rowWeek, 7]].Merge();
             xlWeeksheet.Cells[rowWeek, 7] = "HOLIDAY";
             xlWeeksheet.Cells[rowWeek, 8] = weekdayHolidayCount;
-            xlWeeksheet.Cells[rowWeek++, 8].HorizontalAlignment = XlHAlign.xlHAlignLeft;
             xlWeeksheet.Range[xlWeeksheet.Cells[rowWeek, 7], xlWeeksheet.Cells[rowWeek, 7]].Merge();
             xlWeeksheet.Cells[rowWeek, 7] = "TOTAL WEEKDAYS";
             xlWeeksheet.Cells[rowWeek, 8] = weekdayCount + weekdayHolidayCount;
-            xlWeeksheet.Cells[rowWeek++, 8].HorizontalAlignment = XlHAlign.xlHAlignLeft;
+
+            xlWeeksheet.Range["G4", "G6"].HorizontalAlignment = XlHAlign.xlHAlignLeft;
+            xlWeeksheet.Range["G4", "G6"].EntireRow.Font.Bold = true;
+            xlWEndsheet.Range["G4", "G6"].HorizontalAlignment = XlHAlign.xlHAlignLeft;
+            xlWEndsheet.Range["G4", "G6"].EntireRow.Font.Bold = true;
+            foreach (Microsoft.Office.Interop.Excel.Worksheet worksheet in xlWorkbook.Worksheets)
+            {
+                worksheet.Activate();
+                worksheet.Application.ActiveWindow.SplitColumn = dataPoints.Count;
+                worksheet.Application.ActiveWindow.SplitRow = rowWeek + 1;
+                worksheet.Application.ActiveWindow.FreezePanes = true;
+            }
 
             // Get all routes per district
             var districtToRoutes = new Dictionary<string, List<NameValueCollection>>();
@@ -298,33 +304,43 @@ namespace KTReports
                     double passPerHourS = totalRidesSat / (revenueHoursSat + revenueHoursHolidaysS);
                     Console.WriteLine($"\t\tPassengers per hour saturdays: {passPerHourS}");
 
-                    //write values
+                    // Write values
                     xlWEndsheet.Cells[rowSat, 1] = routeId;
                     xlWeeksheet.Cells[rowWeek, 1] = routeId;
+                    xlWEndsheet.Cells[rowSat, 2] = route["route_name"];
+                    xlWeeksheet.Cells[rowWeek, 2] = route["route_name"];
                     xlWEndsheet.Cells[rowSat, 3] = totalRidesSat;
                     xlWeeksheet.Cells[rowWeek, 3] = totalRidesWeek;
                     xlWEndsheet.Cells[rowSat, 4] = numTripsSat + numTripsHolidaysS;
                     xlWeeksheet.Cells[rowWeek, 4] = numTripsWeek + numTripsHolidaysW;
-                    xlWEndsheet.Cells[rowSat, 5] = revenueMilesSat;
-                    xlWeeksheet.Cells[rowWeek, 5] = revenueMilesWeek;
-                    xlWEndsheet.Cells[rowSat, 6] = revenueHoursSat + revenueHoursHolidaysS;
-                    xlWeeksheet.Cells[rowWeek, 6] = revenueHoursWeek + revenueHoursHolidaysW;
-                    xlWEndsheet.Cells[rowSat, 7] = passPerMileS;
-                    xlWeeksheet.Cells[rowWeek, 7] = passPerMileW;
-                    xlWEndsheet.Cells[rowSat++, 8] = passPerHourS;
-                    xlWeeksheet.Cells[rowWeek++, 8] = passPerHourW;
+                    xlWEndsheet.Cells[rowSat, 5] = Math.Round(revenueMilesSat, 1);
+                    xlWeeksheet.Cells[rowWeek, 5] = Math.Round(revenueMilesWeek, 1);
+                    xlWEndsheet.Cells[rowSat, 6] = Math.Round(revenueHoursSat + revenueHoursHolidaysS, 1);
+                    xlWeeksheet.Cells[rowWeek, 6] = Math.Round(revenueHoursWeek + revenueHoursHolidaysW, 1);
+                    xlWEndsheet.Cells[rowSat, 7] = Math.Round(passPerMileS, 1);
+                    xlWeeksheet.Cells[rowWeek, 7] = Math.Round(passPerMileW, 1);
+                    xlWEndsheet.Cells[rowSat, 8] = Math.Round(passPerHourS, 1);
+                    xlWeeksheet.Cells[rowWeek, 8] = Math.Round(passPerHourW, 1);
+                    rowSat++;
+                    rowWeek++;
                 }
                 rowSat++;
                 rowWeek++;
             }
-           // xlWeeksheet.UsedRange.Rows.AutoFit();
-            //xlWeeksheet.UsedRange.Rows.AutoFit();
+
             xlWeeksheet.Columns.AutoFit();
             xlWEndsheet.Columns.AutoFit();
-            xlWorkbook.SaveAs();
+            Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog();
+            saveFileDialog.FileName = "Kitsap Transit Report (" + rangeStr + ")";
+            saveFileDialog.DefaultExt = ".xlsx";
+            saveFileDialog.Filter = "Excel Files | *.xlsx";
+            bool? dialogResult = saveFileDialog.ShowDialog();
+            if (dialogResult == true)
+            {
+                xlWorkbook.SaveAs(saveFileDialog.FileName);
+            }
             xlWorkbook.Close();
             excel.Quit();
-
         }
 
         private int GetNumWeekdays(List<DateTime> reportRange)
