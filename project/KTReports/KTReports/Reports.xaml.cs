@@ -2,8 +2,12 @@ using Microsoft.Office.Core;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Data;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,17 +21,22 @@ using System.Windows.Shapes;
 
 namespace KTReports
 {
+
     /// <summary>
     /// Interaction logic for Reports.xaml
     /// </summary>
     public partial class Reports : Page
     {
         DatabaseManager databaseManager;
+        private List<NameValueCollection> latestReports = null;
+        private NameValueCollection selectedReport = null;
+        private Button lastButtonClicked = null;
 
         public Reports()
         {
             InitializeComponent();
             databaseManager = DatabaseManager.GetDBManager();
+            RefreshReportsPanel();
         }
 
         public void OnDataPointClick(object sender, RoutedEventArgs e)
@@ -75,7 +84,6 @@ namespace KTReports
 
         public void OnGenerateReportClick(object sender, RoutedEventArgs e)
         {
-            var location = "NULL";
 
             Console.WriteLine("Generate Report Clicked");
             // Get a list of Datapoints to include
@@ -103,15 +111,39 @@ namespace KTReports
                 return;
 
             }
+            var startDateStr = reportRange[0].ToString("MM-dd-yyyy");
+            var endDateStr = reportRange[1].ToString("MM-dd-yyyy");
+            var rangeStr = startDateStr + " to " + endDateStr;
 
-            //insert new report into data table
-            DateTime dateTime = DateTime.UtcNow.Date;
+            Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog();
+            saveFileDialog.FileName = "Kitsap Transit Report " + rangeStr;
+            saveFileDialog.DefaultExt = ".xlsx";
+            saveFileDialog.Filter = "Excel Files | *.xlsx";
+            bool? dialogResult = saveFileDialog.ShowDialog();
+            if (dialogResult != true)
+            {
+                return;
+            }
+
+            // Insert new report information into database
+            DateTime dateTime = DateTime.Now;
             Dictionary<string, string> dict = new Dictionary<string, string>();
             DatabaseManager databaseManager = DatabaseManager.GetDBManager();
-            dict.Add("report_location", location);
-            dict.Add("datetime_created", dateTime.ToString("yyyy-MM-dd"));
-            dict.Add("report_range", reportRange[0].ToString("yyyy-MM-dd") + " - " + reportRange[1].ToString("yyyy-MM-dd"));
+            dict.Add("report_location", saveFileDialog.FileName);
+            dict.Add("datetime_created", dateTime.ToString("yyyy-MM-dd hh:mm tt"));
+            dict.Add("report_range", reportRange[0].ToString("yyyy-MM-dd") + " to " + reportRange[1].ToString("yyyy-MM-dd"));
             databaseManager.InsertReportHistory(dict);
+
+            var thread = new Thread(()=>CreateReport(reportRange, districts, dataPoints, saveFileDialog.FileName));
+            thread.Start();
+        }
+
+        private void CreateReport(List<DateTime> reportRange, List<string> districts, List<string> dataPoints, string saveLocation)
+        {
+
+            var startDateStr = reportRange[0].ToString("MM-dd-yyyy");
+            var endDateStr = reportRange[1].ToString("MM-dd-yyyy");
+            var rangeStr = startDateStr + " TO " + endDateStr;
 
             //creating excel file
             var excel = new Microsoft.Office.Interop.Excel.Application();
@@ -127,9 +159,6 @@ namespace KTReports
             var xlWEndsheet = (Microsoft.Office.Interop.Excel.Worksheet)xlWorkbook.Sheets.Add();
             xlWEndsheet.Name = "FR SAT";
 
-            var startDateStr = reportRange[0].ToString("MM-dd-yyyy");
-            var endDateStr = reportRange[1].ToString("MM-dd-yyyy");
-            var rangeStr = startDateStr + " TO " + endDateStr;
             for (int i = 1; i < 4; i++)
             {
                 xlWEndsheet.Range[xlWEndsheet.Cells[i, 1], xlWEndsheet.Cells[i, 8]].Merge();
@@ -168,27 +197,32 @@ namespace KTReports
             xlWEndsheet.Range[xlWEndsheet.Cells[rowSat, 7], xlWEndsheet.Cells[rowSat, 7]].Merge();
             xlWEndsheet.Cells[rowSat, 7] = "SATURDAY";
             xlWEndsheet.Cells[rowSat, 8] = saturdayCount;
+            xlWEndsheet.Cells[rowSat++, 8].HorizontalAlignment = XlHAlign.xlHAlignLeft;
             xlWEndsheet.Range[xlWEndsheet.Cells[rowSat, 7], xlWEndsheet.Cells[rowSat, 7]].Merge();
             xlWEndsheet.Cells[rowSat, 7] = "HOLIDAY";
             xlWEndsheet.Cells[rowSat, 8] = saturdayHolidayCount;
+            xlWEndsheet.Cells[rowSat++, 8].HorizontalAlignment = XlHAlign.xlHAlignLeft;
             xlWEndsheet.Range[xlWEndsheet.Cells[rowSat, 7], xlWEndsheet.Cells[rowSat, 7]].Merge();
             xlWEndsheet.Cells[rowSat, 7] = "TOTAL SATURDAYS";
             xlWEndsheet.Cells[rowSat, 8] = saturdayCount + saturdayHolidayCount;
+            xlWEndsheet.Cells[rowSat++, 8].HorizontalAlignment = XlHAlign.xlHAlignLeft;
 
             xlWeeksheet.Range[xlWeeksheet.Cells[rowWeek, 7], xlWeeksheet.Cells[rowWeek, 7]].Merge();
             xlWeeksheet.Cells[rowWeek, 7] = "WEEKDAY";
             xlWeeksheet.Cells[rowWeek, 8] = weekdayCount;
+            xlWeeksheet.Cells[rowWeek++, 8].HorizontalAlignment = XlHAlign.xlHAlignLeft;
             xlWeeksheet.Range[xlWeeksheet.Cells[rowWeek, 7], xlWeeksheet.Cells[rowWeek, 7]].Merge();
             xlWeeksheet.Cells[rowWeek, 7] = "HOLIDAY";
             xlWeeksheet.Cells[rowWeek, 8] = weekdayHolidayCount;
+            xlWeeksheet.Cells[rowWeek++, 8].HorizontalAlignment = XlHAlign.xlHAlignLeft;
             xlWeeksheet.Range[xlWeeksheet.Cells[rowWeek, 7], xlWeeksheet.Cells[rowWeek, 7]].Merge();
             xlWeeksheet.Cells[rowWeek, 7] = "TOTAL WEEKDAYS";
             xlWeeksheet.Cells[rowWeek, 8] = weekdayCount + weekdayHolidayCount;
+            xlWeeksheet.Cells[rowWeek++, 8].HorizontalAlignment = XlHAlign.xlHAlignLeft;
 
-            xlWeeksheet.Range["G4", "G6"].HorizontalAlignment = XlHAlign.xlHAlignLeft;
             xlWeeksheet.Range["G4", "G6"].EntireRow.Font.Bold = true;
-            xlWEndsheet.Range["G4", "G6"].HorizontalAlignment = XlHAlign.xlHAlignLeft;
             xlWEndsheet.Range["G4", "G6"].EntireRow.Font.Bold = true;
+
             foreach (Microsoft.Office.Interop.Excel.Worksheet worksheet in xlWorkbook.Worksheets)
             {
                 worksheet.Activate();
@@ -223,16 +257,16 @@ namespace KTReports
                 // Write column titles
                 for (int i = 0; i < dataPoints.Count; i++)
                 {
-                    xlWEndsheet.Cells[rowSat, i+1] = dataPoints[i];
-                    xlWEndsheet.Cells[rowSat, i+1].HorizontalAlignment = XlHAlign.xlHAlignCenter;
-                    xlWEndsheet.Cells[rowSat, i+1].VerticalAlignment = XlVAlign.xlVAlignCenter;
-                    xlWEndsheet.Cells[rowSat, i+1].Font.Bold = true;
+                    xlWEndsheet.Cells[rowSat, i + 1] = dataPoints[i];
+                    xlWEndsheet.Cells[rowSat, i + 1].HorizontalAlignment = XlHAlign.xlHAlignCenter;
+                    xlWEndsheet.Cells[rowSat, i + 1].VerticalAlignment = XlVAlign.xlVAlignCenter;
+                    xlWEndsheet.Cells[rowSat, i + 1].Font.Bold = true;
                     xlWEndsheet.Cells[rowSat, i + 1].WrapText = false;
 
-                    xlWeeksheet.Cells[rowWeek, i+1] = dataPoints[i];
-                    xlWeeksheet.Cells[rowSat, i+1].VerticalAlignment = XlVAlign.xlVAlignCenter;
-                    xlWeeksheet.Cells[rowWeek, i+1].HorizontalAlignment = XlHAlign.xlHAlignCenter;
-                    xlWeeksheet.Cells[rowWeek, i+1].Font.Bold = true;
+                    xlWeeksheet.Cells[rowWeek, i + 1] = dataPoints[i];
+                    xlWeeksheet.Cells[rowSat, i + 1].VerticalAlignment = XlVAlign.xlVAlignCenter;
+                    xlWeeksheet.Cells[rowWeek, i + 1].HorizontalAlignment = XlHAlign.xlHAlignCenter;
+                    xlWeeksheet.Cells[rowWeek, i + 1].Font.Bold = true;
                     xlWeeksheet.Cells[rowSat, i + 1].WrapText = false;
                 }
                 rowSat++;
@@ -330,17 +364,90 @@ namespace KTReports
 
             xlWeeksheet.Columns.AutoFit();
             xlWEndsheet.Columns.AutoFit();
-            Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog();
-            saveFileDialog.FileName = "Kitsap Transit Report (" + rangeStr + ")";
-            saveFileDialog.DefaultExt = ".xlsx";
-            saveFileDialog.Filter = "Excel Files | *.xlsx";
-            bool? dialogResult = saveFileDialog.ShowDialog();
-            if (dialogResult == true)
-            {
-                xlWorkbook.SaveAs(saveFileDialog.FileName);
-            }
+            xlWorkbook.SaveAs(saveLocation);
             xlWorkbook.Close();
             excel.Quit();
+            // Refresh the report history panel on the UI thread
+            this.Dispatcher.Invoke(()=>RefreshReportsPanel());
+        }
+
+        private void RefreshReportsPanel()
+        {
+            latestReports = databaseManager.GetLatestReports();
+            RemoveReportButtons();
+            AddReportButtons();
+            selectedReport = null;
+            lastButtonClicked = null;
+        }
+
+        private void RemoveReportButtons()
+        {
+            PastReportsList.Items.Clear();
+        }
+
+        private void AddReportButtons()
+        {
+            var dataTable = new DataTable();
+            dataTable.Columns.Add("Report Name", typeof(Button));
+            dataTable.Columns.Add("Report Range", typeof(string));
+            dataTable.Columns.Add("Date Created", typeof(string));
+            var dataGrid = new DataGrid();
+            dataGrid.ItemsSource = dataTable.DefaultView;
+            PastReportsList.Items.Add(dataGrid);
+            foreach (var report in latestReports)
+            {
+                var stackPanel = new StackPanel();
+                stackPanel.Orientation = Orientation.Horizontal;
+                stackPanel.VerticalAlignment = VerticalAlignment.Center;
+                stackPanel.HorizontalAlignment = HorizontalAlignment.Stretch;
+                var button = new Button();
+                button.Width = 300;
+                button.Content = System.IO.Path.GetFileName(report["report_location"]);
+                button.Tag = report["report_location"];
+                button.Margin = new Thickness(4);
+                button.Padding = new Thickness(4);
+                button.Click += new RoutedEventHandler(this.ReportButtonClick);
+                var description = new TextBlock();
+                description.Text = $"\tReport Range: {report["report_range"]}";
+                description.VerticalAlignment = VerticalAlignment.Center;
+                var dateCreated = new TextBlock();
+                dateCreated.Text = $"\tCreated: {report["datetime_created"]}";
+                dateCreated.VerticalAlignment = VerticalAlignment.Center;
+                stackPanel.Children.Add(button);
+                stackPanel.Children.Add(description);
+                stackPanel.Children.Add(dateCreated);
+                PastReportsList.Items.Add(stackPanel);
+            }
+        }
+
+        private void ReportButtonClick(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            if (lastButtonClicked != null)
+            {
+                lastButtonClicked.Background = Brushes.Gainsboro;
+            }
+            button.Background = Brushes.SkyBlue;
+            lastButtonClicked = button;
+        }
+
+        private void OpenReportClick(object sender, RoutedEventArgs e)
+        {
+            if (lastButtonClicked == null)
+            {
+                return;
+            }
+            var path = lastButtonClicked.Tag.ToString();
+            try
+            {
+                Process.Start(path);
+            } catch (Exception fileException)
+            {
+                Console.WriteLine(fileException.StackTrace);
+                MessageBox.Show($"Could not open file: {path}", "Open Report Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            RefreshReportsPanel();
         }
 
         private int GetNumWeekdays(List<DateTime> reportRange)

@@ -151,7 +151,7 @@ namespace KTReports
                     string enteredData = row[columnName].ToString();
                     if (columnName.Equals("Is Weekday"))
                     {
-                        if (String.IsNullOrEmpty(enteredData))
+                        if (string.IsNullOrEmpty(enteredData))
                         {
                             enteredData = true.ToString();
                         }
@@ -159,7 +159,6 @@ namespace KTReports
                         enteredData = textInfo.ToTitleCase(enteredData);
                     }
                     keyValuePairs.Add(dbColumnName, enteredData);
-                   // Console.Write(row[columnName].ToString() + " ");
                     Console.Write(dbColumnName + " ");
                 }
                 switch (dataType)

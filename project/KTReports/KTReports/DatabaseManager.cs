@@ -151,8 +151,7 @@ namespace KTReports
                 )";
                 commands.Add(fareCardData);
                 string reportHistory = @"CREATE TABLE IF NOT EXISTS ReportHistory (
-	                report_id integer PRIMARY KEY AUTOINCREMENT,
-	                report_location string,
+	                report_location string PRIMARY KEY,
 	                datetime_created text,
 	                report_range string
                 )";
@@ -672,6 +671,24 @@ namespace KTReports
                 }
             }
             return importedFiles;
+        }
+
+        public List<NameValueCollection> GetLatestReports()
+        {
+            string query = "SELECT * FROM ReportHistory ORDER BY date(datetime_created)";
+            var latestReports = new List<NameValueCollection>();
+            using (var command = new SQLiteCommand(query, sqliteConnection))
+            {
+                using (SQLiteDataReader reader = command.ExecuteReader())
+                {
+                    for (int i = 0; i < 10 && reader.Read(); i++)
+                    {
+                        NameValueCollection row = reader.GetValues();
+                        latestReports.Add(row);
+                    }
+                }
+            }
+            return latestReports;
         }
 
         public void DeleteImportedFile(long fileId, FileType fileType)
