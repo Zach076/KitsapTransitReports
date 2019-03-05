@@ -675,7 +675,7 @@ namespace KTReports
 
         public List<NameValueCollection> GetLatestReports()
         {
-            string query = "SELECT * FROM ReportHistory ORDER BY date(datetime_created)";
+            string query = "SELECT * FROM ReportHistory ORDER BY datetime_created DESC";
             var latestReports = new List<NameValueCollection>();
             using (var command = new SQLiteCommand(query, sqliteConnection))
             {

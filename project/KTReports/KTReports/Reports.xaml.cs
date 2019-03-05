@@ -378,6 +378,8 @@ namespace KTReports
         private void RefreshReportsPanel()
         {
             latestReports = databaseManager.GetLatestReports();
+            // Reverse so that most recent report is at bottom of list
+            latestReports.Reverse();
             RemoveReportButtons();
             AddReportButtons();
             selectedReport = null;
@@ -387,17 +389,6 @@ namespace KTReports
         private void RemoveReportButtons()
         {
             PastReportsList.Items.Clear();
-        }
-        private void ColumnReordering(object sender, DataGridColumnReorderingEventArgs e)
-        {
-            return;
-        }
-
-        class ReportDetails
-        {
-            public string C1 { get; set; }
-            public string C2 { get; set; }
-            public string C3 { get; set; }
         }
 
         private void AddReportButtons()
