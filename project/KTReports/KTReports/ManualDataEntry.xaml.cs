@@ -131,8 +131,12 @@ namespace KTReports
                 MessageBox.Show("Enter a valid date range.", "Add to Database Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            // Ask user if they are sure they want to continue?
-
+            // Ask user if they are sure they want to continue
+            var result = MessageBox.Show("Are you sure you want to add this data?", "Kitsap Transit Reports", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.No)
+            {
+                return;
+            }
             var dataType = GetDataType();
 
             foreach (DataRow row in dataTable.Rows)
@@ -147,7 +151,7 @@ namespace KTReports
                     string enteredData = row[columnName].ToString();
                     if (columnName.Equals("Is Weekday"))
                     {
-                        if (String.IsNullOrEmpty(enteredData))
+                        if (string.IsNullOrEmpty(enteredData))
                         {
                             enteredData = true.ToString();
                         }
@@ -155,7 +159,6 @@ namespace KTReports
                         enteredData = textInfo.ToTitleCase(enteredData);
                     }
                     keyValuePairs.Add(dbColumnName, enteredData);
-                   // Console.Write(row[columnName].ToString() + " ");
                     Console.Write(dbColumnName + " ");
                 }
                 switch (dataType)
