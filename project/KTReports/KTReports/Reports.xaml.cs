@@ -1,8 +1,13 @@
+using Microsoft.Office.Core;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Data;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,17 +21,22 @@ using System.Windows.Shapes;
 
 namespace KTReports
 {
+
     /// <summary>
     /// Interaction logic for Reports.xaml
     /// </summary>
     public partial class Reports : Page
     {
         DatabaseManager databaseManager;
+        private List<NameValueCollection> latestReports = null;
+        private NameValueCollection selectedReport = null;
+        private Button lastButtonClicked = null;
 
         public Reports()
         {
             InitializeComponent();
             databaseManager = DatabaseManager.GetDBManager();
+            RefreshReportsPanel();
         }
 
         public void OnDataPointClick(object sender, RoutedEventArgs e)
@@ -74,7 +84,6 @@ namespace KTReports
 
         public void OnGenerateReportClick(object sender, RoutedEventArgs e)
         {
-            var location = "NULL";
 
             Console.WriteLine("Generate Report Clicked");
             // Get a list of Datapoints to include
@@ -102,23 +111,47 @@ namespace KTReports
                 return;
 
             }
+            var startDateStr = reportRange[0].ToString("MM-dd-yyyy");
+            var endDateStr = reportRange[1].ToString("MM-dd-yyyy");
+            var rangeStr = startDateStr + " to " + endDateStr;
 
-            //insert new report into data table
-            DateTime dateTime = DateTime.UtcNow.Date;
+            Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog();
+            saveFileDialog.FileName = "Kitsap Transit Report " + rangeStr;
+            saveFileDialog.DefaultExt = ".xlsx";
+            saveFileDialog.Filter = "Excel Files | *.xlsx";
+            bool? dialogResult = saveFileDialog.ShowDialog();
+            if (dialogResult != true)
+            {
+                return;
+            }
+
+            // Insert new report information into database
+            DateTime dateTime = DateTime.Now;
             Dictionary<string, string> dict = new Dictionary<string, string>();
             DatabaseManager databaseManager = DatabaseManager.GetDBManager();
-            dict.Add("report_location", location);
-            dict.Add("datetime_created", dateTime.ToString("yyyy-MM-dd"));
-            dict.Add("report_range", reportRange[0].ToString("yyyy-MM-dd") + " - " + reportRange[1].ToString("yyyy-MM-dd"));
+            dict.Add("report_location", saveFileDialog.FileName);
+            dict.Add("datetime_created", dateTime.ToString("yyyy-MM-dd hh:mm tt"));
+            dict.Add("report_range", reportRange[0].ToString("yyyy-MM-dd") + " to " + reportRange[1].ToString("yyyy-MM-dd"));
             databaseManager.InsertReportHistory(dict);
+
+            var thread = new Thread(()=>CreateReport(reportRange, districts, dataPoints, saveFileDialog.FileName));
+            thread.Start();
+        }
+
+        private void CreateReport(List<DateTime> reportRange, List<string> districts, List<string> dataPoints, string saveLocation)
+        {
+
+            var startDateStr = reportRange[0].ToString("MM-dd-yyyy");
+            var endDateStr = reportRange[1].ToString("MM-dd-yyyy");
+            var rangeStr = startDateStr + " TO " + endDateStr;
 
             //creating excel file
             var excel = new Microsoft.Office.Interop.Excel.Application();
             excel.Visible = false;
             excel.DisplayAlerts = false;
             var xlWorkbook = excel.Workbooks.Add(Type.Missing);
-            int x = 1;
-            int y = 1;
+            int rowSat = 1;
+            int rowWeek = 1;
 
             var xlWeeksheet = (Microsoft.Office.Interop.Excel.Worksheet)xlWorkbook.ActiveSheet;
             xlWeeksheet.Name = "FR WEEK";
@@ -126,14 +159,28 @@ namespace KTReports
             var xlWEndsheet = (Microsoft.Office.Interop.Excel.Worksheet)xlWorkbook.Sheets.Add();
             xlWEndsheet.Name = "FR SAT";
 
-            xlWEndsheet.Range[xlWEndsheet.Cells[1, 1], xlWEndsheet.Cells[1, 8]].Merge();
-            xlWEndsheet.Cells[1, 1] = "SAT REPORT";
+            // Center and bold the first 4 lines of each sheet
+            for (int i = 1; i < 4; i++)
+            {
+                xlWEndsheet.Range[xlWEndsheet.Cells[i, 1], xlWEndsheet.Cells[i, 8]].Merge();
+                xlWEndsheet.Cells[i, 1].Font.Bold = true;
+                xlWEndsheet.Cells[i, 1].HorizontalAlignment = XlHAlign.xlHAlignCenter;
+                xlWeeksheet.Range[xlWeeksheet.Cells[i, 1], xlWeeksheet.Cells[i, 8]].Merge();
+                xlWeeksheet.Cells[i, 1].Font.Bold = true;
+                xlWeeksheet.Cells[i, 1].HorizontalAlignment = XlHAlign.xlHAlignCenter;
 
-            xlWeeksheet.Range[xlWeeksheet.Cells[1, 1], xlWeeksheet.Cells[1, 8]].Merge();
-            xlWeeksheet.Cells[1, 1] = "WEEK REPORT";
+            }
+            xlWEndsheet.Cells[1, 1] = "KITSAP TRANSIT ROUTE PERFORMANCE REPORT";
+            xlWEndsheet.Cells[2, 1] = "SATURDAY REPORT";
+            xlWEndsheet.Cells[3, 1] = rangeStr;
 
-            x = 4;
-            y = 4;
+            xlWeeksheet.Cells[1, 1] = "KITSAP TRANSIT ROUTE PERFORMANCE REPORT";
+            xlWeeksheet.Cells[2, 1] = "WEEKDAY REPORT";
+            xlWeeksheet.Cells[3, 1] = rangeStr;
+
+
+            rowSat = 4;
+            rowWeek = 4;
 
 
             // Get num trips from date range for weekdays and saturdays separately
@@ -148,25 +195,42 @@ namespace KTReports
             Console.WriteLine("Saturday holiday count: " + saturdayHolidayCount);
 
             //write days
-            xlWEndsheet.Range[xlWEndsheet.Cells[x, 6], xlWEndsheet.Cells[x, 7]].Merge();
-            xlWEndsheet.Cells[x, 6] = "SATURDAY";
-            xlWEndsheet.Cells[x++, 8] = saturdayCount;
-            xlWEndsheet.Range[xlWEndsheet.Cells[x, 6], xlWEndsheet.Cells[x, 7]].Merge();
-            xlWEndsheet.Cells[x, 6] = "HOLIDAY";
-            xlWEndsheet.Cells[x++, 8] = saturdayHolidayCount;
-            xlWEndsheet.Range[xlWEndsheet.Cells[x, 6], xlWEndsheet.Cells[x, 7]].Merge();
-            xlWEndsheet.Cells[x, 6] = "TOTAL SATURDAY";
-            xlWEndsheet.Cells[x++, 8] = saturdayCount + saturdayHolidayCount;
+            xlWEndsheet.Range[xlWEndsheet.Cells[rowSat, 7], xlWEndsheet.Cells[rowSat, 7]].Merge();
+            xlWEndsheet.Cells[rowSat, 7] = "SATURDAY";
+            xlWEndsheet.Cells[rowSat, 8] = saturdayCount;
+            xlWEndsheet.Cells[rowSat++, 8].HorizontalAlignment = XlHAlign.xlHAlignLeft;
+            xlWEndsheet.Range[xlWEndsheet.Cells[rowSat, 7], xlWEndsheet.Cells[rowSat, 7]].Merge();
+            xlWEndsheet.Cells[rowSat, 7] = "HOLIDAY";
+            xlWEndsheet.Cells[rowSat, 8] = saturdayHolidayCount;
+            xlWEndsheet.Cells[rowSat++, 8].HorizontalAlignment = XlHAlign.xlHAlignLeft;
+            xlWEndsheet.Range[xlWEndsheet.Cells[rowSat, 7], xlWEndsheet.Cells[rowSat, 7]].Merge();
+            xlWEndsheet.Cells[rowSat, 7] = "TOTAL SATURDAYS";
+            xlWEndsheet.Cells[rowSat, 8] = saturdayCount + saturdayHolidayCount;
+            xlWEndsheet.Cells[rowSat++, 8].HorizontalAlignment = XlHAlign.xlHAlignLeft;
 
-            xlWeeksheet.Range[xlWeeksheet.Cells[y, 6], xlWeeksheet.Cells[y, 7]].Merge();
-            xlWeeksheet.Cells[y, 6] = "WEEKDAY";
-            xlWeeksheet.Cells[y++, 8] = weekdayCount;
-            xlWeeksheet.Range[xlWeeksheet.Cells[y, 6], xlWeeksheet.Cells[y, 7]].Merge();
-            xlWeeksheet.Cells[y, 6] = "HOLIDAY";
-            xlWeeksheet.Cells[y++, 8] = weekdayHolidayCount;
-            xlWeeksheet.Range[xlWeeksheet.Cells[y, 6], xlWeeksheet.Cells[y, 7]].Merge();
-            xlWeeksheet.Cells[y, 6] = "TOTAL WEEKDAY";
-            xlWeeksheet.Cells[y++, 8] = weekdayCount + weekdayHolidayCount;
+            xlWeeksheet.Range[xlWeeksheet.Cells[rowWeek, 7], xlWeeksheet.Cells[rowWeek, 7]].Merge();
+            xlWeeksheet.Cells[rowWeek, 7] = "WEEKDAY";
+            xlWeeksheet.Cells[rowWeek, 8] = weekdayCount;
+            xlWeeksheet.Cells[rowWeek++, 8].HorizontalAlignment = XlHAlign.xlHAlignLeft;
+            xlWeeksheet.Range[xlWeeksheet.Cells[rowWeek, 7], xlWeeksheet.Cells[rowWeek, 7]].Merge();
+            xlWeeksheet.Cells[rowWeek, 7] = "HOLIDAY";
+            xlWeeksheet.Cells[rowWeek, 8] = weekdayHolidayCount;
+            xlWeeksheet.Cells[rowWeek++, 8].HorizontalAlignment = XlHAlign.xlHAlignLeft;
+            xlWeeksheet.Range[xlWeeksheet.Cells[rowWeek, 7], xlWeeksheet.Cells[rowWeek, 7]].Merge();
+            xlWeeksheet.Cells[rowWeek, 7] = "TOTAL WEEKDAYS";
+            xlWeeksheet.Cells[rowWeek, 8] = weekdayCount + weekdayHolidayCount;
+            xlWeeksheet.Cells[rowWeek++, 8].HorizontalAlignment = XlHAlign.xlHAlignLeft;
+
+            xlWeeksheet.Range["G4", "G6"].EntireRow.Font.Bold = true;
+            xlWEndsheet.Range["G4", "G6"].EntireRow.Font.Bold = true;
+
+            foreach (Microsoft.Office.Interop.Excel.Worksheet worksheet in xlWorkbook.Worksheets)
+            {
+                worksheet.Activate();
+                worksheet.Application.ActiveWindow.SplitColumn = dataPoints.Count;
+                worksheet.Application.ActiveWindow.SplitRow = rowWeek + 1;
+                worksheet.Application.ActiveWindow.FreezePanes = true;
+            }
 
             // Get all routes per district
             var districtToRoutes = new Dictionary<string, List<NameValueCollection>>();
@@ -179,36 +243,40 @@ namespace KTReports
                 districtToRoutes.Add(district, routes);
                 Console.WriteLine($"Printing routes in district: {district}");
 
-                //write district name
-                xlWEndsheet.Range[xlWEndsheet.Cells[x, 1], xlWEndsheet.Cells[x, 8]].Merge();
-                xlWEndsheet.Cells[x++, 1] = district;
+                // Write district name
+                xlWEndsheet.Range[xlWEndsheet.Cells[rowSat, 1], xlWEndsheet.Cells[rowSat, dataPoints.Count]].Merge();
+                xlWEndsheet.Cells[rowSat, 1] = district;
+                xlWEndsheet.Cells[rowSat, 1].HorizontalAlignment = XlHAlign.xlHAlignCenter;
+                xlWEndsheet.Cells[rowSat, 1].Font.Bold = true;
+                rowSat++;
 
-                xlWeeksheet.Range[xlWeeksheet.Cells[y, 1], xlWeeksheet.Cells[y, 8]].Merge();
-                xlWeeksheet.Cells[y++, 1] = district;
+                xlWeeksheet.Range[xlWeeksheet.Cells[rowWeek, 1], xlWeeksheet.Cells[rowWeek, 8]].Merge();
+                xlWeeksheet.Cells[rowWeek, 1] = district;
+                xlWeeksheet.Cells[rowWeek, 1].HorizontalAlignment = XlHAlign.xlHAlignCenter;
+                xlWeeksheet.Cells[rowWeek, 1].Font.Bold = true;
+                rowWeek++;
+                // Write column titles
+                for (int i = 0; i < dataPoints.Count; i++)
+                {
+                    xlWEndsheet.Cells[rowSat, i + 1] = dataPoints[i];
+                    xlWEndsheet.Cells[rowSat, i + 1].HorizontalAlignment = XlHAlign.xlHAlignCenter;
+                    xlWEndsheet.Cells[rowSat, i + 1].VerticalAlignment = XlVAlign.xlVAlignCenter;
+                    xlWEndsheet.Cells[rowSat, i + 1].Font.Bold = true;
+                    xlWEndsheet.Cells[rowSat, i + 1].WrapText = false;
 
-                //write titles
-                xlWEndsheet.Cells[x, 1] = "ROUTE\nNO.";
-                xlWEndsheet.Cells[x, 2] = "ROUTE NAME";
-                xlWEndsheet.Cells[x, 3] = "TOTAL\nPASSENGERS";
-                xlWEndsheet.Cells[x, 4] = "NO.\nTRIPS";
-                xlWEndsheet.Cells[x, 5] = "REVENUE\nMILES";
-                xlWEndsheet.Cells[x, 6] = "REVENUE\nHOURS";
-                xlWEndsheet.Cells[x, 7] = "PASSENGERS\nPER MILE";
-                xlWEndsheet.Cells[x++, 8] = "PASSENGERS\nPER HOUR";
-
-                xlWeeksheet.Cells[y, 1] = "ROUTE\nNO.";
-                xlWeeksheet.Cells[y, 2] = "ROUTE NAME";
-                xlWeeksheet.Cells[y, 3] = "TOTAL\nPASSENGERS";
-                xlWeeksheet.Cells[y, 4] = "NO.\nTRIPS";
-                xlWeeksheet.Cells[y, 5] = "REVENUE\nMILES";
-                xlWeeksheet.Cells[y, 6] = "REVENUE\nHOURS";
-                xlWeeksheet.Cells[y, 7] = "PASSENGERS\nPER MILE";
-                xlWeeksheet.Cells[y++, 8] = "PASSENGERS\nPER HOUR";
+                    xlWeeksheet.Cells[rowWeek, i + 1] = dataPoints[i];
+                    xlWeeksheet.Cells[rowSat, i + 1].VerticalAlignment = XlVAlign.xlVAlignCenter;
+                    xlWeeksheet.Cells[rowWeek, i + 1].HorizontalAlignment = XlHAlign.xlHAlignCenter;
+                    xlWeeksheet.Cells[rowWeek, i + 1].Font.Bold = true;
+                    xlWeeksheet.Cells[rowSat, i + 1].WrapText = false;
+                }
+                rowSat++;
+                rowWeek++;
 
                 foreach (var route in routes)
                 {
                     int routeId = Convert.ToInt32(route["assigned_route_id"]);
-                    Console.WriteLine($"\tRoute id: {routeId}");
+                    //Console.WriteLine($"\tRoute id: {routeId}");
 
                     // Get sum of ridership for each route between reportRange for weekdays
                     // routeTotal contains nfc.total_ridership, nfc.total_nonridership, fc.boardings and total
@@ -219,82 +287,168 @@ namespace KTReports
 
                     weekRoutes.Add(routeId, routeTotalWeek);
                     satRoutes.Add(routeId, routeTotalSat);
-
+                    var calculatedWeek = new Dictionary<string, object>();
+                    var calculatedSat = new Dictionary<string, object>();
+                    calculatedWeek.Add("ROUTE NAME", route["route_name"]);
+                    calculatedWeek.Add("ROUTE NO.", routeId);
+                    calculatedSat.Add("ROUTE NAME", route["route_name"]);
+                    calculatedSat.Add("ROUTE NO.", routeId);
                     // Num trips on normal weekdays
                     double numTripsWeek = Convert.ToDouble(route["num_trips_week"]) * weekdayCount;
-                    Console.WriteLine($"\t\tNum trips on normal weekdays: {numTripsWeek}");
 
                     // Num trips on serviced holiday weekdays
                     double numTripsHolidaysW = Convert.ToDouble(route["num_trips_hol"]) * weekdayHolidayCount;
-                    Console.WriteLine($"\t\tNum trips on serviced holiday weekdays: {numTripsHolidaysW}");
+                    calculatedWeek.Add("NO. OF TRIPS", numTripsWeek + numTripsHolidaysW);
 
                     // Num trips on normal saturdays
                     double numTripsSat = Convert.ToDouble(route["num_trips_sat"]) * saturdayCount;
-                    Console.WriteLine($"\t\tNum trips on normal saturdays: {numTripsSat}");
 
                     // Num trips on serviced holiday saturdays
                     double numTripsHolidaysS = Convert.ToDouble(route["num_trips_hol"]) * saturdayHolidayCount;
-                    Console.WriteLine($"\t\tNum trips on holiday saturdays: {numTripsHolidaysS}");
+                    calculatedSat.Add("NO. OF TRIPS", numTripsSat + numTripsHolidaysS);
 
                     // Get revenue miles for a route (distance of trip * num trips during week (regardless of holiday or not))
                     double routeDistance = Convert.ToDouble(route["distance"]);
                     double revenueMilesWeek = routeDistance * (numTripsWeek + numTripsHolidaysW);
-                    Console.WriteLine($"\t\tRevenue miles weekdays: {revenueMilesWeek}");
+                    calculatedWeek.Add("REVENUE MILES", revenueMilesWeek);
                     double revenueMilesSat = routeDistance * (numTripsSat + numTripsHolidaysS);
-                    Console.WriteLine($"\t\tRevenue miles saturdays: {revenueMilesSat}");
+                    calculatedSat.Add("REVENUE MILES", revenueMilesSat);
 
                     // Get revenue hours (num hours on weekday * number of weekdays excluding holidays)
                     double revenueHoursWeek = Convert.ToDouble(route["weekday_hours"]) * weekdayCount;
-                    Console.WriteLine($"\t\tRevenue hours normal weekdays: {revenueHoursWeek}");
                     double revenueHoursHolidaysW = Convert.ToDouble(route["holiday_hours"]) * weekdayHolidayCount;
-                    Console.WriteLine($"\t\tRevenue hours holiday weekdays: {revenueHoursHolidaysW}");
+                    calculatedWeek.Add("REVENUE HOURS", revenueHoursWeek + revenueHoursHolidaysW);
                     double revenueHoursSat = Convert.ToDouble(route["saturday_hours"]) * saturdayCount;
-                    Console.WriteLine($"\t\tRevenue hours normal saturdays: {revenueHoursSat}");
                     double revenueHoursHolidaysS = Convert.ToDouble(route["holiday_hours"]) * saturdayHolidayCount;
-                    Console.WriteLine($"\t\tRevenue hours holiday saturdays: {revenueHoursHolidaysS}");
+                    calculatedSat.Add("REVENUE HOURS", revenueHoursSat + revenueHoursHolidaysS);
 
                     // Get total ridership during weekdays and saturdays
                     int totalRidesWeek = routeTotalWeek["total"];
-                    Console.WriteLine($"\t\tTotal ridership weekdays: {totalRidesWeek}");
+                    calculatedWeek.Add("TOTAL PASSENGERS", totalRidesWeek);
                     int totalRidesSat = routeTotalSat["total"];
-                    Console.WriteLine($"\t\tTotal ridership saturdays: {totalRidesSat}");
+                    calculatedSat.Add("TOTAL PASSENGERS", totalRidesSat);
 
                     // Get passengers per mile (total passengers on weekdays / revenue miles)
                     double passPerMileW = totalRidesWeek / revenueMilesWeek;
-                    Console.WriteLine($"\t\tPassengers per mile weekdays: {passPerMileW}");
+                    calculatedWeek.Add("PASSENGERS PER MILE", passPerMileW);
                     double passPerMileS = totalRidesSat / revenueMilesSat;
-                    Console.WriteLine($"\t\tPassengers per mile saturdays: {passPerMileS}");
+                    calculatedSat.Add("PASSENGERS PER MILE", passPerMileS);
 
                     // Get passengers per hour (using total passengers / revenue hours)
                     double passPerHourW = totalRidesWeek / (revenueHoursWeek + revenueHoursHolidaysW);
-                    Console.WriteLine($"\t\tPassengers per hour weekdays: {passPerHourW}");
+                    calculatedWeek.Add("PASSENGERS PER HOUR", passPerHourW);
                     double passPerHourS = totalRidesSat / (revenueHoursSat + revenueHoursHolidaysS);
-                    Console.WriteLine($"\t\tPassengers per hour saturdays: {passPerHourS}");
+                    calculatedSat.Add("PASSENGERS PER HOUR", passPerHourS);
 
-                    //write values
-                    xlWEndsheet.Cells[x, 1] = routeId;
-                    xlWeeksheet.Cells[y, 1] = routeId;
-                    xlWEndsheet.Cells[x, 3] = totalRidesSat;
-                    xlWeeksheet.Cells[y, 3] = totalRidesWeek;
-                    xlWEndsheet.Cells[x, 4] = numTripsSat + numTripsHolidaysS;
-                    xlWeeksheet.Cells[y, 4] = numTripsWeek + numTripsHolidaysW;
-                    xlWEndsheet.Cells[x, 5] = revenueMilesSat;
-                    xlWeeksheet.Cells[y, 5] = revenueMilesWeek;
-                    xlWEndsheet.Cells[x, 6] = revenueHoursSat + revenueHoursHolidaysS;
-                    xlWeeksheet.Cells[y, 6] = revenueHoursWeek + revenueHoursHolidaysW;
-                    xlWEndsheet.Cells[x, 7] = passPerMileS;
-                    xlWeeksheet.Cells[y, 7] = passPerMileW;
-                    xlWEndsheet.Cells[x++, 8] = passPerHourS;
-                    xlWeeksheet.Cells[y++, 8] = passPerHourW;
+                    // Write values
+                    for (int i = 0; i < dataPoints.Count; i++)
+                    {
+                        var column = dataPoints[i];
+                        if (!calculatedWeek.ContainsKey(column))
+                        {
+                            continue;
+                        }
+                        if (calculatedWeek[column] is double)
+                        {
+                            xlWeeksheet.Cells[rowWeek, i + 1] = Math.Round((double)calculatedWeek[column], 1);
+                            xlWEndsheet.Cells[rowSat, i + 1] = Math.Round((double)calculatedSat[column], 1);
+                        }
+                        else
+                        {
+                            xlWeeksheet.Cells[rowWeek, i + 1] = calculatedWeek[column];
+                            xlWEndsheet.Cells[rowSat, i + 1] = calculatedSat[column];
+                        }
+                    }
+                    rowSat++;
+                    rowWeek++;
                 }
-                x++;
-                y++;
+                rowSat++;
+                rowWeek++;
             }
 
-            xlWorkbook.SaveAs();
+            xlWeeksheet.Columns.AutoFit();
+            xlWEndsheet.Columns.AutoFit();
+            xlWorkbook.SaveAs(saveLocation);
             xlWorkbook.Close();
             excel.Quit();
+            // Refresh the report history panel on the UI thread
+            this.Dispatcher.Invoke(()=>RefreshReportsPanel());
+        }
 
+        private void RefreshReportsPanel()
+        {
+            latestReports = databaseManager.GetLatestReports();
+            // Reverse so that most recent report is at bottom of list
+            latestReports.Reverse();
+            RemoveReportButtons();
+            AddReportButtons();
+            selectedReport = null;
+            lastButtonClicked = null;
+        }
+
+        private void RemoveReportButtons()
+        {
+            PastReportsList.Items.Clear();
+        }
+
+        private void AddReportButtons()
+        {
+            foreach (var report in latestReports)
+            {
+                var stackPanel = new StackPanel();
+                stackPanel.Orientation = Orientation.Horizontal;
+                stackPanel.VerticalAlignment = VerticalAlignment.Center;
+                stackPanel.HorizontalAlignment = HorizontalAlignment.Stretch;
+                var button = new Button();
+                button.Width = 300;
+                button.Content = System.IO.Path.GetFileName(report["report_location"]);
+                button.Tag = report["report_location"];
+                button.Margin = new Thickness(4);
+                button.Padding = new Thickness(4);
+                button.Click += new RoutedEventHandler(this.ReportButtonClick);
+                var description = new TextBlock();
+                description.Text = report["report_range"];
+                description.Margin = new Thickness(50, 0, 0, 0);
+                description.VerticalAlignment = VerticalAlignment.Center;
+                var dateCreated = new TextBlock();
+                dateCreated.Text = "Created on " + report["datetime_created"];
+                dateCreated.Margin = new Thickness(50, 0, 0, 0);
+                dateCreated.VerticalAlignment = VerticalAlignment.Center;
+                stackPanel.Children.Add(button);
+                stackPanel.Children.Add(description);
+                stackPanel.Children.Add(dateCreated);
+                PastReportsList.Items.Add(stackPanel);
+            }
+        }
+
+        private void ReportButtonClick(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            if (lastButtonClicked != null)
+            {
+                lastButtonClicked.Background = Brushes.Gainsboro;
+            }
+            button.Background = Brushes.SkyBlue;
+            lastButtonClicked = button;
+        }
+
+        private void OpenReportClick(object sender, RoutedEventArgs e)
+        {
+            if (lastButtonClicked == null)
+            {
+                return;
+            }
+            var path = lastButtonClicked.Tag.ToString();
+            try
+            {
+                Process.Start(path);
+            } catch (Exception fileException)
+            {
+                Console.WriteLine(fileException.StackTrace);
+                MessageBox.Show($"Could not open file: {path}", "Open Report Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            RefreshReportsPanel();
         }
 
         private int GetNumWeekdays(List<DateTime> reportRange)
@@ -428,7 +582,16 @@ namespace KTReports
                 {
                     if (c != SelectAllDataPoints && c.IsChecked == true)
                     {
-                        dataPoints.Add(c.Content.ToString());
+                        var dataPointStr = c.Content.ToString().ToUpper().Replace("NUMBER", "NO.");
+                        /*if (dataPointStr.Length > 10)
+                        {
+                            int firstSpaceIdx = dataPointStr.IndexOf(' ');
+                            if (firstSpaceIdx > 0)
+                            {
+                                dataPointStr = dataPointStr.Substring(0, firstSpaceIdx) + '\n' + dataPointStr.Substring(firstSpaceIdx+1);
+                            }
+                        }*/
+                        dataPoints.Add(dataPointStr);
                     }
                 }
             }
