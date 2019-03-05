@@ -400,7 +400,7 @@ namespace KTReports
             try
             {
                 string insertSQL =
-                    @"INSERT INTO ReportHistory 
+                    @"INSERT OR REPLACE INTO ReportHistory 
                         (report_location, datetime_created, report_range) 
                     VALUES (@report_location, @datetime_created, @report_range)";
                 using (SQLiteCommand command = new SQLiteCommand(insertSQL, sqliteConnection))

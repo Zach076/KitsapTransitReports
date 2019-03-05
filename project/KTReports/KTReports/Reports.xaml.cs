@@ -159,6 +159,7 @@ namespace KTReports
             var xlWEndsheet = (Microsoft.Office.Interop.Excel.Worksheet)xlWorkbook.Sheets.Add();
             xlWEndsheet.Name = "FR SAT";
 
+            // Center and bold the first 4 lines of each sheet
             for (int i = 1; i < 4; i++)
             {
                 xlWEndsheet.Range[xlWEndsheet.Cells[i, 1], xlWEndsheet.Cells[i, 8]].Merge();
@@ -275,7 +276,7 @@ namespace KTReports
                 foreach (var route in routes)
                 {
                     int routeId = Convert.ToInt32(route["assigned_route_id"]);
-                    Console.WriteLine($"\tRoute id: {routeId}");
+                    //Console.WriteLine($"\tRoute id: {routeId}");
 
                     // Get sum of ridership for each route between reportRange for weekdays
                     // routeTotal contains nfc.total_ridership, nfc.total_nonridership, fc.boardings and total
@@ -286,75 +287,78 @@ namespace KTReports
 
                     weekRoutes.Add(routeId, routeTotalWeek);
                     satRoutes.Add(routeId, routeTotalSat);
-
+                    var calculatedWeek = new Dictionary<string, object>();
+                    var calculatedSat = new Dictionary<string, object>();
+                    calculatedWeek.Add("ROUTE NAME", route["route_name"]);
+                    calculatedWeek.Add("ROUTE NO.", routeId);
+                    calculatedSat.Add("ROUTE NAME", route["route_name"]);
+                    calculatedSat.Add("ROUTE NO.", routeId);
                     // Num trips on normal weekdays
                     double numTripsWeek = Convert.ToDouble(route["num_trips_week"]) * weekdayCount;
-                    Console.WriteLine($"\t\tNum trips on normal weekdays: {numTripsWeek}");
 
                     // Num trips on serviced holiday weekdays
                     double numTripsHolidaysW = Convert.ToDouble(route["num_trips_hol"]) * weekdayHolidayCount;
-                    Console.WriteLine($"\t\tNum trips on serviced holiday weekdays: {numTripsHolidaysW}");
+                    calculatedWeek.Add("NO. OF TRIPS", numTripsWeek + numTripsHolidaysW);
 
                     // Num trips on normal saturdays
                     double numTripsSat = Convert.ToDouble(route["num_trips_sat"]) * saturdayCount;
-                    Console.WriteLine($"\t\tNum trips on normal saturdays: {numTripsSat}");
 
                     // Num trips on serviced holiday saturdays
                     double numTripsHolidaysS = Convert.ToDouble(route["num_trips_hol"]) * saturdayHolidayCount;
-                    Console.WriteLine($"\t\tNum trips on holiday saturdays: {numTripsHolidaysS}");
+                    calculatedSat.Add("NO. OF TRIPS", numTripsSat + numTripsHolidaysS);
 
                     // Get revenue miles for a route (distance of trip * num trips during week (regardless of holiday or not))
                     double routeDistance = Convert.ToDouble(route["distance"]);
                     double revenueMilesWeek = routeDistance * (numTripsWeek + numTripsHolidaysW);
-                    Console.WriteLine($"\t\tRevenue miles weekdays: {revenueMilesWeek}");
+                    calculatedWeek.Add("REVENUE MILES", revenueMilesWeek);
                     double revenueMilesSat = routeDistance * (numTripsSat + numTripsHolidaysS);
-                    Console.WriteLine($"\t\tRevenue miles saturdays: {revenueMilesSat}");
+                    calculatedSat.Add("REVENUE MILES", revenueMilesSat);
 
                     // Get revenue hours (num hours on weekday * number of weekdays excluding holidays)
                     double revenueHoursWeek = Convert.ToDouble(route["weekday_hours"]) * weekdayCount;
-                    Console.WriteLine($"\t\tRevenue hours normal weekdays: {revenueHoursWeek}");
                     double revenueHoursHolidaysW = Convert.ToDouble(route["holiday_hours"]) * weekdayHolidayCount;
-                    Console.WriteLine($"\t\tRevenue hours holiday weekdays: {revenueHoursHolidaysW}");
+                    calculatedWeek.Add("REVENUE HOURS", revenueHoursWeek + revenueHoursHolidaysW);
                     double revenueHoursSat = Convert.ToDouble(route["saturday_hours"]) * saturdayCount;
-                    Console.WriteLine($"\t\tRevenue hours normal saturdays: {revenueHoursSat}");
                     double revenueHoursHolidaysS = Convert.ToDouble(route["holiday_hours"]) * saturdayHolidayCount;
-                    Console.WriteLine($"\t\tRevenue hours holiday saturdays: {revenueHoursHolidaysS}");
+                    calculatedSat.Add("REVENUE HOURS", revenueHoursSat + revenueHoursHolidaysS);
 
                     // Get total ridership during weekdays and saturdays
                     int totalRidesWeek = routeTotalWeek["total"];
-                    Console.WriteLine($"\t\tTotal ridership weekdays: {totalRidesWeek}");
+                    calculatedWeek.Add("TOTAL PASSENGERS", totalRidesWeek);
                     int totalRidesSat = routeTotalSat["total"];
-                    Console.WriteLine($"\t\tTotal ridership saturdays: {totalRidesSat}");
+                    calculatedSat.Add("TOTAL PASSENGERS", totalRidesSat);
 
                     // Get passengers per mile (total passengers on weekdays / revenue miles)
                     double passPerMileW = totalRidesWeek / revenueMilesWeek;
-                    Console.WriteLine($"\t\tPassengers per mile weekdays: {passPerMileW}");
+                    calculatedWeek.Add("PASSENGERS PER MILE", passPerMileW);
                     double passPerMileS = totalRidesSat / revenueMilesSat;
-                    Console.WriteLine($"\t\tPassengers per mile saturdays: {passPerMileS}");
+                    calculatedSat.Add("PASSENGERS PER MILE", passPerMileS);
 
                     // Get passengers per hour (using total passengers / revenue hours)
                     double passPerHourW = totalRidesWeek / (revenueHoursWeek + revenueHoursHolidaysW);
-                    Console.WriteLine($"\t\tPassengers per hour weekdays: {passPerHourW}");
+                    calculatedWeek.Add("PASSENGERS PER HOUR", passPerHourW);
                     double passPerHourS = totalRidesSat / (revenueHoursSat + revenueHoursHolidaysS);
-                    Console.WriteLine($"\t\tPassengers per hour saturdays: {passPerHourS}");
+                    calculatedSat.Add("PASSENGERS PER HOUR", passPerHourS);
 
                     // Write values
-                    xlWEndsheet.Cells[rowSat, 1] = routeId;
-                    xlWeeksheet.Cells[rowWeek, 1] = routeId;
-                    xlWEndsheet.Cells[rowSat, 2] = route["route_name"];
-                    xlWeeksheet.Cells[rowWeek, 2] = route["route_name"];
-                    xlWEndsheet.Cells[rowSat, 3] = totalRidesSat;
-                    xlWeeksheet.Cells[rowWeek, 3] = totalRidesWeek;
-                    xlWEndsheet.Cells[rowSat, 4] = numTripsSat + numTripsHolidaysS;
-                    xlWeeksheet.Cells[rowWeek, 4] = numTripsWeek + numTripsHolidaysW;
-                    xlWEndsheet.Cells[rowSat, 5] = Math.Round(revenueMilesSat, 1);
-                    xlWeeksheet.Cells[rowWeek, 5] = Math.Round(revenueMilesWeek, 1);
-                    xlWEndsheet.Cells[rowSat, 6] = Math.Round(revenueHoursSat + revenueHoursHolidaysS, 1);
-                    xlWeeksheet.Cells[rowWeek, 6] = Math.Round(revenueHoursWeek + revenueHoursHolidaysW, 1);
-                    xlWEndsheet.Cells[rowSat, 7] = Math.Round(passPerMileS, 1);
-                    xlWeeksheet.Cells[rowWeek, 7] = Math.Round(passPerMileW, 1);
-                    xlWEndsheet.Cells[rowSat, 8] = Math.Round(passPerHourS, 1);
-                    xlWeeksheet.Cells[rowWeek, 8] = Math.Round(passPerHourW, 1);
+                    for (int i = 0; i < dataPoints.Count; i++)
+                    {
+                        var column = dataPoints[i];
+                        if (!calculatedWeek.ContainsKey(column))
+                        {
+                            continue;
+                        }
+                        if (calculatedWeek[column] is double)
+                        {
+                            xlWeeksheet.Cells[rowWeek, i + 1] = Math.Round((double)calculatedWeek[column], 1);
+                            xlWEndsheet.Cells[rowSat, i + 1] = Math.Round((double)calculatedSat[column], 1);
+                        }
+                        else
+                        {
+                            xlWeeksheet.Cells[rowWeek, i + 1] = calculatedWeek[column];
+                            xlWEndsheet.Cells[rowSat, i + 1] = calculatedSat[column];
+                        }
+                    }
                     rowSat++;
                     rowWeek++;
                 }
@@ -384,16 +388,20 @@ namespace KTReports
         {
             PastReportsList.Items.Clear();
         }
+        private void ColumnReordering(object sender, DataGridColumnReorderingEventArgs e)
+        {
+            return;
+        }
+
+        class ReportDetails
+        {
+            public string C1 { get; set; }
+            public string C2 { get; set; }
+            public string C3 { get; set; }
+        }
 
         private void AddReportButtons()
         {
-            var dataTable = new DataTable();
-            dataTable.Columns.Add("Report Name", typeof(Button));
-            dataTable.Columns.Add("Report Range", typeof(string));
-            dataTable.Columns.Add("Date Created", typeof(string));
-            var dataGrid = new DataGrid();
-            dataGrid.ItemsSource = dataTable.DefaultView;
-            PastReportsList.Items.Add(dataGrid);
             foreach (var report in latestReports)
             {
                 var stackPanel = new StackPanel();
@@ -408,10 +416,12 @@ namespace KTReports
                 button.Padding = new Thickness(4);
                 button.Click += new RoutedEventHandler(this.ReportButtonClick);
                 var description = new TextBlock();
-                description.Text = $"\tReport Range: {report["report_range"]}";
+                description.Text = report["report_range"];
+                description.Margin = new Thickness(50, 0, 0, 0);
                 description.VerticalAlignment = VerticalAlignment.Center;
                 var dateCreated = new TextBlock();
-                dateCreated.Text = $"\tCreated: {report["datetime_created"]}";
+                dateCreated.Text = "Created on " + report["datetime_created"];
+                dateCreated.Margin = new Thickness(50, 0, 0, 0);
                 dateCreated.VerticalAlignment = VerticalAlignment.Center;
                 stackPanel.Children.Add(button);
                 stackPanel.Children.Add(description);
