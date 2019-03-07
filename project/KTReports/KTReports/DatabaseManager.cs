@@ -69,7 +69,8 @@ namespace KTReports
 	                start_date text,
 	                route_name text,
                     district text,
-	                distance float,
+                    distance_week float,
+	                distance_sat float,
                     num_trips_week float,
                     num_trips_sat float,
                     num_trips_hol float,
@@ -424,9 +425,9 @@ namespace KTReports
         {
             string insertSQL =
                 @"INSERT INTO Routes 
-                    (path_id, assigned_route_id, start_date, route_name, district, distance, num_trips_week, 
+                    (path_id, assigned_route_id, start_date, route_name, district, distance_week, distance_sat, num_trips_week, 
                     num_trips_sat, num_trips_hol, weekday_hours, saturday_hours, holiday_hours) 
-                VALUES (@path_id, @assigned_route_id, @start_date, @route_name, @district, @distance, @num_trips_week,
+                VALUES (@path_id, @assigned_route_id, @start_date, @route_name, @district, @distance_week, @distance_sat, @num_trips_week,
                         @num_trips_sat, @num_trips_hol, @weekday_hours, @saturday_hours, @holiday_hours)";
             using (SQLiteCommand command = new SQLiteCommand(insertSQL, sqliteConnection))
             {
@@ -437,8 +438,10 @@ namespace KTReports
                 command.Parameters.Add(new SQLiteParameter("@route_name", route_name));
                 keyValuePairs.TryGetValue("district", out string district);
                 command.Parameters.Add(new SQLiteParameter("@district", district));
-                keyValuePairs.TryGetValue("distance", out string distance);
-                command.Parameters.Add(new SQLiteParameter("@distance", distance));
+                keyValuePairs.TryGetValue("distance_week", out string distance_week);
+                command.Parameters.Add(new SQLiteParameter("@distance_week", distance_week));
+                keyValuePairs.TryGetValue("distance_sat", out string distance_sat);
+                command.Parameters.Add(new SQLiteParameter("@distance_sat", distance_sat));
                 keyValuePairs.TryGetValue("num_trips_week", out string num_trips_week);
                 command.Parameters.Add(new SQLiteParameter("@num_trips_week", num_trips_week));
                 keyValuePairs.TryGetValue("num_trips_sat", out string num_trips_sat);
@@ -843,7 +846,7 @@ namespace KTReports
             {
 
 
-                string updateSQL = "UPDATE Routes SET " + option + " = " + "'" + newTry + "'" + " WHERE path_id = " + "'" + routeName + "'";
+                string updateSQL = "UPDATE Routes SET " + option + " = " + "'" + newTry + "'" + " WHERE assigned_route_id = " + "'" + routeName + "'";
                 Console.WriteLine(updateSQL);
                 using (SQLiteCommand command = new SQLiteCommand(updateSQL, sqliteConnection))
                 {
@@ -860,9 +863,9 @@ namespace KTReports
         {
             Console.WriteLine();
             Console.WriteLine("ALL Routes and associated data");
-            var results = dbManagerInstance.Query(new string[] { "db_route_id", "path_id", "start_date", "route_name", "district", "distance", "num_trips_week", "num_trips_sat",
+            var results = dbManagerInstance.Query(new string[] { "db_route_id", "path_id", "start_date", "route_name", "district", "distance_week", "distance_sat", "num_trips_week", "num_trips_sat",
                 "num_trips_hol", "weekday_hours", "saturday_hours", "holiday_hours", "assigned_route_id" }, new string[] { "Routes" },
-                "distance > 0");
+                "1 = 1");
             var resultStrs = new List<string>();
             foreach (var row in results)
             {
@@ -883,8 +886,8 @@ namespace KTReports
 
         public List<String> getRoutes()
         {
-            var results = dbManagerInstance.Query(new string[] {"path_id"}, new string[] { "Routes" },
-                           "distance >= 0");
+            var results = dbManagerInstance.Query(new string[] {"assigned_route_id"}, new string[] { "Routes" },
+                           "1 = 1");
             var resultStrs = new List<string>();
             foreach (var row in results)
             {
@@ -905,18 +908,18 @@ namespace KTReports
             return resultStrs;
         }
 
-        public void addRouteinfo(String routeID, String start, String name, String district, String distance, String tripsWeek,
+        public void addRouteinfo(String routeID, String start, String name, String district, String distance_week, String distance_sat, String tripsWeek,
                 String tripsSat, String tripsHol, String weekdayHours, String satHours, String holHours)
         {
 
             var newRoute = new Dictionary<string, string>
                 {
-                    { "path_id", routeID },
                     { "route_id", routeID },
                     { "start_date", start },
                     { "route_name", name },
                     { "district", district },
-                    { "distance", distance },
+                    { "distance_week", distance_week },
+                    { "distance_sat", distance_sat },
                     { "num_trips_week", tripsWeek },
                     { "num_trips_sat", tripsSat },
                     { "num_trips_hol", tripsHol },
@@ -924,7 +927,7 @@ namespace KTReports
                     { "saturday_hours", satHours },
                     { "holiday_hours", holHours }
                 };
-            InsertRoute(newRoute);
+            InsertPath(newRoute);
         }
 
         public void deleteRouteinfo(string route)
