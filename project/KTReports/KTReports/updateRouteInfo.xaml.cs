@@ -48,7 +48,8 @@ namespace KTReports
             listAttributes.Items.Add("assigned route id");
             listAttributes.Items.Add("route name");
             listAttributes.Items.Add("district");
-            listAttributes.Items.Add("distance");
+            listAttributes.Items.Add("distance week");
+            listAttributes.Items.Add("distance sat");
             listAttributes.Items.Add("number of trips per week");
             listAttributes.Items.Add("number of saturday trips");
             listAttributes.Items.Add("number of holiday trips");

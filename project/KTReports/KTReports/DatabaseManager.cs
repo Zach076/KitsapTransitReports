@@ -51,7 +51,7 @@ namespace KTReports
             return dbManagerInstance;
         }
 
-        // Current schema: https://i.imgur.com/4eerugA.png
+        // Current schema (NEED TO UPDATE w/ distance_week and distance_sat in Routes table): https://i.imgur.com/4eerugA.png
         private void CreateTables()
         {
             // Complete all commands or none at all
@@ -69,7 +69,8 @@ namespace KTReports
 	                start_date text,
 	                route_name text,
                     district text,
-	                distance float,
+                    distance_week float,
+	                distance_sat float,
                     num_trips_week float,
                     num_trips_sat float,
                     num_trips_hol float,
@@ -87,10 +88,7 @@ namespace KTReports
 	                assigned_stop_id integer
                 )";
                 commands.Add(routeStops);
-                // Restarting the program will reset data that is imported from files
-                string dropRSD = @"DROP TABLE IF EXISTS RouteStopData";
-                commands.Add(dropRSD);
-                string routeStopsData = @"CREATE TABLE RouteStopData (
+                string routeStopsData = @"CREATE TABLE IF NOT EXISTS RouteStopData (
 	                sd_id integer PRIMARY KEY AUTOINCREMENT,
 	                location_id integer,
 	                assigned_stop_id integer,
@@ -103,9 +101,7 @@ namespace KTReports
 	                file_id integer
                 )";
                 commands.Add(routeStopsData);
-                string dropNFCD = @"DROP TABLE IF EXISTS NonFareCardData";
-                commands.Add(dropNFCD);
-                string nonFareCardData = @"CREATE TABLE NonFareCardData (
+                string nonFareCardData = @"CREATE TABLE IF NOT EXISTS NonFareCardData (
 	                nfc_id integer PRIMARY KEY AUTOINCREMENT,
 	                path_id integer,
 	                start_date text,
@@ -131,9 +127,7 @@ namespace KTReports
 	                file_id integer
                 )";
                 commands.Add(nonFareCardData);
-                string dropFCD = @"DROP TABLE IF EXISTS FareCardData";
-                commands.Add(dropFCD);
-                string fareCardData = @"CREATE TABLE FareCardData (
+                string fareCardData = @"CREATE TABLE IF NOT EXISTS FareCardData (
 	                fc_id integer PRIMARY KEY AUTOINCREMENT,
 	                path_id integer,
 	                start_date text,
@@ -166,8 +160,6 @@ namespace KTReports
 	                location_name text
                 )";
                 commands.Add(masterRouteStops);
-                string dropImportedFiles = @"DROP TABLE IF EXISTS ImportedFiles";
-                commands.Add(dropImportedFiles);
                 string importedFiles = @"CREATE TABLE IF NOT EXISTS ImportedFiles (
 	                file_id integer PRIMARY KEY AUTOINCREMENT,
 	                name text,
@@ -211,8 +203,6 @@ namespace KTReports
                 command.Parameters.Add(new SQLiteParameter("@import_date", importDate));
                 command.ExecuteNonQuery();
             }
-            //DeleteImports deleteImports = DeleteImports.GetDeleteImports();
-            //deleteImports.SetupPage();
             // Return file id here
             return sqliteConnection.LastInsertRowId;
         }
@@ -424,9 +414,9 @@ namespace KTReports
         {
             string insertSQL =
                 @"INSERT INTO Routes 
-                    (path_id, assigned_route_id, start_date, route_name, district, distance, num_trips_week, 
+                    (path_id, assigned_route_id, start_date, route_name, district, distance_week, distance_sat, num_trips_week, 
                     num_trips_sat, num_trips_hol, weekday_hours, saturday_hours, holiday_hours) 
-                VALUES (@path_id, @assigned_route_id, @start_date, @route_name, @district, @distance, @num_trips_week,
+                VALUES (@path_id, @assigned_route_id, @start_date, @route_name, @district, @distance_week, @distance_sat, @num_trips_week,
                         @num_trips_sat, @num_trips_hol, @weekday_hours, @saturday_hours, @holiday_hours)";
             using (SQLiteCommand command = new SQLiteCommand(insertSQL, sqliteConnection))
             {
@@ -437,8 +427,10 @@ namespace KTReports
                 command.Parameters.Add(new SQLiteParameter("@route_name", route_name));
                 keyValuePairs.TryGetValue("district", out string district);
                 command.Parameters.Add(new SQLiteParameter("@district", district));
-                keyValuePairs.TryGetValue("distance", out string distance);
-                command.Parameters.Add(new SQLiteParameter("@distance", distance));
+                keyValuePairs.TryGetValue("distance_week", out string distance_week);
+                command.Parameters.Add(new SQLiteParameter("@distance_week", distance_week));
+                keyValuePairs.TryGetValue("distance_sat", out string distance_sat);
+                command.Parameters.Add(new SQLiteParameter("@distance_sat", distance_sat));
                 keyValuePairs.TryGetValue("num_trips_week", out string num_trips_week);
                 command.Parameters.Add(new SQLiteParameter("@num_trips_week", num_trips_week));
                 keyValuePairs.TryGetValue("num_trips_sat", out string num_trips_sat);
@@ -843,7 +835,7 @@ namespace KTReports
             {
 
 
-                string updateSQL = "UPDATE Routes SET " + option + " = " + "'" + newTry + "'" + " WHERE path_id = " + "'" + routeName + "'";
+                string updateSQL = "UPDATE Routes SET " + option + " = " + "'" + newTry + "'" + " WHERE assigned_route_id = " + "'" + routeName + "'";
                 Console.WriteLine(updateSQL);
                 using (SQLiteCommand command = new SQLiteCommand(updateSQL, sqliteConnection))
                 {
@@ -860,9 +852,9 @@ namespace KTReports
         {
             Console.WriteLine();
             Console.WriteLine("ALL Routes and associated data");
-            var results = dbManagerInstance.Query(new string[] { "db_route_id", "path_id", "start_date", "route_name", "district", "distance", "num_trips_week", "num_trips_sat",
+            var results = dbManagerInstance.Query(new string[] { "db_route_id", "path_id", "start_date", "route_name", "district", "distance_week", "distance_sat", "num_trips_week", "num_trips_sat",
                 "num_trips_hol", "weekday_hours", "saturday_hours", "holiday_hours", "assigned_route_id" }, new string[] { "Routes" },
-                "distance > 0");
+                "1 = 1");
             var resultStrs = new List<string>();
             foreach (var row in results)
             {
@@ -883,8 +875,8 @@ namespace KTReports
 
         public List<String> getRoutes()
         {
-            var results = dbManagerInstance.Query(new string[] {"path_id"}, new string[] { "Routes" },
-                           "distance >= 0");
+            var results = dbManagerInstance.Query(new string[] {"assigned_route_id"}, new string[] { "Routes" },
+                           "1 = 1");
             var resultStrs = new List<string>();
             foreach (var row in results)
             {
@@ -905,18 +897,18 @@ namespace KTReports
             return resultStrs;
         }
 
-        public void addRouteinfo(String routeID, String start, String name, String district, String distance, String tripsWeek,
+        public void addRouteinfo(String routeID, String start, String name, String district, String distance_week, String distance_sat, String tripsWeek,
                 String tripsSat, String tripsHol, String weekdayHours, String satHours, String holHours)
         {
 
             var newRoute = new Dictionary<string, string>
                 {
-                    { "path_id", routeID },
                     { "route_id", routeID },
                     { "start_date", start },
                     { "route_name", name },
                     { "district", district },
-                    { "distance", distance },
+                    { "distance_week", distance_week },
+                    { "distance_sat", distance_sat },
                     { "num_trips_week", tripsWeek },
                     { "num_trips_sat", tripsSat },
                     { "num_trips_hol", tripsHol },
@@ -924,7 +916,7 @@ namespace KTReports
                     { "saturday_hours", satHours },
                     { "holiday_hours", holHours }
                 };
-            InsertRoute(newRoute);
+            InsertPath(newRoute);
         }
 
         public void deleteRouteinfo(string route)
