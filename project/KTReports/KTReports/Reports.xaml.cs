@@ -331,7 +331,6 @@ namespace KTReports
 
                     // Get total ridership during weekdays and saturdays
                     int totalRidesWeek = routeTotalWeek["total"];
-                    Console.WriteLine("TOTAL RIDES: " + totalRidesWeek);
                     calculatedWeek.Add("TOTAL PASSENGERS", totalRidesWeek);
                     int totalRidesSat = routeTotalSat["total"];
                     calculatedSat.Add("TOTAL PASSENGERS", totalRidesSat);
