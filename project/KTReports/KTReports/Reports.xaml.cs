@@ -132,7 +132,7 @@ namespace KTReports
             Dictionary<string, string> dict = new Dictionary<string, string>();
             DatabaseManager databaseManager = DatabaseManager.GetDBManager();
             dict.Add("report_location", saveFileDialog.FileName);
-            dict.Add("datetime_created", dateTime.ToString("yyyy-MM-dd hh:mm tt"));
+            dict.Add("datetime_created", dateTime.ToString("yyyy-MM-dd hh:mm:ss tt"));
             dict.Add("report_range", reportRange[0].ToString("yyyy-MM-dd") + " to " + reportRange[1].ToString("yyyy-MM-dd"));
             databaseManager.InsertReportHistory(dict);
 
@@ -299,6 +299,7 @@ namespace KTReports
                     calculatedSat.Add("ROUTE NAME", route["route_name"]);
                     calculatedSat.Add("ROUTE NO.", routeId);
                     // Num trips on normal weekdays
+                    //Console.WriteLine("NUM TRIPS WEEK: " + route["num_trips_week"]);
                     double numTripsWeek = Convert.ToDouble(route["num_trips_week"]) * weekdayCount;
 
                     // Num trips on serviced holiday weekdays
@@ -313,10 +314,11 @@ namespace KTReports
                     calculatedSat.Add("NO. OF TRIPS", numTripsSat + numTripsHolidaysS);
 
                     // Get revenue miles for a route (distance of trip * num trips during week (regardless of holiday or not))
-                    double routeDistance = Convert.ToDouble(route["distance"]);
-                    double revenueMilesWeek = routeDistance * (numTripsWeek + numTripsHolidaysW);
+                    double routeDistanceWeek = Convert.ToDouble(route["distance_week"]);
+                    double routeDistanceSat = Convert.ToDouble(route["distance_sat"]);
+                    double revenueMilesWeek = routeDistanceWeek * (numTripsWeek + numTripsHolidaysW);
                     calculatedWeek.Add("REVENUE MILES", revenueMilesWeek);
-                    double revenueMilesSat = routeDistance * (numTripsSat + numTripsHolidaysS);
+                    double revenueMilesSat = routeDistanceSat * (numTripsSat + numTripsHolidaysS);
                     calculatedSat.Add("REVENUE MILES", revenueMilesSat);
 
                     // Get revenue hours (num hours on weekday * number of weekdays excluding holidays)
@@ -329,6 +331,7 @@ namespace KTReports
 
                     // Get total ridership during weekdays and saturdays
                     int totalRidesWeek = routeTotalWeek["total"];
+                    Console.WriteLine("TOTAL RIDES: " + totalRidesWeek);
                     calculatedWeek.Add("TOTAL PASSENGERS", totalRidesWeek);
                     int totalRidesSat = routeTotalSat["total"];
                     calculatedSat.Add("TOTAL PASSENGERS", totalRidesSat);
