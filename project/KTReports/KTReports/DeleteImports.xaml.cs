@@ -54,7 +54,7 @@ namespace KTReports
             // Query the database for a list of imported files
             DatabaseManager databaseManager = DatabaseManager.GetDBManager();
             importedFiles = databaseManager.GetImportedFiles();
-            this.Dispatcher.Invoke(() =>
+            Dispatcher.Invoke(() =>
             {
                 // Remove existing radio buttons and add new radio buttons to the ListOfImports
                 RemoveRadioButtons();
@@ -68,7 +68,7 @@ namespace KTReports
 
         private void RemoveRadioButtons()
         {
-            this.Dispatcher.Invoke(() => ListOfImports.Items.Clear());
+            Dispatcher.Invoke(() => ListOfImports.Items.Clear());
         }
 
         private void AddRadioButtons()

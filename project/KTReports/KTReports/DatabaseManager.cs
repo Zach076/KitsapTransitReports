@@ -51,7 +51,7 @@ namespace KTReports
             return dbManagerInstance;
         }
 
-        // Current schema: https://i.imgur.com/4eerugA.png
+        // Current schema (NEED TO UPDATE w/ distance_week and distance_sat in Routes table): https://i.imgur.com/4eerugA.png
         private void CreateTables()
         {
             // Complete all commands or none at all
@@ -88,9 +88,6 @@ namespace KTReports
 	                assigned_stop_id integer
                 )";
                 commands.Add(routeStops);
-                // Restarting the program will reset data that is imported from files
-                //string dropRSD = @"DROP TABLE IF EXISTS RouteStopData";
-                //commands.Add(dropRSD);
                 string routeStopsData = @"CREATE TABLE IF NOT EXISTS RouteStopData (
 	                sd_id integer PRIMARY KEY AUTOINCREMENT,
 	                location_id integer,
@@ -104,8 +101,6 @@ namespace KTReports
 	                file_id integer
                 )";
                 commands.Add(routeStopsData);
-                //string dropNFCD = @"DROP TABLE IF EXISTS NonFareCardData";
-                //commands.Add(dropNFCD);
                 string nonFareCardData = @"CREATE TABLE IF NOT EXISTS NonFareCardData (
 	                nfc_id integer PRIMARY KEY AUTOINCREMENT,
 	                path_id integer,
@@ -132,8 +127,6 @@ namespace KTReports
 	                file_id integer
                 )";
                 commands.Add(nonFareCardData);
-                //string dropFCD = @"DROP TABLE IF EXISTS FareCardData";
-                //commands.Add(dropFCD);
                 string fareCardData = @"CREATE TABLE IF NOT EXISTS FareCardData (
 	                fc_id integer PRIMARY KEY AUTOINCREMENT,
 	                path_id integer,
@@ -167,8 +160,6 @@ namespace KTReports
 	                location_name text
                 )";
                 commands.Add(masterRouteStops);
-                string dropImportedFiles = @"DROP TABLE IF EXISTS ImportedFiles";
-                commands.Add(dropImportedFiles);
                 string importedFiles = @"CREATE TABLE IF NOT EXISTS ImportedFiles (
 	                file_id integer PRIMARY KEY AUTOINCREMENT,
 	                name text,
