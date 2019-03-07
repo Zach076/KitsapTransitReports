@@ -779,58 +779,13 @@ namespace KTReports
 
         public void modifyRoute(string routeName, string option, string newTry)
         {
-
-            if(option == "path id")
-            {
-                option = "path_id";
-            }
-
-            else if (option == "start date")
-            {
-                option = "start_date";
-            }
-            else if (option == "assigned route id")
-            {
-                option = "assigned_route_id";
-            }
-            else if (option == "route name")
-            {
-                option = "route_name";
-            }
-            else if (option == "district")
-            {
-                
-            }
-            else if (option == "distance")
-            {
-                
-            }
-            else if (option == "number of trips per week")
-            {
-                option = "num_trips_week";
-            }
-            else if (option == "number of saturday trips")
-            {
-                option = "num_trips_sat";
-            }
-            else if (option == "number of holiday trips")
-            {
-                option = "num_trips_hol";
-            }
-            else if (option == "weekday hours")
-            {
-                option = "weekday_hours";
-            }
-            else if (option == "saturday hours")
-            {
-                option = "saturday_hours";
-            }
-            else if (option == "holilday hours")
-            {
-                option = "holiday_hours";
-            }
-
-
+            option = option.Replace(" of", string.Empty)
+                        .Replace(" per", string.Empty)
+                        .Replace("number", "num")
+                        .Replace("weekday", "week")
+                        .Replace("saturday", "sat")
+                        .Replace("holiday", "hol")
+                        .Replace(' ', '_');
             try
             {
 
@@ -1058,50 +1013,9 @@ namespace KTReports
 
         public void modifyStop(string routeStop, string option, string newTry)
         {
-            
 
-            if (option == "stop name")
-            {
-                option = "stop_name";
-            }
-
-            else if (option == "location name")
-            {
-                option = "location_name";
-            }
-            else if (option == "stop id")
-            {
-                option = "stop_id";
-            }
-            else if (option == "path id")
-            {
-                option = "path_id";
-            }
-            else if (option == "start date")
-            {
-                option = "start_date";
-            }
-            else if (option == "(-)door 1 person")
-            {
-                option = "minus_door_1_person";
-            }
-            else if (option == "(-)door 2 person")
-            {
-                option = "minus_door_2_person";
-            }
-            else if (option == "door 1 person")
-            {
-                option = "door_1_person";
-            }
-            else if (option == "door 2 person")
-            {
-                option = "door_2_person";
-            }
-            else if(option == "location id")
-            {
-                option = "location_id";
-            }
-
+            option = option.Replace("(-)", string.Empty)
+                        .Replace(' ', '_');
 
             try
             {

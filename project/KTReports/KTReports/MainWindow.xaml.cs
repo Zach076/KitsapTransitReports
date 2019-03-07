@@ -173,8 +173,7 @@ namespace KTReports
             DatabaseManager databaseManager = DatabaseManager.GetDBManager();
             long? file_id = 0;
             bool isORCA = false;
-            string isWeekday = "false";
-            string[] reportPeriod;
+            bool isWeekday = false;
             Microsoft.Office.Interop.Excel.Application xlApp = new Microsoft.Office.Interop.Excel.Application();
             Microsoft.Office.Interop.Excel.Workbook xlWorkbook = xlApp.Workbooks.Open(fileName);
             Console.WriteLine("FILE NAME: " + fileName);
@@ -199,7 +198,10 @@ namespace KTReports
                 {
                     if (!Regex.Match(xlWorksheet.Name, @".*SAT.*").Success)
                     {
-                        isWeekday = "true";
+                        isWeekday = true;
+                    } else
+                    {
+                        isWeekday = false;
                     }
                     Microsoft.Office.Interop.Excel.Range xlRange = xlWorksheet.UsedRange;
 
@@ -223,7 +225,7 @@ namespace KTReports
                     int j = 1;
                     LinkedListNode<string> key = colNames.First;
                     string reportVal = values[1, 6].ToString();
-                    reportPeriod = reportVal.Split(' ');
+                    string[] reportPeriod = reportVal.Split(' ');
 
                     //0 means hasnt hit table, 1 means reading columns, 2 means hit end of columns
                     int inTable = 0;
@@ -300,9 +302,9 @@ namespace KTReports
                         //Debug.WriteLine("inTable = " + inTable);
                         if (inTable == 2)
                         {
-                            dict.Add("start_date", reportPeriod[0]);
-                            dict.Add("end_date", reportPeriod[2]);
-                            dict.Add("is_weekday", isWeekday);
+                            dict.Add("start_date", DateTime.Parse(reportPeriod[0]).ToString("yyyy-MM-dd"));
+                            dict.Add("end_date", DateTime.Parse(reportPeriod[2]).ToString("yyyy-MM-dd"));
+                            dict.Add("is_weekday", isWeekday.ToString());
                             dict.Add("file_id", file_id.ToString());
                             //Debug.WriteLine("insert");
                             if (isORCA)
