@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -31,6 +32,7 @@ namespace KTReports
         private List<NameValueCollection> latestReports = null;
         private NameValueCollection selectedReport = null;
         private Button lastButtonClicked = null;
+        private int numReportsGenerating = 0;
 
         public Reports()
         {
@@ -134,6 +136,9 @@ namespace KTReports
             dict.Add("report_range", reportRange[0].ToString("yyyy-MM-dd") + " to " + reportRange[1].ToString("yyyy-MM-dd"));
             databaseManager.InsertReportHistory(dict);
 
+            Interlocked.Increment(ref numReportsGenerating);
+            MainWindow.progressBar.IsIndeterminate = true;
+            MainWindow.statusTextBlock.Text = "Generating Report...";
             var thread = new Thread(()=>CreateReport(reportRange, districts, dataPoints, saveFileDialog.FileName));
             thread.Start();
         }
@@ -372,7 +377,16 @@ namespace KTReports
             xlWorkbook.Close();
             excel.Quit();
             // Refresh the report history panel on the UI thread
-            this.Dispatcher.Invoke(()=>RefreshReportsPanel());
+            this.Dispatcher.Invoke(()=>
+            {
+                RefreshReportsPanel();
+                Interlocked.Decrement(ref numReportsGenerating);
+                if (numReportsGenerating == 0)
+                {
+                    MainWindow.progressBar.IsIndeterminate = false;
+                    MainWindow.statusTextBlock.Text = string.Empty;
+                }
+            });
         }
 
         private void RefreshReportsPanel()

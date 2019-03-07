@@ -33,7 +33,8 @@ namespace KTReports
             string start = startTextBox.Text;
             string name = routeNameTextBox.Text;
             string district = districtTextBox.Text;
-            string distance = districtTextBox.Text;
+            string distanceWeek = distanceWeekTextBox.Text;
+            string distanceSat = distanceSatTextBox.Text;
             string tripsWeek = tripsWeekTextBox.Text;
             string tripsSat = tripsSaturdayTextBox.Text;
             string tripsHol = tripsHolidayTextBox.Text;
@@ -42,7 +43,7 @@ namespace KTReports
             string holHours = holidayHoursTextBox.Text;
 
             DatabaseManager dbManager = DatabaseManager.GetDBManager();
-            dbManager.addRouteinfo(routeID, start, name, district, distance, tripsWeek,
+            dbManager.addRouteinfo(routeID, start, name, district, distanceWeek, distanceSat, tripsWeek,
                 tripsSat, tripsHol, weekdayHours, satHours, holHours);
             dbManager.viewRoutes();
 
@@ -50,7 +51,8 @@ namespace KTReports
             startTextBox.Text = "";
             routeNameTextBox.Text = "";
             districtTextBox.Text = "";
-            districtTextBox.Text = "";
+            distanceWeekTextBox.Text = "";
+            distanceSatTextBox.Text = "";
             tripsWeekTextBox.Text = "";
             tripsSaturdayTextBox.Text = "";
             tripsHolidayTextBox.Text = "";
