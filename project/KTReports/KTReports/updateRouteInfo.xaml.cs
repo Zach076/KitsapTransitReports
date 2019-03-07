@@ -22,6 +22,8 @@ namespace KTReports
     /// </summary>
     public partial class updateRouteInfo: Page
     {
+        string selectedRoute = null;
+
         public updateRouteInfo()
         {
             InitializeComponent();
@@ -50,20 +52,25 @@ namespace KTReports
             listAttributes.Items.Add("district");
             listAttributes.Items.Add("distance week");
             listAttributes.Items.Add("distance sat");
-            listAttributes.Items.Add("number of trips per week");
-            listAttributes.Items.Add("number of saturday trips");
-            listAttributes.Items.Add("number of holiday trips");
+            listAttributes.Items.Add("number of trips per weekday");
+            listAttributes.Items.Add("number of trips per saturday");
+            listAttributes.Items.Add("number of trips per holiday");
             listAttributes.Items.Add("weekday hours");
             listAttributes.Items.Add("saturday hours");
-            listAttributes.Items.Add("holilday hours");
+            listAttributes.Items.Add("holiday hours");
 
         }
 
         private void update(object sender, RoutedEventArgs e)
         {
-            if (listRoutes.SelectedItem != null && listAttributes.SelectedItem != null && newField.Text != null)
+            if ((selectedRoute != null || listRoutes.SelectedItem != null) 
+                && listAttributes.SelectedItem != null 
+                && newField.Text != null)
             {
-                string selectedRoute = listRoutes.SelectedItem.ToString();
+                if (listRoutes.SelectedItem != null)
+                {
+                    selectedRoute = listRoutes.SelectedItem.ToString();
+                }
                 string selectedAttribute = listAttributes.SelectedItem.ToString();
                 string input = newField.Text;
 
@@ -78,9 +85,6 @@ namespace KTReports
 
                 dbManager.viewRoutes();
 
-                
-                listRoutes.SelectedIndex = -1;
-                listAttributes.SelectedIndex = -1;
                 newField.Text = "";
 
                 var routeList = dbManager.getRoutes();
