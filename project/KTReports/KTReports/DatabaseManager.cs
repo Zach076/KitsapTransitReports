@@ -89,9 +89,9 @@ namespace KTReports
                 )";
                 commands.Add(routeStops);
                 // Restarting the program will reset data that is imported from files
-                string dropRSD = @"DROP TABLE IF EXISTS RouteStopData";
-                commands.Add(dropRSD);
-                string routeStopsData = @"CREATE TABLE RouteStopData (
+                //string dropRSD = @"DROP TABLE IF EXISTS RouteStopData";
+                //commands.Add(dropRSD);
+                string routeStopsData = @"CREATE TABLE IF NOT EXISTS RouteStopData (
 	                sd_id integer PRIMARY KEY AUTOINCREMENT,
 	                location_id integer,
 	                assigned_stop_id integer,
@@ -104,9 +104,9 @@ namespace KTReports
 	                file_id integer
                 )";
                 commands.Add(routeStopsData);
-                string dropNFCD = @"DROP TABLE IF EXISTS NonFareCardData";
-                commands.Add(dropNFCD);
-                string nonFareCardData = @"CREATE TABLE NonFareCardData (
+                //string dropNFCD = @"DROP TABLE IF EXISTS NonFareCardData";
+                //commands.Add(dropNFCD);
+                string nonFareCardData = @"CREATE TABLE IF NOT EXISTS NonFareCardData (
 	                nfc_id integer PRIMARY KEY AUTOINCREMENT,
 	                path_id integer,
 	                start_date text,
@@ -132,9 +132,9 @@ namespace KTReports
 	                file_id integer
                 )";
                 commands.Add(nonFareCardData);
-                string dropFCD = @"DROP TABLE IF EXISTS FareCardData";
-                commands.Add(dropFCD);
-                string fareCardData = @"CREATE TABLE FareCardData (
+                //string dropFCD = @"DROP TABLE IF EXISTS FareCardData";
+                //commands.Add(dropFCD);
+                string fareCardData = @"CREATE TABLE IF NOT EXISTS FareCardData (
 	                fc_id integer PRIMARY KEY AUTOINCREMENT,
 	                path_id integer,
 	                start_date text,
@@ -212,8 +212,6 @@ namespace KTReports
                 command.Parameters.Add(new SQLiteParameter("@import_date", importDate));
                 command.ExecuteNonQuery();
             }
-            //DeleteImports deleteImports = DeleteImports.GetDeleteImports();
-            //deleteImports.SetupPage();
             // Return file id here
             return sqliteConnection.LastInsertRowId;
         }

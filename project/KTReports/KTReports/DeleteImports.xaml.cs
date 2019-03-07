@@ -32,9 +32,9 @@ namespace KTReports
             dataTable = new DataTable();
             dataTable.Columns.Add(new DataColumn("File Name", typeof(string)));
             dataTable.Columns.Add(new DataColumn("Date Imported", typeof(string)));
-            dataTable.Columns.Add(new DataColumn("Directory Location", typeof(string)));
             dataTable.Columns.Add(new DataColumn("File Type", typeof(string)));
             dataTable.Columns.Add(new DataColumn("File ID", typeof(string)));
+            dataTable.Columns.Add(new DataColumn("Directory Location", typeof(string)));
             ImportedInfoGrid.ItemsSource = dataTable.DefaultView;
             SetupPage();
         }
@@ -54,18 +54,21 @@ namespace KTReports
             // Query the database for a list of imported files
             DatabaseManager databaseManager = DatabaseManager.GetDBManager();
             importedFiles = databaseManager.GetImportedFiles();
-            // Remove existing radio buttons and add new radio buttons to the ListOfImports
-            RemoveRadioButtons();
-            AddRadioButtons();
-            // Set/Reset selected file to null so that we don't try to delete an already deleted file
-            selectedFile = null;
-            FileInfoTitle.Text = "No File Selected";
+            this.Dispatcher.Invoke(() =>
+            {
+                // Remove existing radio buttons and add new radio buttons to the ListOfImports
+                RemoveRadioButtons();
+                AddRadioButtons();
+                // Set/Reset selected file to null so that we don't try to delete an already deleted file
+                selectedFile = null;
+                FileInfoTitle.Text = "No File Selected";
+            });
             dataTable.Clear();
         }
 
         private void RemoveRadioButtons()
         {
-            ListOfImports.Items.Clear();
+            this.Dispatcher.Invoke(() => ListOfImports.Items.Clear());
         }
 
         private void AddRadioButtons()
@@ -103,9 +106,9 @@ namespace KTReports
             var dataRow = dataTable.NewRow();
             dataRow[0] = file["name"];
             dataRow[1] = file["import_date"];
-            dataRow[2] = file["dir_location"];
-            dataRow[3] = file["file_type"].ToString();
-            dataRow[4] = file["file_id"];
+            dataRow[2] = file["file_type"].ToString();
+            dataRow[3] = file["file_id"];
+            dataRow[4] = file["dir_location"];
             dataTable.Rows.Add(dataRow);
         }
 
