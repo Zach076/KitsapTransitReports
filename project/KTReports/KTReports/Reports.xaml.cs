@@ -325,9 +325,9 @@ namespace KTReports
                     routeWeekCalculations.Add(calculatedWeek);
                     var calculatedSat = new Dictionary<string, object>();
                     routeSatCalculations.Add(calculatedSat);
-                    calculatedWeek.Add("ROUTE NAME", route["route_name"]);
+                    calculatedWeek.Add("ROUTE NAME", route["route_name"].ToUpper());
                     calculatedWeek.Add("ROUTE NO.", routeId);
-                    calculatedSat.Add("ROUTE NAME", route["route_name"]);
+                    calculatedSat.Add("ROUTE NAME", route["route_name"].ToUpper());
                     calculatedSat.Add("ROUTE NO.", routeId);
                     // Num trips on normal weekdays
                     //Console.WriteLine("NUM TRIPS WEEK: " + route["num_trips_week"]);
@@ -433,7 +433,7 @@ namespace KTReports
                     {
                         xlWeeksheet.Cells[rowWeek, i + 1].Formula = "=Sum(" + xlWeeksheet.Cells[rowWeekStart, i + 1].Address
                                                                     + ":" + xlWeeksheet.Cells[rowWeek - 1, i + 1].Address + ")";
-                        xlWEndsheet.Cells[rowWeek, i + 1].Formula = "=Sum(" + xlWEndsheet.Cells[rowSatStart, i + 1].Address
+                        xlWEndsheet.Cells[rowSat, i + 1].Formula = "=Sum(" + xlWEndsheet.Cells[rowSatStart, i + 1].Address
                                                                         + ":" + xlWEndsheet.Cells[rowSat - 1, i + 1].Address + ")";
                     }
                 }
@@ -467,7 +467,7 @@ namespace KTReports
                 totalPassengersS += Convert.ToInt32(route["TOTAL PASSENGERS"]);
                 totalHoursS += Convert.ToDouble(route["REVENUE HOURS"]);
             }
-            xlWEndsheet.Cells[rowWeek, col] = Math.Round(totalPassengersS / totalHoursS, 1);
+            xlWEndsheet.Cells[rowSat, col] = Math.Round(totalPassengersS / totalHoursS, 1);
         }
 
         private void WritePassengersPerMile(Microsoft.Office.Interop.Excel.Worksheet xlWeeksheet, Microsoft.Office.Interop.Excel.Worksheet xlWEndsheet, 
@@ -488,7 +488,7 @@ namespace KTReports
                 totalPassengersS += Convert.ToInt32(route["TOTAL PASSENGERS"]);
                 totalRevenueMilesS += Convert.ToDouble(route["REVENUE MILES"]);
             }
-            xlWEndsheet.Cells[rowWeek, col] = Math.Round(totalPassengersS / totalRevenueMilesS, 1);
+            xlWEndsheet.Cells[rowSat, col] = Math.Round(totalPassengersS / totalRevenueMilesS, 1);
         }
 
         private void RefreshReportsPanel()

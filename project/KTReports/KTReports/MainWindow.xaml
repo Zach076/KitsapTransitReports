@@ -12,13 +12,13 @@
         <DockPanel DockPanel.Dock="Top">
             <Menu>
                 <MenuItem Header="_File">
-                    <MenuItem Header="Import Files" 
+                    <MenuItem Header="Import Data File" 
                               Margin="0,5,0,5"
                               Click="ImportFile"/>
                     <MenuItem Header="Delete Imports"
                               Margin="0,5,0,5"
                               Click="OpenDeleteFiles"/>
-                    <MenuItem Header="Manually Add Data"
+                    <MenuItem Header="Add Data (Manual)"
                               Margin="0,5,0,5"
                               Click="OpenManualAddData"/>
                     <MenuItem Header="Close" 
@@ -28,19 +28,24 @@
                 <MenuItem Header="Create Report"
                           Margin="0,5,0,5"
                           Click="OpenReportsPage"/>
-                <MenuItem Header="View Visualizations" Margin="0,5,0,5"/>
-                <MenuItem Header="Update Route Info" 
+                <MenuItem Header="Visualize Data" Margin="0,5,0,5"/>
+                <MenuItem Header="Modify Routes">
+                    <MenuItem Header="Import Routes"
                           Margin="0,5,0,5"
-                          Click="editPage"/>
-                <MenuItem Header="Add Route"
+                          Click="ImportRoutes"/>
+                    <MenuItem Header="Add Routes (Manual)"
                           Margin="0,5,0,5"
                           Click="addRoute"/>
-                <MenuItem Header="Delete Route" Margin="0,5,0,5"
+                    <MenuItem Header="Update Route Info" 
+                          Margin="0,5,0,5"
+                          Click="editPage"/>
+                    <MenuItem Header="Delete Routes" Margin="0,5,0,5"
                           Click="deleteRoute"/>
-                <MenuItem Header="Update Route Stop" Margin="0,5,0,5"
+                    <MenuItem Header="Update Stops" Margin="0,5,0,5"
                           Click="updateStop"/>
-                <MenuItem Header="Add Route Stop" Margin="0,5,0,5"
+                    <MenuItem Header="Add Route Stops" Margin="0,5,0,5"
                           Click="addStop"/>
+                </MenuItem>
                 <MenuItem Header="Help" Margin="0,5,0,5"/>
             </Menu>
         </DockPanel>

@@ -20,23 +20,7 @@ namespace KTReports
         protected override void OnStartup(StartupEventArgs e)
         {
             // Gets a singleton for database manager
-            databaseManager = DatabaseManager.GetDBManager();
-            using (var reader = new StreamReader("routes.json"))
-            {
-                string json = reader.ReadToEnd();
-                var jss = new JavaScriptSerializer();
-                var routes = jss.Deserialize<List<Dictionary<string, string>>>(json);
-                foreach (var route in routes)
-                {
-                    Console.WriteLine($"Route name: {route["route_name"]}");
-                    databaseManager.InsertPath(route);
-                }
-            }
-           /* string json = 
-                @"[
-                    {""route_name"": ""ABC""},
-                    {""route_name"": ""DEF""}
-                 ]";*/
+            //databaseManager = DatabaseManager.GetDBManager();
             // Run tests on insertions and queries for a test database
             //TestDB test = new TestDB();
             //test.TestInsertions();
