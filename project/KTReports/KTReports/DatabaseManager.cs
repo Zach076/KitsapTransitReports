@@ -300,6 +300,33 @@ namespace KTReports
             return true;
         }
 
+        public bool InsertBulkFCD(List<Dictionary<string, string>> bulkFCD)
+        {
+            var command = new SQLiteCommand("begin", sqliteConnection);
+            command.ExecuteNonQuery();
+            foreach (var keyValuePair in bulkFCD)
+            {
+                InsertFCD(keyValuePair);
+            }
+            command = new SQLiteCommand("end", sqliteConnection);
+            command.ExecuteNonQuery();
+            command.Dispose();
+            return true;
+        }
+
+        public bool InsertBulkNFC(List<Dictionary<string, string>> bulkNFC) {
+            var command = new SQLiteCommand("begin", sqliteConnection);
+            command.ExecuteNonQuery();
+            foreach (var keyValuePair in bulkNFC)
+            {
+                InsertNFC(keyValuePair);
+            }
+            command = new SQLiteCommand("end", sqliteConnection);
+            command.ExecuteNonQuery();
+            command.Dispose();
+            return true;
+        }
+
         // Insert non-fare card data into the database
         // Returns bool based on the success of the operation
         public bool InsertNFC(Dictionary<string, string> keyValuePairs)
@@ -471,6 +498,20 @@ namespace KTReports
                 }
                 command.ExecuteNonQuery();
             }
+            return true;
+        }
+
+        public bool InsertBulkPaths(List<Dictionary<string, string>> bulkPaths)
+        {
+            var command = new SQLiteCommand("begin", sqliteConnection);
+            command.ExecuteNonQuery();
+            foreach (var keyValuePair in bulkPaths)
+            {
+                InsertPath(keyValuePair);
+            }
+            command = new SQLiteCommand("end", sqliteConnection);
+            command.ExecuteNonQuery();
+            command.Dispose();
             return true;
         }
 

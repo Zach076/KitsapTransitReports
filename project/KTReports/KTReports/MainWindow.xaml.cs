@@ -157,7 +157,6 @@ namespace KTReports
         private bool ParseFileData(string fileName)
         {
             DateTime dateTime = DateTime.Now;
-            Dictionary<string, string> dict = new Dictionary<string, string>();
             LinkedList<string> colNames = new LinkedList<string>();
             DatabaseManager databaseManager = DatabaseManager.GetDBManager();
             long? file_id = 0;
@@ -179,6 +178,7 @@ namespace KTReports
             }
             int sheetCount = xlWorkbook.Sheets.Count;
             //Loop through each sheet in the file
+            var bulkData = new List<Dictionary<string, string>>();
             for (int sheetNum = 1; sheetNum <= sheetCount; sheetNum++)
             {
                 Microsoft.Office.Interop.Excel._Worksheet xlWorksheet = xlWorkbook.Sheets[sheetNum];
@@ -221,6 +221,7 @@ namespace KTReports
 
                     while (i <= rowLim)
                     {
+                        Dictionary<string, string> dict = new Dictionary<string, string>();
                         while (j <= colLim)
                         {
                             //Debug.WriteLine("i:" + i + " j:" + j);
@@ -296,16 +297,7 @@ namespace KTReports
                             dict.Add("is_weekday", isWeekday.ToString());
                             dict.Add("file_id", file_id.ToString());
                             //Debug.WriteLine("insert");
-                            if (isORCA)
-                            {
-                                databaseManager.InsertFCD(dict);
-                            }
-                            else
-                            {
-                                databaseManager.InsertNFC(dict);
-                            }
-
-                            dict.Clear();
+                            bulkData.Add(dict);
                             key = colNames.First;
                         }
                         else if (inTable == 1)
@@ -317,6 +309,14 @@ namespace KTReports
                         i++;
                     }
                 }
+            }
+            if (isORCA)
+            {
+                databaseManager.InsertBulkFCD(bulkData);
+            }
+            else
+            {
+                databaseManager.InsertBulkNFC(bulkData);
             }
             if (isORCA)
             {
@@ -341,23 +341,28 @@ namespace KTReports
             var importRoutesDialog = new OpenFileDialog();
             importRoutesDialog.Filter = "Json files | *.json";
             importRoutesDialog.ShowDialog();
+            if (string.IsNullOrEmpty(importRoutesDialog.FileName))
+            {
+                return;
+            }
             var databaseManager = DatabaseManager.GetDBManager();
             KTProgressBar.IsIndeterminate = true;
             StatusBarText.Text = "Importing Routes...";
             try
             {
                 var thread = new System.Threading.Thread(delegate() {
-                    using (var reader = new StreamReader(importRoutesDialog.FileName))
+                    var bulkPaths = new List<Dictionary<string, string>>();
+                    var reader = new StreamReader(importRoutesDialog.FileName);
+                    string json = reader.ReadToEnd();
+                    var jss = new JavaScriptSerializer();
+                    var routes = jss.Deserialize<List<Dictionary<string, string>>>(json);
+                    foreach (var route in routes)
                     {
-                        string json = reader.ReadToEnd();
-                        var jss = new JavaScriptSerializer();
-                        var routes = jss.Deserialize<List<Dictionary<string, string>>>(json);
-                        foreach (var route in routes)
-                        {
-                            Console.WriteLine($"Route name: {route["route_name"]}");
-                            databaseManager.InsertPath(route);
-                        }
+                        Console.WriteLine($"Route name: {route["route_name"]}");
+                        bulkPaths.Add(route);
                     }
+                    reader.Dispose();
+                    databaseManager.InsertBulkPaths(bulkPaths);
                     Dispatcher.Invoke(() =>
                     {
                         KTProgressBar.IsIndeterminate = false;
