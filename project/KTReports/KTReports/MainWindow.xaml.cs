@@ -313,17 +313,11 @@ namespace KTReports
             if (isORCA)
             {
                 databaseManager.InsertBulkFCD(bulkData);
-            }
-            else
-            {
-                databaseManager.InsertBulkNFC(bulkData);
-            }
-            if (isORCA)
-            {
                 ImportKnownRoutes();
             }
             else
             {
+                databaseManager.InsertBulkNFC(bulkData);
                 ImportKnownRoutesNFC();
             }
             //cleanup workbook
