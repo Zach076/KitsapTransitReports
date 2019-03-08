@@ -20,6 +20,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Controls.Primitives;
+using System.Web.Script.Serialization;
 
 namespace KTReports
 {
@@ -85,18 +86,6 @@ namespace KTReports
         private void addStop(object sender, RoutedEventArgs e)
         {
             Main.Content = new addStop();
-        }
-
-        [STAThread]
-        private void ImportRoutes(object sender, RoutedEventArgs e)
-        {
-            string fileName = "";
-            OpenFileDialog fileDia = new OpenFileDialog();
-            fileDia.Title = "Select a file to import";
-            fileDia.FilterIndex = 2;
-            fileDia.ShowDialog();
-            fileName = fileDia.FileName;
-            
         }
 
         private void ImportKnownRoutes()
@@ -345,6 +334,44 @@ namespace KTReports
             xlApp.Quit();
             Marshal.ReleaseComObject(xlApp);
             return true;
+        }
+
+        private void ImportRoutes(object sender, RoutedEventArgs e)
+        {
+            var importRoutesDialog = new OpenFileDialog();
+            importRoutesDialog.Filter = "Json files | *.json";
+            importRoutesDialog.ShowDialog();
+            var databaseManager = DatabaseManager.GetDBManager();
+            KTProgressBar.IsIndeterminate = true;
+            StatusBarText.Text = "Importing Routes...";
+            try
+            {
+                var thread = new System.Threading.Thread(delegate() {
+                    using (var reader = new StreamReader(importRoutesDialog.FileName))
+                    {
+                        string json = reader.ReadToEnd();
+                        var jss = new JavaScriptSerializer();
+                        var routes = jss.Deserialize<List<Dictionary<string, string>>>(json);
+                        foreach (var route in routes)
+                        {
+                            Console.WriteLine($"Route name: {route["route_name"]}");
+                            databaseManager.InsertPath(route);
+                        }
+                    }
+                    Dispatcher.Invoke(() =>
+                    {
+                        KTProgressBar.IsIndeterminate = false;
+                        StatusBarText.Text = string.Empty;
+                    });
+                });
+                thread.Start();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Unable to open {importRoutesDialog.FileName}", "Import Routes Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                KTProgressBar.IsIndeterminate = false;
+                StatusBarText.Text = string.Empty;
+            }
         }
 
         private void CreateReport(object sender, RoutedEventArgs e)
