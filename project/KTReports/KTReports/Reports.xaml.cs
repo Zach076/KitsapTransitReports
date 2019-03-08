@@ -374,6 +374,7 @@ namespace KTReports
                     calculatedSat.Add("PASSENGERS PER HOUR", passPerHourS);
 
                     // Write values
+                    bool includeSat = routeDistanceSat > 0;
                     for (int i = 0; i < dataPoints.Count; i++)
                     {
                         var column = dataPoints[i];
@@ -384,15 +385,24 @@ namespace KTReports
                         if (calculatedWeek[column] is double)
                         {
                             xlWeeksheet.Cells[rowWeek, i + 1] = Math.Round((double)calculatedWeek[column], 1);
-                            xlWEndsheet.Cells[rowSat, i + 1] = Math.Round((double)calculatedSat[column], 1);
+                            if (includeSat)
+                            {
+                                xlWEndsheet.Cells[rowSat, i + 1] = Math.Round((double)calculatedSat[column], 1);
+                            }
                         }
                         else
                         {
                             xlWeeksheet.Cells[rowWeek, i + 1] = calculatedWeek[column];
-                            xlWEndsheet.Cells[rowSat, i + 1] = calculatedSat[column];
+                            if (includeSat)
+                            {
+                                xlWEndsheet.Cells[rowSat, i + 1] = calculatedSat[column];
+                            }
                         }
                     }
-                    rowSat++;
+                    if (includeSat)
+                    {
+                        rowSat++;
+                    }
                     rowWeek++;
                 }
                 rowSat++;
