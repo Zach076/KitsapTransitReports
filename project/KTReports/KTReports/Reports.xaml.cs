@@ -303,7 +303,10 @@ namespace KTReports
                 }
                 rowSat++;
                 rowWeek++;
-
+                int rowSatStart = rowSat;
+                int rowWeekStart = rowWeek;
+                var routeWeekCalculations = new List<Dictionary<string, object>>();
+                var routeSatCalculations = new List<Dictionary<string, object>>();
                 foreach (var route in routes)
                 {
                     int routeId = Convert.ToInt32(route["assigned_route_id"]);
@@ -319,7 +322,9 @@ namespace KTReports
                     weekRoutes.Add(routeId, routeTotalWeek);
                     satRoutes.Add(routeId, routeTotalSat);
                     var calculatedWeek = new Dictionary<string, object>();
+                    routeWeekCalculations.Add(calculatedWeek);
                     var calculatedSat = new Dictionary<string, object>();
+                    routeSatCalculations.Add(calculatedSat);
                     calculatedWeek.Add("ROUTE NAME", route["route_name"]);
                     calculatedWeek.Add("ROUTE NO.", routeId);
                     calculatedSat.Add("ROUTE NAME", route["route_name"]);
@@ -405,8 +410,37 @@ namespace KTReports
                     }
                     rowWeek++;
                 }
-                rowSat++;
-                rowWeek++;
+                xlWeeksheet.Cells[rowWeek, 2] = $"TOTAL {district.ToUpper()}";
+                xlWEndsheet.Cells[rowSat, 2] = $"TOTAL {district.ToUpper()}";
+                // Insert totals for district
+                for (int i = 2; i < dataPoints.Count; i++)
+                {
+                    var column = dataPoints[i];
+                    if (column.Equals("ROUTE NO.") || column.Equals("ROUTE NAME"))
+                    {
+                        continue;
+                    }
+                    else if (column.Equals("PASSENGERS PER MILE"))
+                    {
+                        WritePassengersPerMile(xlWeeksheet, xlWEndsheet, rowWeek, rowSat, i + 1, routeWeekCalculations, routeSatCalculations);
+                        
+                    }
+                    else if (column.Equals("PASSENGERS PER HOUR"))
+                    {
+                        WritePassengersPerHour(xlWeeksheet, xlWEndsheet, rowWeek, rowSat, i + 1, routeWeekCalculations, routeSatCalculations);
+                    }
+                    else
+                    {
+                        xlWeeksheet.Cells[rowWeek, i + 1].Formula = "=Sum(" + xlWeeksheet.Cells[rowWeekStart, i + 1].Address
+                                                                    + ":" + xlWeeksheet.Cells[rowWeek - 1, i + 1].Address + ")";
+                        xlWEndsheet.Cells[rowWeek, i + 1].Formula = "=Sum(" + xlWEndsheet.Cells[rowSatStart, i + 1].Address
+                                                                        + ":" + xlWEndsheet.Cells[rowSat - 1, i + 1].Address + ")";
+                    }
+                }
+                xlWeeksheet.Cells[rowWeek, 1].EntireRow.Font.Bold = true;
+                xlWEndsheet.Cells[rowSat, 1].EntireRow.Font.Bold = true;
+                rowSat += 2;
+                rowWeek += 2;
             }
 
             xlWeeksheet.Columns.AutoFit();
@@ -414,6 +448,47 @@ namespace KTReports
             xlWorkbook.SaveAs(saveLocation);
             xlWorkbook.Close();
             excel.Quit();
+        }
+        private void WritePassengersPerHour(Microsoft.Office.Interop.Excel.Worksheet xlWeeksheet, Microsoft.Office.Interop.Excel.Worksheet xlWEndsheet,
+            int rowWeek, int rowSat, int col, List<Dictionary<string, object>> routeWeekCalculations, List<Dictionary<string, object>> routeSatCalculations)
+        {
+            int totalPassengersW = 0;
+            double totalHoursW = 0;
+            foreach (var route in routeWeekCalculations)
+            {
+                totalPassengersW += Convert.ToInt32(route["TOTAL PASSENGERS"]);
+                totalHoursW += Convert.ToDouble(route["REVENUE HOURS"]);
+            }
+            xlWeeksheet.Cells[rowWeek, col] = Math.Round(totalPassengersW / totalHoursW, 1);
+            int totalPassengersS = 0;
+            double totalHoursS = 0;
+            foreach (var route in routeSatCalculations)
+            {
+                totalPassengersS += Convert.ToInt32(route["TOTAL PASSENGERS"]);
+                totalHoursS += Convert.ToDouble(route["REVENUE HOURS"]);
+            }
+            xlWEndsheet.Cells[rowWeek, col] = Math.Round(totalPassengersS / totalHoursS, 1);
+        }
+
+        private void WritePassengersPerMile(Microsoft.Office.Interop.Excel.Worksheet xlWeeksheet, Microsoft.Office.Interop.Excel.Worksheet xlWEndsheet, 
+            int rowWeek, int rowSat, int col, List<Dictionary<string, object>> routeWeekCalculations, List<Dictionary<string, object>>routeSatCalculations)
+        {
+            int totalPassengersW = 0;
+            double totalRevenueMilesW = 0;
+            foreach (var route in routeWeekCalculations)
+            {
+                totalPassengersW += Convert.ToInt32(route["TOTAL PASSENGERS"]);
+                totalRevenueMilesW += Convert.ToDouble(route["REVENUE MILES"]);
+            }
+            xlWeeksheet.Cells[rowWeek, col] = Math.Round(totalPassengersW / totalRevenueMilesW, 1);
+            int totalPassengersS = 0;
+            double totalRevenueMilesS = 0;
+            foreach (var route in routeSatCalculations)
+            {
+                totalPassengersS += Convert.ToInt32(route["TOTAL PASSENGERS"]);
+                totalRevenueMilesS += Convert.ToDouble(route["REVENUE MILES"]);
+            }
+            xlWEndsheet.Cells[rowWeek, col] = Math.Round(totalPassengersS / totalRevenueMilesS, 1);
         }
 
         private void RefreshReportsPanel()

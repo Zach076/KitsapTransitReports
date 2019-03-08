@@ -634,11 +634,11 @@ namespace KTReports
                         {
                             nfcTotal += Convert.ToInt32(ridershipStr);
                         }
-                        string nonRidershipStr = values["nfc_non_ridership"];
+                        /*string nonRidershipStr = values["nfc_non_ridership"];
                         if (!string.IsNullOrEmpty(nonRidershipStr))
                         {
                             nfcTotal += Convert.ToInt32(nonRidershipStr);
-                        }
+                        }*/
                     }
                 }
             }
