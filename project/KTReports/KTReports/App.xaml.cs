@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Script.Serialization;
 using System.Windows;
 
 namespace KTReports
@@ -18,7 +20,23 @@ namespace KTReports
         protected override void OnStartup(StartupEventArgs e)
         {
             // Gets a singleton for database manager
-            //databaseManager = DatabaseManager.GetDBManager();
+            databaseManager = DatabaseManager.GetDBManager();
+            using (var reader = new StreamReader("routes.json"))
+            {
+                string json = reader.ReadToEnd();
+                var jss = new JavaScriptSerializer();
+                var routes = jss.Deserialize<List<Dictionary<string, string>>>(json);
+                foreach (var route in routes)
+                {
+                    Console.WriteLine($"Route name: {route["route_name"]}");
+                    databaseManager.InsertPath(route);
+                }
+            }
+           /* string json = 
+                @"[
+                    {""route_name"": ""ABC""},
+                    {""route_name"": ""DEF""}
+                 ]";*/
             // Run tests on insertions and queries for a test database
             //TestDB test = new TestDB();
             //test.TestInsertions();

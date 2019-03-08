@@ -139,8 +139,34 @@ namespace KTReports
             Interlocked.Increment(ref numReportsGenerating);
             MainWindow.progressBar.IsIndeterminate = true;
             MainWindow.statusTextBlock.Text = "Generating Report...";
-            var thread = new Thread(()=>CreateReport(reportRange, districts, dataPoints, saveFileDialog.FileName));
+            var thread = new Thread(()=>CreateReportThread(reportRange, districts, dataPoints, saveFileDialog.FileName));
             thread.Start();
+        }
+
+        private void CreateReportThread(List<DateTime> reportRange, List<string> districts, List<string> dataPoints, string saveLocation)
+        {
+            try
+            {
+                CreateReport(reportRange, districts, dataPoints, saveLocation);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show($"Unable to save report {saveLocation}", "Report Generation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                // Refresh the report history panel on the UI thread
+                Dispatcher.Invoke(() =>
+                {
+                    RefreshReportsPanel();
+                    Interlocked.Decrement(ref numReportsGenerating);
+                    if (numReportsGenerating == 0)
+                    {
+                        MainWindow.progressBar.IsIndeterminate = false;
+                        MainWindow.statusTextBlock.Text = string.Empty;
+                    }
+                });
+            }
         }
 
         private void CreateReport(List<DateTime> reportRange, List<string> districts, List<string> dataPoints, string saveLocation)
@@ -316,9 +342,9 @@ namespace KTReports
                     // Get revenue miles for a route (distance of trip * num trips during week (regardless of holiday or not))
                     double routeDistanceWeek = Convert.ToDouble(route["distance_week"]);
                     double routeDistanceSat = Convert.ToDouble(route["distance_sat"]);
-                    double revenueMilesWeek = routeDistanceWeek * (numTripsWeek + numTripsHolidaysW);
+                    double revenueMilesWeek = routeDistanceWeek * (weekdayCount + weekdayHolidayCount);
                     calculatedWeek.Add("REVENUE MILES", revenueMilesWeek);
-                    double revenueMilesSat = routeDistanceSat * (numTripsSat + numTripsHolidaysS);
+                    double revenueMilesSat = routeDistanceSat * (saturdayCount + saturdayHolidayCount);
                     calculatedSat.Add("REVENUE MILES", revenueMilesSat);
 
                     // Get revenue hours (num hours on weekday * number of weekdays excluding holidays)
@@ -378,17 +404,6 @@ namespace KTReports
             xlWorkbook.SaveAs(saveLocation);
             xlWorkbook.Close();
             excel.Quit();
-            // Refresh the report history panel on the UI thread
-            this.Dispatcher.Invoke(()=>
-            {
-                RefreshReportsPanel();
-                Interlocked.Decrement(ref numReportsGenerating);
-                if (numReportsGenerating == 0)
-                {
-                    MainWindow.progressBar.IsIndeterminate = false;
-                    MainWindow.statusTextBlock.Text = string.Empty;
-                }
-            });
         }
 
         private void RefreshReportsPanel()
