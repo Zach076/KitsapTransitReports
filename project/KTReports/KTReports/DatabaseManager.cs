@@ -634,11 +634,11 @@ namespace KTReports
                         {
                             nfcTotal += Convert.ToInt32(ridershipStr);
                         }
-                        string nonRidershipStr = values["nfc_non_ridership"];
+                        /*string nonRidershipStr = values["nfc_non_ridership"];
                         if (!string.IsNullOrEmpty(nonRidershipStr))
                         {
                             nfcTotal += Convert.ToInt32(nonRidershipStr);
-                        }
+                        }*/
                     }
                 }
             }
@@ -879,7 +879,7 @@ namespace KTReports
             try
             {
                
-                string updateSQL = "DELETE FROM Routes WHERE path_id = " + "'" + route + "'";
+                string updateSQL = "DELETE FROM Routes WHERE assigned_route_id = " + "'" + route + "'";
                 using (SQLiteCommand command = new SQLiteCommand(updateSQL, sqliteConnection))
                 {
                     command.ExecuteNonQuery();
@@ -910,7 +910,7 @@ namespace KTReports
             try
             {
                 
-                string updateSQL = "DELETE FROM Routes WHERE path_id >= 0";
+                string updateSQL = "DELETE FROM Routes WHERE assigned_route_id >= 0";
                 using (SQLiteCommand command = new SQLiteCommand(updateSQL, sqliteConnection))
                 {
                     command.ExecuteNonQuery();
