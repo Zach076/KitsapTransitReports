@@ -361,6 +361,7 @@ namespace KTReports
                     {
                         KTProgressBar.IsIndeterminate = false;
                         StatusBarText.Text = string.Empty;
+                        MessageBox.Show($"Successfully imported routes from {importRoutesDialog.FileName}", "Import Routes Successful", MessageBoxButton.OK, MessageBoxImage.Asterisk);
                     });
                 });
                 thread.Start();
