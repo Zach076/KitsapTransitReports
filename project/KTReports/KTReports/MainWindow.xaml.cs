@@ -65,17 +65,17 @@ namespace KTReports
         
         private void editPage(object sender, RoutedEventArgs e)
         {
-            Main.Content = new updateRouteInfo();
+            Main.Content = new UpdateRouteInfo();
         }
 
         private void addRoute(object sender, RoutedEventArgs e)
         {
-            Main.Content = new addRoute();
+            Main.Content = new AddRoute();
         }
 
         private void deleteRoute(object sender, RoutedEventArgs e)
         {
-            Main.Content = new deleteRoute();
+            Main.Content = new DeleteRoute();
         }
 
         private void updateStop(object sender, RoutedEventArgs e)
@@ -85,7 +85,7 @@ namespace KTReports
 
         private void addStop(object sender, RoutedEventArgs e)
         {
-            Main.Content = new addStop();
+            Main.Content = new AddStop();
         }
 
         private void ImportKnownRoutes()
