@@ -31,11 +31,12 @@ namespace KTReports
 
         private void ConnectToDB(string fileName)
         {
-            sqliteConnection = new SQLiteConnection("Data Source=" + fileName + ".sqlite3");
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            sqliteConnection = new SQLiteConnection("Data Source=" + appDataPath + "\\" + fileName + ".sqlite3");
             // Create the database if it doesn't exist
-            if (!File.Exists("./" + fileName + ".sqlite3"))
+            if (!File.Exists(appDataPath + "\\" + fileName + ".sqlite3"))
             {
-                SQLiteConnection.CreateFile(fileName + ".sqlite3");
+                SQLiteConnection.CreateFile(appDataPath + "\\" + fileName + ".sqlite3");
             }
             sqliteConnection.Open();
             CreateTables();
