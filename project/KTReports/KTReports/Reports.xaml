@@ -27,9 +27,11 @@
                             <CheckBox IsChecked="True" Click="OnDataPointClick">Route number</CheckBox>
                             <CheckBox IsChecked="True" Click="OnDataPointClick">Route name</CheckBox>
                             <CheckBox IsChecked="True" Click="OnDataPointClick">Total passengers</CheckBox>
+                            <CheckBox IsChecked="True" Click="OnDataPointClick">Number of Trips</CheckBox>
                         </StackPanel>
                         <StackPanel Name="DataPointsRight" Grid.Column="1">
                             <CheckBox IsChecked="True" Click="OnDataPointClick">Revenue miles</CheckBox>
+                            <CheckBox IsChecked="True" Click="OnDataPointClick">Revenue hours</CheckBox>
                             <CheckBox IsChecked="True" Click="OnDataPointClick">Passengers per mile</CheckBox>
                             <CheckBox IsChecked="True" Click="OnDataPointClick">Passengers per hour</CheckBox>
                         </StackPanel>
@@ -59,10 +61,8 @@
         <DockPanel Grid.Column="1">
             <Rectangle VerticalAlignment="Stretch" Width="1" Stroke="Gray" Margin="3"/>
             <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="5" FontSize="16">Past Reports</TextBlock>
-            <DataGrid Name="PastReportsGrid" DockPanel.Dock="Top">
-                <!-- TODO: Fill in with past reports-->
-            </DataGrid>
-            <Button DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="100" Name="OpenReportButton" Margin="0,0,10,10">Open Report</Button>
+            <ListBox DockPanel.Dock="Top" Name="PastReportsList" HorizontalAlignment="Stretch"/>
+            <Button DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="100" Name="OpenReportButton" Margin="0,0,10,10" Click="OpenReportClick">Open Report</Button>
         </DockPanel>
     </Grid>
 </Page>

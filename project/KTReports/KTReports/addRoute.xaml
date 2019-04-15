@@ -20,26 +20,28 @@
         <TextBox x:Name="startTextBox" Height="23" Canvas.Left="234" TextWrapping="Wrap" Canvas.Top="124" Width="120"/>
         <TextBox x:Name="routeNameTextBox" Height="24" Canvas.Left="234" TextWrapping="Wrap" Canvas.Top="192" Width="120"/>
         <TextBox x:Name="districtTextBox" Height="22" Canvas.Left="234" TextWrapping="Wrap" Canvas.Top="256" Width="120"/>
-        <TextBox x:Name="distanceTextBox" Height="23" Canvas.Left="234" TextWrapping="Wrap" Canvas.Top="320" Width="120"/>
-        <TextBox x:Name="tripsSaturdayTextBox" Height="23" Canvas.Left="726" TextWrapping="Wrap" Canvas.Top="68" Width="120"/>
-        <TextBox x:Name="tripsHolidayTextBox" Height="23" Canvas.Left="726" TextWrapping="Wrap" Canvas.Top="124" Width="120"/>
-        <TextBox x:Name="weekdayHoursTextBox" Height="23" Canvas.Left="726" TextWrapping="Wrap" Canvas.Top="192" Width="120"/>
-        <TextBox x:Name="saturdayHoursTextBox" Height="23" Canvas.Left="726" TextWrapping="Wrap" Canvas.Top="256" Width="120"/>
-        <TextBox x:Name="holidayHoursTextBox" Height="23" Canvas.Left="726" TextWrapping="Wrap" Canvas.Top="320" Width="120"/>
-        <TextBox x:Name="tripsWeekTextBox" Height="23" Canvas.Left="234" TextWrapping="Wrap" Canvas.Top="382" Width="120"/>
+        <TextBox x:Name="distanceWeekTextBox" Height="24" Canvas.Left="234" TextWrapping="Wrap" Canvas.Top="314" Width="120"/>
+        <TextBox x:Name="distanceSatTextBox" Height="23" Canvas.Left="234" TextWrapping="Wrap" Canvas.Top="380" Width="120"/>
+        <TextBox x:Name="tripsSaturdayTextBox" Height="23" Canvas.Left="677" TextWrapping="Wrap" Canvas.Top="120" Width="120"/>
+        <TextBox x:Name="tripsHolidayTextBox" Height="23" Canvas.Left="677" TextWrapping="Wrap" Canvas.Top="176" Width="120"/>
+        <TextBox x:Name="weekdayHoursTextBox" Height="23" Canvas.Left="677" TextWrapping="Wrap" Canvas.Top="244" Width="120"/>
+        <TextBox x:Name="saturdayHoursTextBox" Height="23" Canvas.Left="677" TextWrapping="Wrap" Canvas.Top="308" Width="120"/>
+        <TextBox x:Name="holidayHoursTextBox" Height="23" Canvas.Left="677" TextWrapping="Wrap" Canvas.Top="372" Width="120"/>
+        <TextBox x:Name="tripsWeekTextBox" Height="23" Canvas.Left="677" TextWrapping="Wrap" Canvas.Top="62" Width="120"/>
         <TextBlock Canvas.Left="149" TextWrapping="Wrap" Text="Route ID: " Canvas.Top="68" Height="23" Width="80" TextAlignment="Center"/>
         <TextBlock Canvas.Left="149" TextWrapping="Wrap" Text="Start Date:" Canvas.Top="124" Height="23" Width="80" TextAlignment="Center"/>
         <TextBlock Canvas.Left="149" TextWrapping="Wrap" Canvas.Top="192" Height="23" Width="80" TextAlignment="Center" Text="Route Name:"/>
         <TextBlock Canvas.Left="149" TextWrapping="Wrap" Canvas.Top="256" Height="23" Width="80" TextAlignment="Center" Text="District:"/>
-        <TextBlock Canvas.Left="149" TextWrapping="Wrap" Canvas.Top="320" Height="23" Width="80" TextAlignment="Center" Text="Distance:"/>
-        <TextBlock Canvas.Left="149" TextWrapping="Wrap" Canvas.Top="382" Height="23" Width="80" TextAlignment="Center" Text="Trips/week"/>
-        <TextBlock Canvas.Left="641" TextWrapping="Wrap" Canvas.Top="68" Height="23" Width="80" TextAlignment="Center" Text="Trips/Saturday:"/>
-        <TextBlock Canvas.Left="641" TextWrapping="Wrap" Canvas.Top="124" Height="23" Width="80" TextAlignment="Center" Text="Trips/Holiday:"/>
-        <TextBlock Canvas.Left="633" TextWrapping="Wrap" Canvas.Top="192" Height="23" Width="88" TextAlignment="Center" Text="Weekday Hours:"/>
-        <TextBlock Canvas.Left="633" TextWrapping="Wrap" Canvas.Top="256" Height="23" Width="88" TextAlignment="Center" Text="Saturday Hours:"/>
-        <TextBlock Canvas.Left="633" TextWrapping="Wrap" Canvas.Top="320" Height="23" Width="88" TextAlignment="Center" Text="Holiday Hours:"/>
+        <TextBlock Canvas.Left="149" TextWrapping="Wrap" Canvas.Top="308" Height="34" Width="80" TextAlignment="Center" Text="Distance for Weekday:"/>
+        <TextBlock Canvas.Left="149" TextWrapping="Wrap" Canvas.Top="372" Height="38" Width="85" TextAlignment="Center" Text="Distance for Saturday:"/>
+        <TextBlock Canvas.Left="587" TextWrapping="Wrap" Canvas.Top="53" Height="32" Width="85" TextAlignment="Center" Text="Trips during Weekday:"/>
+        <TextBlock Canvas.Left="592" TextWrapping="Wrap" Canvas.Top="120" Height="35" Width="80" TextAlignment="Center" Text="Trips during Saturday:"/>
+        <TextBlock Canvas.Left="592" TextWrapping="Wrap" Canvas.Top="176" Height="46" Width="80" TextAlignment="Center" Text="Trips during Holiday:"/>
+        <TextBlock Canvas.Left="584" TextWrapping="Wrap" Canvas.Top="244" Height="23" Width="88" TextAlignment="Center" Text="Weekday Hours:"/>
+        <TextBlock Canvas.Left="584" TextWrapping="Wrap" Canvas.Top="308" Height="23" Width="88" TextAlignment="Center" Text="Saturday Hours:"/>
+        <TextBlock Canvas.Left="584" TextWrapping="Wrap" Canvas.Top="372" Height="23" Width="88" TextAlignment="Center" Text="Holiday Hours:"/>
         <TextBlock Canvas.Left="52" TextWrapping="Wrap" Text="Fill in known route information" Canvas.Top="26" Width="168" Height="26"/>
-        <Button Content="Add Route" Canvas.Left="726" Canvas.Top="382" Width="120" Height="23" Click="addRouteButton"/>
+        <Button Content="Add Route" Canvas.Left="677" Canvas.Top="417" Width="120" Height="23" Click="addRouteButton" RenderTransformOrigin="0.283,2.87"/>
         <Canvas Height="100" Canvas.Left="354" Canvas.Top="124" Width="100"/>
     </Canvas>
 </Page>

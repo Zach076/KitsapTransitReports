@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,9 +25,17 @@ namespace KTReports
         private static DeleteImports deleteImportsInstance = null;
         private List<NameValueCollection> importedFiles = null;
         private NameValueCollection selectedFile;
+        private DataTable dataTable;
         private DeleteImports()
         {
             InitializeComponent();
+            dataTable = new DataTable();
+            dataTable.Columns.Add(new DataColumn("File Name", typeof(string)));
+            dataTable.Columns.Add(new DataColumn("Date Imported", typeof(string)));
+            dataTable.Columns.Add(new DataColumn("File Type", typeof(string)));
+            dataTable.Columns.Add(new DataColumn("File ID", typeof(string)));
+            dataTable.Columns.Add(new DataColumn("Directory Location", typeof(string)));
+            ImportedInfoGrid.ItemsSource = dataTable.DefaultView;
             SetupPage();
         }
 
@@ -45,19 +54,21 @@ namespace KTReports
             // Query the database for a list of imported files
             DatabaseManager databaseManager = DatabaseManager.GetDBManager();
             importedFiles = databaseManager.GetImportedFiles();
-            // Remove existing radio buttons and add new radio buttons to the ListOfImports
-            RemoveRadioButtons();
-            AddRadioButtons();
-            // Set/Reset selected file to null so that we don't try to delete an already deleted file
-            selectedFile = null;
-            FileInfoTitle.Text = "No File Selected";
-            ImportedFileInfo.Text = string.Empty;
-            ImportedFileInfo.Visibility = Visibility.Hidden;
+            Dispatcher.Invoke(() =>
+            {
+                // Remove existing radio buttons and add new radio buttons to the ListOfImports
+                RemoveRadioButtons();
+                AddRadioButtons();
+                // Set/Reset selected file to null so that we don't try to delete an already deleted file
+                selectedFile = null;
+                FileInfoTitle.Text = "No File Selected";
+            });
+            dataTable.Clear();
         }
 
         private void RemoveRadioButtons()
         {
-            ListOfImports.Items.Clear();
+            Dispatcher.Invoke(() => ListOfImports.Items.Clear());
         }
 
         private void AddRadioButtons()
@@ -90,14 +101,15 @@ namespace KTReports
 
         private void DisplayFileInfo(NameValueCollection file)
         {
+            dataTable.Clear();
             FileInfoTitle.Text = $"File selected:";
-            string nameStr = $"{ file["name"] }\n\n";
-            string importDateStr = $"Date imported: {file["import_date"]}\n\n";
-            string dirLocationStr = $"Directory location: {file["dir_location"]}\n\n";
-            string fileTypeStr = $"File type: ${file["file_type"].ToString()}\n\n";
-            string fileIdStr = $"File ID: {file["file_id"]}";
-            ImportedFileInfo.Text = nameStr + fileTypeStr + dirLocationStr + importDateStr + fileIdStr;
-            ImportedFileInfo.Visibility = Visibility.Visible;
+            var dataRow = dataTable.NewRow();
+            dataRow[0] = file["name"];
+            dataRow[1] = file["import_date"];
+            dataRow[2] = file["file_type"].ToString();
+            dataRow[3] = file["file_id"];
+            dataRow[4] = file["dir_location"];
+            dataTable.Rows.Add(dataRow);
         }
 
         private void DeleteImportedFile(object sender, RoutedEventArgs e)
