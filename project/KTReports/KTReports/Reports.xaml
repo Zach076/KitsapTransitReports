@@ -15,7 +15,7 @@
         <DockPanel Name="OptionsStack" Grid.Column="0" Grid.Row="0" VerticalAlignment="Stretch">
             <GroupBox Name="PropertiesBox" DockPanel.Dock="Top">
                 <StackPanel VerticalAlignment="Stretch">
-                    <TextBlock Margin="0, 5, 0, 3">Select the data points to include:</TextBlock>
+                    <TextBlock Margin="0, 5, 0, 5">Select the data points to include:</TextBlock>
                     <Grid Name="DataPointCheckBoxes">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1*"/>
@@ -40,7 +40,7 @@
             </GroupBox>
             <GroupBox Name="DistrictBox"  DockPanel.Dock="Top">
                 <StackPanel Name="DistrictCheckBoxes">
-                    <TextBlock Margin="0, 5, 0, 3">Select the districts to include:</TextBlock>
+                    <TextBlock Margin="0, 5, 0, 5">Select the districts to include:</TextBlock>
                     <CheckBox Name="SelectAllDistricts" IsChecked="True" Click="OnDistictClick">Select All</CheckBox>
                     <CheckBox IsChecked="True" Click="OnDistictClick">Bremerton</CheckBox>
                     <CheckBox IsChecked="True" Click="OnDistictClick">Central Kitsap</CheckBox>
@@ -60,7 +60,16 @@
         
         <DockPanel Grid.Column="1">
             <Rectangle VerticalAlignment="Stretch" Width="1" Stroke="Gray" Margin="3"/>
-            <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="5" FontSize="16">Past Reports</TextBlock>
+            <TextBlock DockPanel.Dock="Top" 
+                       HorizontalAlignment="Stretch" 
+                       Foreground="White" 
+                       TextAlignment="Center" 
+                       Padding="5" 
+                       Margin="0, 0, 0, 5" 
+                       FontSize="20"
+                       Background="#3471ee">
+                Reports
+            </TextBlock>
             <ListBox DockPanel.Dock="Top" Name="PastReportsList" HorizontalAlignment="Stretch"/>
             <Button DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="100" Name="OpenReportButton" Margin="0,0,10,10" Click="OpenReportClick">Open Report</Button>
         </DockPanel>

@@ -11,11 +11,11 @@
     <DockPanel>
         <DockPanel DockPanel.Dock="Top">
             <Menu>
-                <MenuItem Header="_File">
+                <MenuItem Header="_File" >
                     <MenuItem Header="Import Data File" 
                               Margin="0,5,0,5"
                               Click="ImportFile"/>
-                    <MenuItem Header="Delete Imports"
+                    <MenuItem Header="View Imported Files"
                               Margin="0,5,0,5"
                               Click="OpenDeleteFiles"/>
                     <MenuItem Header="Add Data (Manual)"
@@ -26,9 +26,8 @@
                               Click="CloseClicked"/>
                 </MenuItem>
                 <MenuItem Header="Create Report"
-                          Margin="0,5,0,5"
                           Click="OpenReportsPage"/>
-                <MenuItem Header="Visualize Data" Margin="0,5,0,5"/>
+                <!--<MenuItem Header="Visualize Data" Margin="0,5,0,5"/>-->
                 <MenuItem Header="Modify Routes">
                     <MenuItem Header="Import Routes"
                           Margin="0,5,0,5"
@@ -46,7 +45,7 @@
                     <MenuItem Header="Add Route Stops" Margin="0,5,0,5"
                           Click="addStop"/>
                 </MenuItem>
-                <MenuItem Header="Help" Margin="0,5,0,5"/>
+                <MenuItem Header="Help"/>
             </Menu>
         </DockPanel>
         <StatusBar DockPanel.Dock="Bottom" Height="22" Name="KTStatusBar">
@@ -57,7 +56,7 @@
                 <TextBlock Name="StatusBarText" FontSize="12"/>
             </StatusBarItem>
         </StatusBar>
-        <Frame x:Name="Main"/>
+        <Frame x:Name="Main" NavigationUIVisibility="Hidden"/>
 
     </DockPanel>
 </Window>
