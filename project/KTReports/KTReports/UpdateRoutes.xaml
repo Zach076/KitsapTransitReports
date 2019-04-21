@@ -1,0 +1,43 @@
+﻿<Page x:Class="KTReports.UpdateRoutes"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:KTReports"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="UpdateRoutes">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Name="OptionSelection" Width="1.25*" MinWidth="3in" MaxWidth="4in"/>
+            <ColumnDefinition Name="DataEntries" Width="3*"/>
+        </Grid.ColumnDefinitions>
+        <DockPanel Name="OptionsStack" Grid.Column="0" VerticalAlignment="Stretch">
+            <TextBlock  DockPanel.Dock="Top" Margin="0,5,0,2" HorizontalAlignment="Center">Select update date:</TextBlock>
+            <DatePicker DockPanel.Dock="Top" VerticalAlignment="Top" Name="StartDatePicker" Margin="2,0,0,0"></DatePicker>
+        </DockPanel>
+
+        <DockPanel Grid.Column="1">
+            <Rectangle VerticalAlignment="Stretch" Width="1" Stroke="Gray" Margin="3"/>
+            <TextBlock DockPanel.Dock="Top"
+                       HorizontalAlignment="Stretch" 
+                       Foreground="White" 
+                       TextAlignment="Center" 
+                       Padding="5" 
+                       Margin="0, 0, 0, 5" 
+                       FontSize="20"
+                       Background="#3471ee">Add Data</TextBlock>
+            <DataGrid Name="dataGrid" DockPanel.Dock="Top" 
+                ColumnHeaderStyle="{StaticResource DataGridHeaderStyle}" 
+                RowStyle="{StaticResource DataGridRowStyle}" 
+                AlternationCount="2"
+                Style="{StaticResource KTDataGridStyle}">
+            </DataGrid>
+            <StackPanel DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Right" Orientation="Horizontal">
+                <Button Click="CancelChanges" Width="110" Name="CancelChangesButton" Margin="0,0,10,10">Cancel</Button>
+                <Button Click="SaveChanges" Width="110" Name="SaveChangesButton" Margin="0,0,10,10">Save Changes</Button>
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</Page>
