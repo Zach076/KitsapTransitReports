@@ -62,20 +62,10 @@ namespace KTReports
         {
             Main.Content = new ManualDataEntry();
         }
-        
-        private void editPage(object sender, RoutedEventArgs e)
-        {
-            Main.Content = new UpdateRouteInfo();
-        }
 
-        private void addRoute(object sender, RoutedEventArgs e)
+        private void OpenUpdateRoutes(object sender, RoutedEventArgs e)
         {
-            Main.Content = new AddRoute();
-        }
-
-        private void deleteRoute(object sender, RoutedEventArgs e)
-        {
-            Main.Content = new DeleteRoute();
+            Main.Content = new UpdateRoutes();
         }
 
         private void updateStop(object sender, RoutedEventArgs e)

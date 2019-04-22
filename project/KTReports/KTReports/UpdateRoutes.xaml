@@ -14,8 +14,8 @@
             <ColumnDefinition Name="DataEntries" Width="3*"/>
         </Grid.ColumnDefinitions>
         <DockPanel Name="OptionsStack" Grid.Column="0" VerticalAlignment="Stretch">
-            <TextBlock  DockPanel.Dock="Top" Margin="0,5,0,2" HorizontalAlignment="Center">Select update date:</TextBlock>
-            <DatePicker DockPanel.Dock="Top" VerticalAlignment="Top" Name="StartDatePicker" Margin="2,0,0,0"></DatePicker>
+            <TextBlock  DockPanel.Dock="Top" Margin="0,5,0,2" HorizontalAlignment="Center">Select an update date:</TextBlock>
+            <DatePicker DockPanel.Dock="Top" VerticalAlignment="Top" Name="updateDatePicker" SelectedDateChanged="OnDateChange" Margin="2,0,0,0"></DatePicker>
         </DockPanel>
 
         <DockPanel Grid.Column="1">
@@ -27,14 +27,16 @@
                        Padding="5" 
                        Margin="0, 0, 0, 5" 
                        FontSize="20"
-                       Background="#3471ee">Add Data</TextBlock>
+                       Background="#3471ee">Update Routes</TextBlock>
             <DataGrid Name="dataGrid" DockPanel.Dock="Top" 
                 ColumnHeaderStyle="{StaticResource DataGridHeaderStyle}" 
                 RowStyle="{StaticResource DataGridRowStyle}" 
                 AlternationCount="2"
+                MaxHeight="850"
+                ItemsSource="{Binding}"
                 Style="{StaticResource KTDataGridStyle}">
             </DataGrid>
-            <StackPanel DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Right" Orientation="Horizontal">
+            <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Right" Orientation="Horizontal">
                 <Button Click="CancelChanges" Width="110" Name="CancelChangesButton" Margin="0,0,10,10">Cancel</Button>
                 <Button Click="SaveChanges" Width="110" Name="SaveChangesButton" Margin="0,0,10,10">Save Changes</Button>
             </StackPanel>

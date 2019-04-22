@@ -707,6 +707,31 @@ namespace KTReports
             return importedFiles;
         }
 
+        public List<NameValueCollection> GetValidRoutes(DateTime date)
+        {
+            var results = new List<NameValueCollection>();
+            string query = @"SELECT *
+                                FROM Routes
+                                WHERE start_date <= @date
+                                GROUP BY path_id";
+            using (SQLiteCommand command = new SQLiteCommand(query, sqliteConnection))
+            {
+                command.Parameters.Add(new SQLiteParameter("@date", date.ToString("yyyy-MM-dd")));
+                using (SQLiteDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        NameValueCollection row = reader.GetValues();
+                        foreach (string s in row)
+                            foreach (string v in row.GetValues(s))
+                                Console.WriteLine("{0} {1}", s, v);
+                        results.Add(row);
+                    }
+                }
+            }
+            return results;
+        }
+
         public List<NameValueCollection> GetLatestReports()
         {
             string query = "SELECT * FROM ReportHistory ORDER BY datetime_created DESC";
@@ -788,6 +813,24 @@ namespace KTReports
             return columnNames;
         }
 
+        public List<string> GetRouteTableInfo()
+        {
+            string tableInfoCmd = $"PRAGMA table_info(Routes)";
+            var columnNames = new List<string>();
+            using (var command = new SQLiteCommand(tableInfoCmd, sqliteConnection))
+            {
+                using (SQLiteDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        //Console.WriteLine("Table Column: " + reader.GetString(1));
+                        columnNames.Add(reader.GetString(1));
+                    }
+                }
+            }
+            return columnNames;
+        }
+
         // A generic method for querying data from the database
         public List<NameValueCollection> Query(string[] selection, string[] tables, string expressions)
         {
@@ -816,8 +859,6 @@ namespace KTReports
             GC.WaitForPendingFinalizers();
         }
 
-
-        ////////////////// TODO: Methods to handle updates for information in tables, rather than only inserting
 
         public void modifyRoute(string routeName, string option, string newTry)
         {
@@ -869,6 +910,7 @@ namespace KTReports
             }
             Console.WriteLine();
         }
+
 
         public List<String> getRoutes()
         {
