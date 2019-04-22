@@ -37,10 +37,7 @@ namespace KTReports
             foreach (string col in routeColumns)
             {
                 var titleCol = ti.ToTitleCase(col.Replace('_', ' '));
-                if (titleCol.Equals("Db Route Id") || titleCol.Equals("Path Id"))
-                {
-                    continue;
-                } else if (titleCol.Equals("Assigned Route Id"))
+                if (titleCol.Equals("Assigned Route Id"))
                 {
                     titleCol = "Route ID";
                 }
@@ -48,6 +45,7 @@ namespace KTReports
             }
             updateDatePicker.SelectedDate = DateTime.Today;
             dataGrid.DataContext = dataTable.DefaultView;
+            dataGrid.ItemsSource = dataTable.DefaultView;
             var checkBoxColumn = new DataGridCheckBoxColumn
             {
                 Header = "Delete?"
@@ -55,32 +53,45 @@ namespace KTReports
             dataGrid.Columns.Add(checkBoxColumn);
         }
 
+        private void LoadedDataGrid(object sender, EventArgs e)
+        {
+            dataGrid.Columns[1].Visibility = Visibility.Collapsed;
+            dataGrid.Columns[2].Visibility = Visibility.Collapsed;
+        }
+        
+
         private void OnDateChange(object sender, RoutedEventArgs e)
         {
+            if (dataTable == null)
+            {
+                return;
+            }
             // If any unsaved changes, ask user if they want to save or cancel
-
+            if (dataTable.GetChanges() != null)
+            {
+                MessageBoxResult result = MessageBox.Show("Save your changes?", "Save Changes", MessageBoxButton.OKCancel);
+                if (result == MessageBoxResult.OK)
+                {
+                    SaveChanges(null, null);
+                } 
+            }
             PopulateDataGrid();
-        }
-
-        private void OnCellChanged(object sender, EventArgs e)
-        {
-            // If any unsaved changes, ask user if they want to save or cancel
-            DataGrid cell = (DataGrid) sender;
-            Console.WriteLine(cell);
         }
 
         private void PopulateDataGrid()
         {
+            
+            //dataGrid.Columns[1].Visibility = Visibility.Collapsed;
             dataTable.Clear();
             // Get all route data valid on selected date
             routes = databaseManager.GetValidRoutes((DateTime) updateDatePicker.SelectedDate);
             foreach(NameValueCollection route in routes)
             {
                 var dataRow = dataTable.NewRow();
-                for (int i = 2; i < routeColumns.Count; i++)
+                for (int i = 0; i < routeColumns.Count; i++)
                 {
                     string col = routeColumns[i];
-                    dataRow[i-2] = route[col];
+                    dataRow[i] = route[col];
                 }
                 dataTable.Rows.Add(dataRow);
                 dataRow.AcceptChanges();
@@ -89,8 +100,14 @@ namespace KTReports
 
         private void SaveChanges(object sender, RoutedEventArgs e)
         {
-            // Add new routes to database
-            // Update existing route info
+            
+            MessageBoxResult result = MessageBox.Show("Save your changes?", "Save Changes", MessageBoxButton.OKCancel);
+            if (result != MessageBoxResult.OK)
+            {
+                return;
+            }
+            var addedRoutes = new Dictionary<string, string>();
+            var modifiedRoutes = new List<Dictionary<string, string>>();
             foreach (DataRow row in dataTable.Rows)
             {
                 if (row.HasVersion(DataRowVersion.Proposed))
@@ -100,10 +117,15 @@ namespace KTReports
                 if (row.RowState == DataRowState.Modified)
                 {
                     Console.Write("Modified: ");
+                    var modifiedRoute = new Dictionary<string, string>();
                     foreach (DataColumn col in dataTable.Columns)
                     {
-                        Console.Write(row[col] + " ");
+                        string databaseColName = col.ColumnName.ToLower().Replace(' ', '_');
+                        modifiedRoute.Add(databaseColName, row[col] as string);
+                        Console.Write(databaseColName + ": " + row[col] + ", ");
                     }
+                    //modifiedRoute.Add("start_date", ((DateTime) updateDatePicker.SelectedDate).ToString("yyyy-MM-dd")); 
+                    modifiedRoutes.Add(modifiedRoute);
                     Console.WriteLine();
                 } else if (row.RowState == DataRowState.Added)
                 {
@@ -114,11 +136,21 @@ namespace KTReports
                     }
                     Console.WriteLine();
                 }
+                row.AcceptChanges();
+            }
+            foreach (var route in modifiedRoutes)
+            {
+                databaseManager.UpdateRoute(route);
             }
         }
 
         private void CancelChanges(object sender, RoutedEventArgs e)
         {
+            MessageBoxResult result = MessageBox.Show("Cancel your changes?", "Cancel Changes", MessageBoxButton.OKCancel);
+            if (result != MessageBoxResult.OK)
+            {
+                return;
+            }
             PopulateDataGrid();
         }
 

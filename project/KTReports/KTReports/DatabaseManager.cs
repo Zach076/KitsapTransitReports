@@ -437,6 +437,64 @@ namespace KTReports
             return true;
         }
 
+        private bool ModifyRouteRow(Dictionary<string, string> keyValuePairs)
+        {
+            string updateSQL =
+            @"UPDATE Routes 
+                SET assigned_route_id = @assigned_route_id, route_name = @route_name, 
+                    district = @district, distance_week = @distance_week, distance_sat = @distance_sat, num_trips_week = @num_trips_week,
+                    num_trips_sat = @num_trips_sat, num_trips_hol = @num_trips_hol, weekday_hours = @weekday_hours, saturday_hours = @saturday_hours, holiday_hours = @holiday_hours
+                WHERE start_date = @start_date AND path_id = @path_id";
+            using (SQLiteCommand command = new SQLiteCommand(updateSQL, sqliteConnection))
+            {
+                command.Parameters.Add(new SQLiteParameter("@path_id", keyValuePairs["path_id"]));
+                command.Parameters.Add(new SQLiteParameter("@assigned_route_id", keyValuePairs["route_id"]));
+                command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
+                keyValuePairs.TryGetValue("route_name", out string route_name);
+                command.Parameters.Add(new SQLiteParameter("@route_name", route_name));
+                keyValuePairs.TryGetValue("district", out string district);
+                command.Parameters.Add(new SQLiteParameter("@district", district));
+                keyValuePairs.TryGetValue("distance_week", out string distance_week);
+                command.Parameters.Add(new SQLiteParameter("@distance_week", distance_week));
+                keyValuePairs.TryGetValue("distance_sat", out string distance_sat);
+                command.Parameters.Add(new SQLiteParameter("@distance_sat", distance_sat));
+                keyValuePairs.TryGetValue("num_trips_week", out string num_trips_week);
+                command.Parameters.Add(new SQLiteParameter("@num_trips_week", num_trips_week));
+                keyValuePairs.TryGetValue("num_trips_sat", out string num_trips_sat);
+                command.Parameters.Add(new SQLiteParameter("@num_trips_sat", num_trips_sat));
+                keyValuePairs.TryGetValue("num_trips_hol", out string num_trips_hol);
+                command.Parameters.Add(new SQLiteParameter("@num_trips_hol", num_trips_hol));
+                keyValuePairs.TryGetValue("weekday_hours", out string weekday_hours);
+                command.Parameters.Add(new SQLiteParameter("@weekday_hours", weekday_hours));
+                keyValuePairs.TryGetValue("saturday_hours", out string saturday_hours);
+                command.Parameters.Add(new SQLiteParameter("@saturday_hours", saturday_hours));
+                keyValuePairs.TryGetValue("holiday_hours", out string holiday_hours);
+                command.Parameters.Add(new SQLiteParameter("@holiday_hours", holiday_hours));
+                command.ExecuteNonQuery();
+            }
+            return true;
+        }
+
+        // Update Route Information from a specific date
+        public bool UpdateRoute(Dictionary<string, string> keyValuePairs)
+        {
+            string queryTest = "SELECT * FROM Routes WHERE start_date = @start_date AND path_id = @path_id";
+            using (SQLiteCommand command = new SQLiteCommand(queryTest, sqliteConnection))
+            {
+                command.Parameters.Add(new SQLiteParameter("@path_id", keyValuePairs["path_id"]));
+                command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
+                var reader = command.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    ModifyRouteRow(keyValuePairs);
+                } else
+                {
+                    InsertRoute(keyValuePairs);
+                }
+            }
+            return true;
+        }
+
         // Insert a route (either new or a change to a route using an existing path)
         public bool InsertRoute(Dictionary<string, string> keyValuePairs)
         {
@@ -722,9 +780,6 @@ namespace KTReports
                     while (reader.Read())
                     {
                         NameValueCollection row = reader.GetValues();
-                        foreach (string s in row)
-                            foreach (string v in row.GetValues(s))
-                                Console.WriteLine("{0} {1}", s, v);
                         results.Add(row);
                     }
                 }
@@ -934,6 +989,28 @@ namespace KTReports
             //List<String> distinct = resultStrs.Distinct().ToList();
             //distinct.Sort();
             return resultStrs;
+        }
+
+        public void AddRoute(String routeID, String start, String name, String district, String distance_week, String distance_sat, String tripsWeek,
+                String tripsSat, String tripsHol, String weekdayHours, String satHours, String holHours)
+        {
+
+            var newRoute = new Dictionary<string, string>
+                {
+                    { "route_id", routeID },
+                    { "start_date", start },
+                    { "route_name", name },
+                    { "district", district },
+                    { "distance_week", distance_week },
+                    { "distance_sat", distance_sat },
+                    { "num_trips_week", tripsWeek },
+                    { "num_trips_sat", tripsSat },
+                    { "num_trips_hol", tripsHol },
+                    { "weekday_hours", weekdayHours },
+                    { "saturday_hours", satHours },
+                    { "holiday_hours", holHours }
+                };
+            InsertPath(newRoute);
         }
 
         public void addRouteinfo(String routeID, String start, String name, String district, String distance_week, String distance_sat, String tripsWeek,

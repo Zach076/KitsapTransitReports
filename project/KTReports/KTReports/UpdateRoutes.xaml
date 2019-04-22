@@ -34,6 +34,8 @@
                 AlternationCount="2"
                 MaxHeight="850"
                 ItemsSource="{Binding}"
+                CanUserSortColumns="False"
+                Loaded="LoadedDataGrid"
                 Style="{StaticResource KTDataGridStyle}">
             </DataGrid>
             <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Right" Orientation="Horizontal">
