@@ -106,7 +106,7 @@ namespace KTReports
             {
                 return;
             }
-            var addedRoutes = new Dictionary<string, string>();
+            var addedRoutes = new List<Dictionary<string, string>>();
             var modifiedRoutes = new List<Dictionary<string, string>>();
             foreach (DataRow row in dataTable.Rows)
             {
@@ -130,10 +130,14 @@ namespace KTReports
                 } else if (row.RowState == DataRowState.Added)
                 {
                     Console.Write("Added: ");
+                    var addedRoute = new Dictionary<string, string>();
                     foreach (DataColumn col in dataTable.Columns)
                     {
-                        Console.Write(row[col] + " ");
+                        string databaseColName = col.ColumnName.ToLower().Replace(' ', '_');
+                        addedRoute.Add(databaseColName, row[col] as string);
+                        Console.Write(databaseColName + ": " + row[col] + ", ");
                     }
+                    addedRoutes.Add(addedRoute);
                     Console.WriteLine();
                 }
                 row.AcceptChanges();
@@ -141,6 +145,12 @@ namespace KTReports
             foreach (var route in modifiedRoutes)
             {
                 databaseManager.UpdateRoute(route);
+            }
+            foreach (var route in addedRoutes)
+            {
+                route.Remove("path_id");
+                route.Remove("db_route_id");
+                databaseManager.InsertPath(route);
             }
         }
 
