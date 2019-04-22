@@ -11,12 +11,22 @@
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
 
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/Cobalt.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <Style TargetType="{x:Type Control}" x:Key="baseStyle">
                 <Setter Property="FontSize" Value="14" />
             </Style>
+            <Color x:Key="HighlightColor">#1e4061</Color>
+
+            <Color x:Key="AccentBaseColor">#1e4061</Color>
+            <!--  80%  -->
+            <Color x:Key="AccentColor">#1e4061</Color>
+            <!--  60%  -->
+            <Color x:Key="AccentColor2">#1e4061</Color>
+            <!--  40%  -->
+            <Color x:Key="AccentColor3">#1e4061</Color>
+            <!--  20%  -->
+            <Color x:Key="AccentColor4">#1e4061</Color>
 
             <Style TargetType="{x:Type Button}" BasedOn="{StaticResource baseStyle}"/>
             <Style TargetType="{x:Type Label}" BasedOn="{StaticResource baseStyle}"/>
@@ -27,7 +37,11 @@
             <Style TargetType="{x:Type TextBlock}">
                 <Setter Property="FontSize" Value="14" />
             </Style>
-
+            <LinearGradientBrush x:Key="BlueGradient" StartPoint="0.5,0" EndPoint="0.5,1">
+                <GradientStop Color="#1e4061" Offset="0"/>
+                <GradientStop Color="#3470ab" Offset="1"/>
+            </LinearGradientBrush>
+            
             <LinearGradientBrush x:Key="HeaderBrush" StartPoint="0.5,0" EndPoint="0.5,1">
                 <GradientStop Color="#003880" Offset="0"/>
                 <GradientStop Color="#0062c0" Offset="1"/>

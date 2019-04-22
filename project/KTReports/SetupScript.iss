@@ -29,6 +29,9 @@ Source: "KTReports\bin\Release\EntityFramework.SqlServer.dll"; DestDir: "{app}";
 Source: "KTReports\bin\Release\EntityFramework.SqlServer.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "KTReports\bin\Release\EntityFramework.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "KTReports\bin\Release\KTReports.pdb"; DestDir: "{app}"; Flags: ignoreversion
+Source: "KTReports\bin\Release\MahApps.Metro.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "KTReports\bin\Release\MahApps.Metro.pdb"; DestDir: "{app}"; Flags: ignoreversion
+Source: "KTReports\bin\Release\MahApps.Metro.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "KTReports\bin\Release\System.Data.SQLite.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "KTReports\bin\Release\System.Data.SQLite.dll.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: "KTReports\bin\Release\System.Data.SQLite.EF6.dll"; DestDir: "{app}"; Flags: ignoreversion
@@ -39,6 +42,9 @@ Source: "KTReports\bin\Release\x64\SQLite.Interop.dll"; DestDir: "{app}\x64"; Fl
 Source: "KTReports\bin\Release\x86\SQLite.Interop.dll"; DestDir: "{app}\x86"; Flags: ignoreversion
 Source: "KTReports\bin\Release\System.Windows.Controls.DataVisualization.Toolkit.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "KTReports\bin\Release\System.Windows.Controls.DataVisualization.Toolkit.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "KTReports\bin\Release\ControlzEx.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "KTReports\bin\Release\ControlzEx.pdb"; DestDir: "{app}"; Flags: ignoreversion
+Source: "KTReports\bin\Release\System.Windows.Interactivity.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "routes.json"; DestDir: "{app}"; Flags: ignoreversion
 Source: "ktdatabase.sqlite3"; DestDir: "{userappdata}"; Flags: onlyifdoesntexist;
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files

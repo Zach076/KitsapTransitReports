@@ -55,6 +55,7 @@ namespace KTReports
 
         private void LoadedDataGrid(object sender, EventArgs e)
         {
+            dataGrid.MaxHeight = ActualHeight - 90;
             dataGrid.Columns[1].Visibility = Visibility.Collapsed;
             dataGrid.Columns[2].Visibility = Visibility.Collapsed;
         }
@@ -151,6 +152,16 @@ namespace KTReports
                 route.Remove("path_id");
                 route.Remove("db_route_id");
                 databaseManager.InsertPath(route);
+            }
+        }
+
+        private void OnPageSizeChanged(object sender, RoutedEventArgs e)
+        {
+            if (!double.IsNaN(Height))
+            {
+                Console.WriteLine("TEST");
+                dataGrid.MaxHeight = 50;
+
             }
         }
 

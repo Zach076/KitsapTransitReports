@@ -27,7 +27,7 @@
                        Padding="5" 
                        Margin="0, 0, 0, 5" 
                        FontSize="20"
-                       Background="#3471ee">No File Selected</TextBlock>
+                       Background="{StaticResource BlueGradient}">No File Selected</TextBlock>
             <DataGrid DockPanel.Dock="Top" Name="ImportedInfoGrid" IsReadOnly="True"
                 ColumnHeaderStyle="{StaticResource DataGridHeaderStyle}" 
                 RowStyle="{StaticResource DataGridRowStyle}" 

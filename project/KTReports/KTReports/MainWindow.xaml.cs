@@ -78,6 +78,15 @@ namespace KTReports
             Main.Content = new AddStop();
         }
 
+        private void OnSizeChanged(object sender, RoutedEventArgs e)
+        {
+            if (Main.Content is UpdateRoutes)
+            {
+                var updateRoutesPage = Main.Content as UpdateRoutes;
+                updateRoutesPage.dataGrid.MaxHeight = ActualHeight - 180;
+            }
+        }
+
         private void ImportKnownRoutes()
         {
             DatabaseManager databaseManager = DatabaseManager.GetDBManager();
