@@ -20,9 +20,9 @@ namespace KTReports
     /// <summary>
     /// Interaction logic for Reports.xaml
     /// </summary>
-    public partial class deleteRoute: Page
+    public partial class DeleteRoute: Page
     {
-        public deleteRoute()
+        public DeleteRoute()
         {
             InitializeComponent();
             DatabaseManager dbManager = DatabaseManager.GetDBManager();
@@ -38,7 +38,7 @@ namespace KTReports
             }
         }
 
-        private void deleteRoutebutton(object sender, RoutedEventArgs e)
+        private void DeleteRoutebutton(object sender, RoutedEventArgs e)
         {
             if (routes.SelectedItem != null)
             {
@@ -58,7 +58,7 @@ namespace KTReports
 
         }
 
-        private void deleteAllRoutes(object sender, RoutedEventArgs e)
+        private void DeleteAllRoutes(object sender, RoutedEventArgs e)
         {
             DatabaseManager dbManager = DatabaseManager.GetDBManager();
             dbManager.deleteAllRouteinfo();

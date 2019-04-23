@@ -78,6 +78,7 @@ namespace KTReports
                 RadioButton radioButton = new RadioButton();
                 radioButton.Content = file["name"];
                 radioButton.Tag = file["file_id"];
+                radioButton.FontSize = 14;
                 radioButton.Margin = new Thickness(4);
                 radioButton.Click += new RoutedEventHandler(this.RadioButtonClicked);
                 ListOfImports.Items.Add(radioButton);
