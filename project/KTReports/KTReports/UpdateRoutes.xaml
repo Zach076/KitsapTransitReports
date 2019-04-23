@@ -1,4 +1,4 @@
-﻿<Page x:Class="KTReports.ManualDataEntry"
+﻿<Page x:Class="KTReports.UpdateRoutes"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -6,24 +6,24 @@
       xmlns:local="clr-namespace:KTReports"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="ManualDataEntry">
+      Title="UpdateRoutes">
 
-    <Grid Name="ReportsGrid">
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Name="OptionSelection" Width="1.25*" MinWidth="3in" MaxWidth="4in"/>
             <ColumnDefinition Name="DataEntries" Width="3*"/>
         </Grid.ColumnDefinitions>
         <DockPanel Name="OptionsStack" Grid.Column="0" VerticalAlignment="Stretch">
-            <TextBlock  DockPanel.Dock="Top" Margin="0,5,0,2" HorizontalAlignment="Center">Select the data type:</TextBlock>
-            <ComboBox Name="DataTypeSelector" SelectionChanged="DataTypeChanged" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" SelectedIndex="0" Margin="0,2,0,2" Padding="20,5,20,5">
-                <ComboBoxItem Name="FC">Fare Card</ComboBoxItem>
-                <ComboBoxItem Name="NFC">Non-Fare Card</ComboBoxItem>
-                <ComboBoxItem Name="RSD">Boardings</ComboBoxItem>
-            </ComboBox>
-            <TextBlock  DockPanel.Dock="Top" Margin="0,5,0,2" HorizontalAlignment="Center">Data start date:</TextBlock>
-            <DatePicker DockPanel.Dock="Top" Name="StartDatePicker" Margin="2,0,0,0"></DatePicker>
-            <TextBlock DockPanel.Dock="Top" Margin="0,5,0,2" HorizontalAlignment="Center">Data end date:</TextBlock>
-            <DatePicker DockPanel.Dock="Top" VerticalAlignment="Top" Name="EndDatePicker" Margin="2,0,0,0"></DatePicker>
+            <TextBlock DockPanel.Dock="Top"
+                       HorizontalAlignment="Stretch" 
+                       Foreground="White" 
+                       TextAlignment="Center" 
+                       Padding="5" 
+                       Margin="0, 0, 0, 5" 
+                       FontSize="20"
+                       Background="{StaticResource BlueGradient}">Options</TextBlock>
+            <TextBlock  DockPanel.Dock="Top" Margin="0,5,0,2" HorizontalAlignment="Center">Select an update date:</TextBlock>
+            <DatePicker DockPanel.Dock="Top" VerticalAlignment="Top" Name="updateDatePicker" SelectedDateChanged="OnDateChange" Margin="2,0,0,0"></DatePicker>
         </DockPanel>
 
         <DockPanel Grid.Column="1">
@@ -35,14 +35,21 @@
                        Padding="5" 
                        Margin="0, 0, 0, 5" 
                        FontSize="20"
-                       Background="{StaticResource BlueGradient}">Add Data</TextBlock>
+                       Background="{StaticResource BlueGradient}">Update Routes</TextBlock>
             <DataGrid Name="dataGrid" DockPanel.Dock="Top" 
                 ColumnHeaderStyle="{StaticResource DataGridHeaderStyle}" 
                 RowStyle="{StaticResource DataGridRowStyle}" 
                 AlternationCount="2"
+                MaxHeight="850"
+                ItemsSource="{Binding}"
+                CanUserSortColumns="False"
+                Loaded="LoadedDataGrid"
                 Style="{StaticResource KTDataGridStyle}">
             </DataGrid>
-            <Button DockPanel.Dock="Bottom" Click="AddToDatabase" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="110" Name="AddToDatabaseButton" Margin="0,0,10,10">Add to database</Button>
+            <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Right" Orientation="Horizontal">
+                <Button Click="CancelChanges" Width="110" Name="CancelChangesButton" Margin="0,0,10,10">Cancel</Button>
+                <Button Click="SaveChanges" Width="110" Name="SaveChangesButton" Margin="0,0,10,10">Save Changes</Button>
+            </StackPanel>
         </DockPanel>
     </Grid>
 </Page>

@@ -20,14 +20,14 @@ namespace KTReports
     /// <summary>
     /// Interaction logic for Reports.xaml
     /// </summary>
-    public partial class addRoute: Page
+    public partial class AddRoute: Page
     {
-        public addRoute()
+        public AddRoute()
         {
             InitializeComponent();
         }
 
-        private void addRouteButton(object sender, RoutedEventArgs e)
+        private void AddRouteButton(object sender, RoutedEventArgs e)
         {
             string routeID = routeIDtextbox.Text;
             string start = startTextBox.Text;

@@ -6,6 +6,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -448,6 +449,7 @@ namespace KTReports
             xlWorkbook.SaveAs(saveLocation);
             xlWorkbook.Close();
             excel.Quit();
+            Marshal.ReleaseComObject(excel);
         }
         private void WritePassengersPerHour(Microsoft.Office.Interop.Excel.Worksheet xlWeeksheet, Microsoft.Office.Interop.Excel.Worksheet xlWEndsheet,
             int rowWeek, int rowSat, int col, List<Dictionary<string, object>> routeWeekCalculations, List<Dictionary<string, object>> routeSatCalculations)

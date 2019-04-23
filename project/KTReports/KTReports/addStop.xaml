@@ -1,4 +1,4 @@
-﻿<Page x:Class="KTReports.addStop"
+﻿<Page x:Class="KTReports.AddStop"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -36,7 +36,7 @@
         <TextBlock Canvas.Left="451" TextWrapping="Wrap" Text="(-)door 2 person:" Canvas.Top="184" Height="23" Width="98" TextAlignment="Right"/>
         <TextBlock Canvas.Left="468" TextWrapping="Wrap" Text="door 1 person:" Canvas.Top="229" Height="23" Width="81" TextAlignment="Right"/>
         <TextBlock Canvas.Left="468" TextWrapping="Wrap" Text="door 2 person:" Canvas.Top="276" Height="23" Width="81" TextAlignment="Right"/>
-        <Button Content="Add Stop" Canvas.Left="873" Canvas.Top="336" Width="120" Height="23" Click="addStopButton"/>
+        <Button Content="Add Stop" Canvas.Left="873" Canvas.Top="336" Width="120" Height="23" Click="AddStopButton"/>
     </Canvas>
 
 

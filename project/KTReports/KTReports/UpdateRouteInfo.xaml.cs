@@ -20,11 +20,11 @@ namespace KTReports
     /// <summary>
     /// Interaction logic for Reports.xaml
     /// </summary>
-    public partial class updateRouteInfo: Page
+    public partial class UpdateRouteInfo: Page
     {
         string selectedRoute = null;
 
-        public updateRouteInfo()
+        public UpdateRouteInfo()
         {
             InitializeComponent();
             
@@ -61,7 +61,7 @@ namespace KTReports
 
         }
 
-        private void update(object sender, RoutedEventArgs e)
+        private void Update(object sender, RoutedEventArgs e)
         {
             if ((selectedRoute != null || listRoutes.SelectedItem != null) 
                 && listAttributes.SelectedItem != null 
