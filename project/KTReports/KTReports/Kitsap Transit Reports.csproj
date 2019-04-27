@@ -142,7 +142,6 @@
     <Compile Include="AddStop.xaml.cs">
       <DependentUpon>AddStop.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Routes.cs" />
     <Compile Include="UpdateRoutes.xaml.cs">
       <DependentUpon>UpdateRoutes.xaml</DependentUpon>
     </Compile>
