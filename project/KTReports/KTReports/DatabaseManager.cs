@@ -1035,35 +1035,16 @@ namespace KTReports
             InsertPath(newRoute);
         }
 
-        public void deleteRouteinfo(string route)
+        public void DeleteRoute(Dictionary<string, string> keyValuePairs)
         {
-            try
+            string updateSQL = "DELETE FROM Routes WHERE assigned_route_id = @route_id AND start_date = @start_date";
+            using (SQLiteCommand command = new SQLiteCommand(updateSQL, sqliteConnection))
             {
-               
-                string updateSQL = "DELETE FROM Routes WHERE assigned_route_id = " + "'" + route + "'";
-                using (SQLiteCommand command = new SQLiteCommand(updateSQL, sqliteConnection))
-                {
-                    command.ExecuteNonQuery();
-                }
+                command.Parameters.Add(new SQLiteParameter("@route_id", keyValuePairs["route_id"]));
+                command.Parameters.Add(new SQLiteParameter("@start_date", keyValuePairs["start_date"]));
+                command.ExecuteNonQuery();
             }
-            catch (SQLiteException sqle)
-            {
-                Console.WriteLine(sqle.StackTrace);
-            }
-
-            try
-            {
-             
-                string updateSQL = "DELETE FROM Paths WHERE path_id = " + "'" + route + "'";
-                using (SQLiteCommand command = new SQLiteCommand(updateSQL, sqliteConnection))
-                {
-                    command.ExecuteNonQuery();
-                }
-            }
-            catch (SQLiteException sqle)
-            {
-                Console.WriteLine(sqle.StackTrace);
-            }
+          
         }
 
         public void deleteAllRouteinfo()
