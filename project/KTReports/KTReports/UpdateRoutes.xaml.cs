@@ -34,6 +34,9 @@ namespace KTReports
             InitializeComponent();
             routeColumns = databaseManager.GetRouteTableInfo();
             TextInfo ti = new CultureInfo("en-US", false).TextInfo;
+            var deleteCol = new DataColumn("Delete?", typeof(bool));
+            deleteCol.DefaultValue = false;
+            dataTable.Columns.Add(deleteCol);
             foreach (string col in routeColumns)
             {
                 var titleCol = ti.ToTitleCase(col.Replace('_', ' '));
@@ -43,14 +46,15 @@ namespace KTReports
                 }
                 dataTable.Columns.Add(new DataColumn(titleCol, typeof(string)));
             }
+            //dataTable.Columns.Add(new DataColumn("DELETE", typeof(bool)));
             updateDatePicker.SelectedDate = DateTime.Today;
             dataGrid.DataContext = dataTable.DefaultView;
             dataGrid.ItemsSource = dataTable.DefaultView;
-            var checkBoxColumn = new DataGridCheckBoxColumn
-            {
-                Header = "Delete?"
-            };
-            dataGrid.Columns.Add(checkBoxColumn);
+            //var checkBoxColumn = new DataGridCheckBoxColumn
+            // {
+            //    Header = "Delete?"
+            //};
+            //dataGrid.Columns.Add(checkBoxColumn);
         }
 
         private void LoadedDataGrid(object sender, EventArgs e)
@@ -92,7 +96,7 @@ namespace KTReports
                 for (int i = 0; i < routeColumns.Count; i++)
                 {
                     string col = routeColumns[i];
-                    dataRow[i] = route[col];
+                    dataRow[i+1] = route[col];
                 }
                 dataTable.Rows.Add(dataRow);
                 dataRow.AcceptChanges();
@@ -108,6 +112,7 @@ namespace KTReports
                 return;
             }
             var addedRoutes = new List<Dictionary<string, string>>();
+            var deletedRoutes = new List<Dictionary<string, string>>();
             var modifiedRoutes = new List<Dictionary<string, string>>();
             foreach (DataRow row in dataTable.Rows)
             {
@@ -126,9 +131,17 @@ namespace KTReports
                         Console.Write(databaseColName + ": " + row[col] + ", ");
                     }
                     //modifiedRoute.Add("start_date", ((DateTime) updateDatePicker.SelectedDate).ToString("yyyy-MM-dd")); 
-                    modifiedRoutes.Add(modifiedRoute);
+                    if ((bool) row["Delete?"])
+                    {
+                        deletedRoutes.Add(modifiedRoute);
+                    }
+                    else
+                    {
+                        modifiedRoutes.Add(modifiedRoute);
+                    }
                     Console.WriteLine();
-                } else if (row.RowState == DataRowState.Added)
+                }
+                else if (row.RowState == DataRowState.Added)
                 {
                     Console.Write("Added: ");
                     var addedRoute = new Dictionary<string, string>();
@@ -153,6 +166,11 @@ namespace KTReports
                 route.Remove("db_route_id");
                 databaseManager.InsertPath(route);
             }
+            foreach (var route in deletedRoutes)
+            {
+                databaseManager.DeleteRoute(route);
+            }
+            PopulateDataGrid();
         }
 
         private void OnPageSizeChanged(object sender, RoutedEventArgs e)

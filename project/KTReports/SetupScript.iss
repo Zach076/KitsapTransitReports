@@ -45,6 +45,14 @@ Source: "KTReports\bin\Release\System.Windows.Controls.DataVisualization.Toolkit
 Source: "KTReports\bin\Release\ControlzEx.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "KTReports\bin\Release\ControlzEx.pdb"; DestDir: "{app}"; Flags: ignoreversion
 Source: "KTReports\bin\Release\System.Windows.Interactivity.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "KTReports\bin\Release\ClosedXML.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "KTReports\bin\Release\ClosedXML.pdb"; DestDir: "{app}"; Flags: ignoreversion
+Source: "KTReports\bin\Release\ClosedXML.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "KTReports\bin\Release\DocumentFormat.OpenXml.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "KTReports\bin\Release\DocumentFormat.OpenXml.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "KTReports\bin\Release\ExcelNumberFormat.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "KTReports\bin\Release\FastMember.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "KTReports\bin\Release\System.Windows.Interactivity.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "routes.json"; DestDir: "{app}"; Flags: ignoreversion
 Source: "ktdatabase.sqlite3"; DestDir: "{userappdata}"; Flags: onlyifdoesntexist;
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
