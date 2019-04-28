@@ -13,9 +13,10 @@
 
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <Style TargetType="{x:Type Control}" x:Key="baseStyle">
+            <Style TargetType="{x:Type Control}" x:Key="BaseStyle">
                 <Setter Property="FontSize" Value="14" />
             </Style>
+
             <Color x:Key="HighlightColor">#1e4061</Color>
 
             <Color x:Key="AccentBaseColor">#1e4061</Color>
@@ -28,12 +29,12 @@
             <!--  20%  -->
             <Color x:Key="AccentColor4">#1e4061</Color>
 
-            <Style TargetType="{x:Type Button}" BasedOn="{StaticResource baseStyle}"/>
-            <Style TargetType="{x:Type Label}" BasedOn="{StaticResource baseStyle}"/>
-            <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource baseStyle}"/>
-            <Style TargetType="{x:Type ListView}" BasedOn="{StaticResource baseStyle}"/>
-            <Style TargetType="{x:Type RadioButton}" BasedOn="{StaticResource baseStyle}"/>
-            <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource baseStyle}"/>
+            <Style TargetType="{x:Type Button}" BasedOn="{StaticResource BaseStyle}"/>
+            <Style TargetType="{x:Type Label}" BasedOn="{StaticResource BaseStyle}"/>
+            <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource BaseStyle}"/>
+            <Style TargetType="{x:Type ListView}" BasedOn="{StaticResource BaseStyle}"/>
+            <Style TargetType="{x:Type RadioButton}" BasedOn="{StaticResource BaseStyle}"/>
+            <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource BaseStyle}"/>
             <Style TargetType="{x:Type TextBlock}">
                 <Setter Property="FontSize" Value="14" />
             </Style>

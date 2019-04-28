@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -220,6 +221,10 @@ namespace KTReports
                 dataGrid.Columns[2].Visibility = Visibility.Collapsed;
                 Console.WriteLine("Redo Complete");
             }
+            else
+            {
+                SystemSounds.Beep.Play();
+            }
         }
 
         private void OnUndoClicked(object sender, RoutedEventArgs e)
@@ -240,6 +245,10 @@ namespace KTReports
                 dataGrid.Columns[1].Visibility = Visibility.Collapsed;
                 dataGrid.Columns[2].Visibility = Visibility.Collapsed;
                 Console.WriteLine("Undo Complete");
+            }
+            else
+            {
+                SystemSounds.Beep.Play();
             }
         }
     }
