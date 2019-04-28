@@ -28,7 +28,8 @@ namespace KTReports
         private List<NameValueCollection> routes = null;
         private DataTable dataTable = new DataTable();
         private List<string> routeColumns;
-
+        private Stack<DataTable> undoStack = new Stack<DataTable>();
+        private Stack<DataTable> redoStack = new Stack<DataTable>();
         public UpdateRoutes()
         {
             InitializeComponent();
@@ -50,11 +51,12 @@ namespace KTReports
             updateDatePicker.SelectedDate = DateTime.Today;
             dataGrid.DataContext = dataTable.DefaultView;
             dataGrid.ItemsSource = dataTable.DefaultView;
-            //var checkBoxColumn = new DataGridCheckBoxColumn
-            // {
-            //    Header = "Delete?"
-            //};
-            //dataGrid.Columns.Add(checkBoxColumn);
+            RoutedCommand undoCommand = new RoutedCommand();
+            undoCommand.InputGestures.Add(new KeyGesture(Key.Z, ModifierKeys.Control));
+            CommandBindings.Add(new CommandBinding(undoCommand, OnUndoClicked));
+            RoutedCommand redoCommand = new RoutedCommand();
+            redoCommand.InputGestures.Add(new KeyGesture(Key.Z, ModifierKeys.Control | ModifierKeys.Shift));
+            CommandBindings.Add(new CommandBinding(redoCommand, OnRedoClicked));
         }
 
         private void LoadedDataGrid(object sender, EventArgs e)
@@ -63,7 +65,7 @@ namespace KTReports
             dataGrid.Columns[1].Visibility = Visibility.Collapsed;
             dataGrid.Columns[2].Visibility = Visibility.Collapsed;
         }
-        
+
 
         private void OnDateChange(object sender, RoutedEventArgs e)
         {
@@ -78,25 +80,27 @@ namespace KTReports
                 if (result == MessageBoxResult.OK)
                 {
                     SaveChanges(null, null);
-                } 
+                }
             }
+            undoStack.Clear();
+            redoStack.Clear();
             PopulateDataGrid();
         }
 
         private void PopulateDataGrid()
         {
-            
+
             //dataGrid.Columns[1].Visibility = Visibility.Collapsed;
             dataTable.Clear();
             // Get all route data valid on selected date
-            routes = databaseManager.GetValidRoutes((DateTime) updateDatePicker.SelectedDate);
-            foreach(NameValueCollection route in routes)
+            routes = databaseManager.GetValidRoutes((DateTime)updateDatePicker.SelectedDate);
+            foreach (NameValueCollection route in routes)
             {
                 var dataRow = dataTable.NewRow();
                 for (int i = 0; i < routeColumns.Count; i++)
                 {
                     string col = routeColumns[i];
-                    dataRow[i+1] = route[col];
+                    dataRow[i + 1] = route[col];
                 }
                 dataTable.Rows.Add(dataRow);
                 dataRow.AcceptChanges();
@@ -105,7 +109,7 @@ namespace KTReports
 
         private void SaveChanges(object sender, RoutedEventArgs e)
         {
-            
+
             MessageBoxResult result = MessageBox.Show("Save your changes?", "Save Changes", MessageBoxButton.OKCancel);
             if (result != MessageBoxResult.OK)
             {
@@ -131,7 +135,7 @@ namespace KTReports
                         Console.Write(databaseColName + ": " + row[col] + ", ");
                     }
                     //modifiedRoute.Add("start_date", ((DateTime) updateDatePicker.SelectedDate).ToString("yyyy-MM-dd")); 
-                    if ((bool) row["Delete?"])
+                    if ((bool)row["Delete?"])
                     {
                         deletedRoutes.Add(modifiedRoute);
                     }
@@ -177,7 +181,6 @@ namespace KTReports
         {
             if (!double.IsNaN(Height))
             {
-                Console.WriteLine("TEST");
                 dataGrid.MaxHeight = 50;
 
             }
@@ -185,6 +188,10 @@ namespace KTReports
 
         private void CancelChanges(object sender, RoutedEventArgs e)
         {
+            if (dataTable.GetChanges() == null)
+            {
+                return;
+            }
             MessageBoxResult result = MessageBox.Show("Cancel your changes?", "Cancel Changes", MessageBoxButton.OKCancel);
             if (result != MessageBoxResult.OK)
             {
@@ -193,5 +200,47 @@ namespace KTReports
             PopulateDataGrid();
         }
 
+        private void UpdatedDataGrid(object sender, EventArgs e)
+        {
+            Console.WriteLine("Cell Updated");
+            undoStack.Push(dataTable.Copy());
+            redoStack.Clear();
+        }
+
+        private void OnRedoClicked(object sender, RoutedEventArgs e)
+        {
+            if (redoStack.Count() > 0)
+            {
+                undoStack.Push(dataTable.Copy());
+                dataTable = redoStack.Pop();
+                dataGrid.DataContext = dataTable.DefaultView;
+                dataGrid.ItemsSource = dataTable.DefaultView;
+                dataGrid.Items.Refresh();
+                dataGrid.Columns[1].Visibility = Visibility.Collapsed;
+                dataGrid.Columns[2].Visibility = Visibility.Collapsed;
+                Console.WriteLine("Redo Complete");
+            }
+        }
+
+        private void OnUndoClicked(object sender, RoutedEventArgs e)
+        {
+            if (undoStack.Count() > 0)
+            {
+                redoStack.Push(dataTable.Copy());
+                /*dataTable.Clear();
+                foreach (DataRow dataRow in undoStack.Pop().Rows)
+                {
+                    Console.WriteLine(dataRow.ItemArray);
+                    dataTable.Rows.Add(dataRow.ItemArray);
+                }*/
+                dataTable = undoStack.Pop();
+                dataGrid.DataContext = dataTable.DefaultView;
+                dataGrid.ItemsSource = dataTable.DefaultView;
+                dataGrid.Items.Refresh();
+                dataGrid.Columns[1].Visibility = Visibility.Collapsed;
+                dataGrid.Columns[2].Visibility = Visibility.Collapsed;
+                Console.WriteLine("Undo Complete");
+            }
+        }
     }
 }
