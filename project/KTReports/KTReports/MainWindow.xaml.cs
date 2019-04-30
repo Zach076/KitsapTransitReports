@@ -68,6 +68,11 @@ namespace KTReports
             Main.Content = new UpdateRoutes();
         }
 
+        private void OpenHolidays(object sender, RoutedEventArgs e)
+        {
+            Main.Content = new Holidays();
+        }
+
         private void updateStop(object sender, RoutedEventArgs e)
         {
             Main.Content = new updateStop();

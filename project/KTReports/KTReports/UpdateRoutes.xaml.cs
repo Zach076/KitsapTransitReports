@@ -31,6 +31,7 @@ namespace KTReports
         private List<string> routeColumns;
         private Stack<DataTable> undoStack = new Stack<DataTable>();
         private Stack<DataTable> redoStack = new Stack<DataTable>();
+        
         public UpdateRoutes()
         {
             InitializeComponent();
