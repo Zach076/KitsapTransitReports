@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -85,6 +86,10 @@ namespace KTReports
         private void addStop(object sender, RoutedEventArgs e)
         {
             Main.Content = new addStop();
+        }
+        private void visualizeData(object sender, RoutedEventArgs e)
+        {
+            Main.Content = new Visualization();
         }
 
         private void ImportKnownRoutes()

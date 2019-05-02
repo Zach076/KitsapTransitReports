@@ -531,7 +531,10 @@ namespace KTReports
                 masterCommand.ExecuteNonQuery();
             }
             // Use the new master route id when inserting a route into the Routes table
-            long path_id = sqliteConnection.LastInsertRowId;    
+            long path_id = sqliteConnection.LastInsertRowId;
+            Console.WriteLine();
+            Console.WriteLine(path_id);
+            Console.WriteLine();
             keyValuePairs.Add("path_id", path_id.ToString());
             InsertRoute(keyValuePairs);
             return path_id;
@@ -782,6 +785,14 @@ namespace KTReports
                         //Console.WriteLine("Table Column: " + reader.GetString(1));
                         columnNames.Add(reader.GetString(1));
                     }
+                }
+            }
+            for(int i = 0; i < columnNames.Count(); i++)
+            {
+                if (columnNames[i].Equals("file_id") || columnNames[i].Equals("path_id") || columnNames[i].Equals("fc_id") ||
+                    columnNames[i].Equals("assigned_stop_id"))
+                {
+                    columnNames.RemoveAt(i);
                 }
             }
             return columnNames;
@@ -1191,6 +1202,25 @@ namespace KTReports
             }
             Console.WriteLine();
         }
+        public List<NameValueCollection> GetRoutesRange()
+        {
+            var results = new List<NameValueCollection>();
+            string query = @"SELECT DISTINCT start_date
+                                FROM Routes";
+            using (SQLiteCommand command = new SQLiteCommand(query, sqliteConnection))
+            {
+                using (SQLiteDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        NameValueCollection row = reader.GetValues();
+                        results.Add(row);
+                    }
+                }
+            }
+            return results;
+        }
+
 
         public void getNFCRoutes()
         {
@@ -1238,4 +1268,5 @@ namespace KTReports
         }
     }
 }
+
 

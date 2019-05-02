@@ -144,6 +144,7 @@ namespace KTReports
                 var keyValuePairs = new Dictionary<string, string>();
                 keyValuePairs.Add("start_date", dateRange[0].ToString("yyyy-MM-dd"));
                 keyValuePairs.Add("end_date", dateRange[1].ToString("yyyy-MM-dd"));
+                keyValuePairs.Add("file_id", "1");
                 foreach (DataColumn column in dataTable.Columns)
                 {
                     string columnName = column.ColumnName;
@@ -170,6 +171,7 @@ namespace KTReports
                         databaseManager.InsertNFC(keyValuePairs);
                         break;
                     case FileType.RSD:
+                        keyValuePairs.Add("assigned_stop_id", "");
                         databaseManager.InsertRSD(keyValuePairs);
                         break;
                 }
