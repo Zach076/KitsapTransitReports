@@ -77,6 +77,10 @@ namespace KTReports
         {
             Main.Content = new AddStop();
         }
+        private void visualizeData(object sender, RoutedEventArgs e)
+        {
+            Main.Content = new Visualization();
+        }
 
         private void OnSizeChanged(object sender, RoutedEventArgs e)
         {
@@ -294,6 +298,7 @@ namespace KTReports
                             dict.Add("start_date", DateTime.Parse(reportPeriod[0]).ToString("yyyy-MM-dd"));
                             dict.Add("end_date", DateTime.Parse(reportPeriod[2]).ToString("yyyy-MM-dd"));
                             dict.Add("is_weekday", isWeekday.ToString());
+
                             dict.Add("file_id", file_id.ToString());
                             //Debug.WriteLine("insert");
                             bulkData.Add(dict);
