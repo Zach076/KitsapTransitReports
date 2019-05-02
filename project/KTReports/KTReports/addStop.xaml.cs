@@ -20,15 +20,15 @@ namespace KTReports
     /// <summary>
     /// Interaction logic for Reports.xaml
     /// </summary>
-    public partial class addStop: Page
+    public partial class AddStop: Page
     {
-        public addStop()
+        public AddStop()
         {
             InitializeComponent();
             
         }
 
-        private void addStopButton(object sender, RoutedEventArgs e)
+        private void AddStopButton(object sender, RoutedEventArgs e)
         {
 
             String stopName = stopNameTextBox.Text;

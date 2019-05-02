@@ -1,3 +1,4 @@
+using MahApps.Metro;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -19,6 +20,15 @@ namespace KTReports
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            ThemeManager.AddAccent("AppAccent", new Uri("pack://application:,,,/AppAccent.xaml"));
+
+            // get the current app style (theme and accent) from the application
+            Tuple<AppTheme, Accent> theme = ThemeManager.DetectAppStyle(Application.Current);
+
+            // now change app style to the custom accent and current theme
+            ThemeManager.ChangeAppStyle(Application.Current,
+                                        ThemeManager.GetAccent("AppAccent"),
+                                        ThemeManager.GetAppTheme("BaseLight"));
             // Gets a singleton for database manager
             //databaseManager = DatabaseManager.GetDBManager();
             // Run tests on insertions and queries for a test database

@@ -28,8 +28,20 @@
 
         <DockPanel Grid.Column="1">
             <Rectangle VerticalAlignment="Stretch" Width="1" Stroke="Gray" Margin="3"/>
-            <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="5" FontSize="16">Data to add:</TextBlock>
-            <DataGrid Name="dataGrid" DockPanel.Dock="Top" />
+            <TextBlock DockPanel.Dock="Top"
+                       HorizontalAlignment="Stretch" 
+                       Foreground="White" 
+                       TextAlignment="Center" 
+                       Padding="5" 
+                       Margin="0, 0, 0, 5" 
+                       FontSize="20"
+                       Background="{StaticResource BlueGradient}">Add Data</TextBlock>
+            <DataGrid Name="dataGrid" DockPanel.Dock="Top" 
+                ColumnHeaderStyle="{StaticResource DataGridHeaderStyle}" 
+                RowStyle="{StaticResource DataGridRowStyle}" 
+                AlternationCount="2"
+                Style="{StaticResource KTDataGridStyle}">
+            </DataGrid>
             <Button DockPanel.Dock="Bottom" Click="AddToDatabase" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="110" Name="AddToDatabaseButton" Margin="0,0,10,10">Add to database</Button>
         </DockPanel>
     </Grid>

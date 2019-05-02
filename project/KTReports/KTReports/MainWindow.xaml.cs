@@ -62,20 +62,10 @@ namespace KTReports
         {
             Main.Content = new ManualDataEntry();
         }
-        
-        private void editPage(object sender, RoutedEventArgs e)
-        {
-            Main.Content = new updateRouteInfo();
-        }
 
-        private void addRoute(object sender, RoutedEventArgs e)
+        private void OpenUpdateRoutes(object sender, RoutedEventArgs e)
         {
-            Main.Content = new addRoute();
-        }
-
-        private void deleteRoute(object sender, RoutedEventArgs e)
-        {
-            Main.Content = new deleteRoute();
+            Main.Content = new UpdateRoutes();
         }
 
         private void updateStop(object sender, RoutedEventArgs e)
@@ -85,11 +75,20 @@ namespace KTReports
 
         private void addStop(object sender, RoutedEventArgs e)
         {
-            Main.Content = new addStop();
+            Main.Content = new AddStop();
         }
         private void visualizeData(object sender, RoutedEventArgs e)
         {
             Main.Content = new Visualization();
+        }
+
+        private void OnSizeChanged(object sender, RoutedEventArgs e)
+        {
+            if (Main.Content is UpdateRoutes)
+            {
+                var updateRoutesPage = Main.Content as UpdateRoutes;
+                updateRoutesPage.dataGrid.MaxHeight = ActualHeight - 180;
+            }
         }
 
         private void ImportKnownRoutes()
@@ -299,6 +298,7 @@ namespace KTReports
                             dict.Add("start_date", DateTime.Parse(reportPeriod[0]).ToString("yyyy-MM-dd"));
                             dict.Add("end_date", DateTime.Parse(reportPeriod[2]).ToString("yyyy-MM-dd"));
                             dict.Add("is_weekday", isWeekday.ToString());
+
                             dict.Add("file_id", file_id.ToString());
                             //Debug.WriteLine("insert");
                             bulkData.Add(dict);
@@ -317,17 +317,11 @@ namespace KTReports
             if (isORCA)
             {
                 databaseManager.InsertBulkFCD(bulkData);
-            }
-            else
-            {
-                databaseManager.InsertBulkNFC(bulkData);
-            }
-            if (isORCA)
-            {
                 ImportKnownRoutes();
             }
             else
             {
+                databaseManager.InsertBulkNFC(bulkData);
                 ImportKnownRoutesNFC();
             }
             //cleanup workbook
@@ -371,6 +365,7 @@ namespace KTReports
                     {
                         KTProgressBar.IsIndeterminate = false;
                         StatusBarText.Text = string.Empty;
+                        MessageBox.Show($"Successfully imported routes from {importRoutesDialog.FileName}", "Import Routes Successful", MessageBoxButton.OK, MessageBoxImage.Asterisk);
                     });
                 });
                 thread.Start();
