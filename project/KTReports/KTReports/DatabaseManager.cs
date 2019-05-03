@@ -1002,6 +1002,50 @@ namespace KTReports
             return resultStrs;
         }
 
+        public List<String> getRange()
+        {
+            var results = dbManagerInstance.Query(new string[] { "start_date" }, new string[] { "Routes" },
+                           "1 = 1");
+            var resultStrs = new List<string>();
+            foreach (var row in results)
+            {
+                string rowStr = "";
+                foreach (string colName in row.AllKeys)
+                {
+                    if (rowStr.Length != 0)
+                    {
+
+                    }
+                    rowStr += row[colName].ToString();
+                }
+                resultStrs.Add(rowStr);
+            }
+            List<String> distinct = resultStrs.Distinct().ToList();
+            return resultStrs;
+        }
+
+        public int getBoardings(int route)
+        {
+            var results = dbManagerInstance.Query(new string[] { "boardings" }, new string[] { "FareCardData" },
+                           "assigned_route_id = " + "'" + route +"'");
+            var resultStrs = new List<string>();
+            foreach (var row in results)
+            {
+                string rowStr = "";
+                foreach (string colName in row.AllKeys)
+                {
+                    if (rowStr.Length != 0)
+                    {
+
+                    }
+                    rowStr += row[colName].ToString();
+                }
+                resultStrs.Add(rowStr);
+            }
+            int x = Int32.Parse(resultStrs.First());
+            return x;
+        }
+
         public void AddRoute(String routeID, String start, String name, String district, String distance_week, String distance_sat, String tripsWeek,
                 String tripsSat, String tripsHol, String weekdayHours, String satHours, String holHours)
         {
