@@ -133,7 +133,7 @@ namespace KTReports
                     foreach (DataColumn col in dataTable.Columns)
                     {
                         string databaseColName = col.ColumnName.ToLower().Replace(' ', '_');
-                        modifiedRoute.Add(databaseColName, row[col] as string);
+                        modifiedRoute.Add(databaseColName, row[col].ToString());
                         Console.Write(databaseColName + ": " + row[col] + ", ");
                     }
                     //modifiedRoute.Add("start_date", ((DateTime) updateDatePicker.SelectedDate).ToString("yyyy-MM-dd")); 
@@ -154,7 +154,7 @@ namespace KTReports
                     foreach (DataColumn col in dataTable.Columns)
                     {
                         string databaseColName = col.ColumnName.ToLower().Replace(' ', '_');
-                        addedRoute.Add(databaseColName, row[col] as string);
+                        addedRoute.Add(databaseColName, row[col].ToString());
                         Console.Write(databaseColName + ": " + row[col] + ", ");
                     }
                     addedRoutes.Add(addedRoute);

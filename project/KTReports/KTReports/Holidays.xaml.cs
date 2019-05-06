@@ -45,8 +45,12 @@ namespace KTReports
             var dateCol = new DataColumn("Date", typeof(string));
             dataTable.Columns.Add(dateCol);
             var serviceTypeCol = new DataColumn("Service Type", typeof(int));
-            deleteCol.DefaultValue = 0;
+            serviceTypeCol.DefaultValue = 0;
             dataTable.Columns.Add(serviceTypeCol);
+            var holidayIdCol = new DataColumn("Holiday Id", typeof(int));
+            holidayIdCol.DefaultValue = -1;
+            dataTable.Columns.Add(holidayIdCol);
+
             yearPicker.Value = DateTime.Today;
             dataGrid.DataContext = dataTable.DefaultView;
             dataGrid.ItemsSource = dataTable.DefaultView;
@@ -61,6 +65,7 @@ namespace KTReports
         private void LoadedDataGrid(object sender, EventArgs e)
         {
             dataGrid.MaxHeight = ActualHeight - 90;
+            dataGrid.Columns[4].Visibility = Visibility.Collapsed;
         }
 
 
@@ -99,30 +104,55 @@ namespace KTReports
             dataTable.Clear();
             int year = ((DateTime)yearPicker.Value).Year;
             IDictionary<DateTime, string> holidays = new USAPublicHoliday().PublicHolidayNames(year);
+            var yearStartAndEnd = new List<DateTime>() {
+                new DateTime(year, 1, 1),
+                new DateTime(year, 12, 31)
+            };
+            List<NameValueCollection> dbHolidays = databaseManager.GetHolidaysInRange(yearStartAndEnd);
+            var dbDates = new Dictionary<string, NameValueCollection>();
+            foreach (var holiday in dbHolidays)
+            {
+                dbDates.Add(DateTime.Parse(holiday["date"]).ToShortDateString(), holiday);
+                Console.WriteLine(DateTime.Parse(holiday["date"]).ToShortDateString());
+            }
+
             foreach (var holiday in holidays.Keys)
             {
                 var dataRow = dataTable.NewRow();
-                dataRow[1] = holidays[holiday];
-                dataRow[2] = holiday.ToShortDateString();
-                dataRow[3] = 0;
+                var date = holiday.ToShortDateString();
+                dataRow[2] = date;
+                if (dbDates.ContainsKey(date))
+                {
+                    dataRow[1] = dbDates[date]["name"];
+                    Console.WriteLine((dbDates[date]));
+                    dataRow[3] = dbDates[date]["service_type"];
+                    dataRow[4] = dbDates[date]["holiday_id"];
+                    dbDates.Remove(date);
+                }
+                else
+                {
+                    dataRow[1] = holidays[holiday];
+                    dataRow[3] = 0;
+                    dataRow[4] = -1;
+                }
                 dataTable.Rows.Add(dataRow);
                 dataRow.AcceptChanges();
                 Console.WriteLine(holiday + " " + holidays[holiday]);
                 
             }
-            Console.WriteLine("Holidays printed");
-            /*routes = databaseManager.GetValidRoutes((DateTime)yearPicker.Value);
-            foreach (NameValueCollection route in routes)
+            foreach (var holiday in dbDates.Values)
             {
                 var dataRow = dataTable.NewRow();
-                for (int i = 0; i < routeColumns.Count; i++)
-                {
-                    string col = routeColumns[i];
-                    dataRow[i + 1] = route[col];
-                }
+                dataRow[1] = holiday["name"];
+                var date = holiday["date"];
+                dataRow[2] = date;
+                dataRow[3] = holiday["service_type"];
+                dataRow[4] = holiday["holiday_id"];
                 dataTable.Rows.Add(dataRow);
                 dataRow.AcceptChanges();
-            }*/
+                Console.WriteLine(date);
+            }
+            Console.WriteLine("Holidays printed");
         }
 
         private void SaveChanges(object sender, RoutedEventArgs e)
@@ -133,9 +163,9 @@ namespace KTReports
             {
                 return;
             }
-            var addedRoutes = new List<Dictionary<string, string>>();
-            var deletedRoutes = new List<Dictionary<string, string>>();
-            var modifiedRoutes = new List<Dictionary<string, string>>();
+            var addedHolidays = new List<Dictionary<string, string>>();
+            var deletedHolidays = new List<Dictionary<string, string>>();
+            var modifiedHolidays = new List<Dictionary<string, string>>();
             foreach (DataRow row in dataTable.Rows)
             {
                 if (row.HasVersion(DataRowVersion.Proposed))
@@ -145,53 +175,76 @@ namespace KTReports
                 if (row.RowState == DataRowState.Modified)
                 {
                     Console.Write("Modified: ");
-                    var modifiedRoute = new Dictionary<string, string>();
+                    var modifiedHoliday = new Dictionary<string, string>();
                     foreach (DataColumn col in dataTable.Columns)
                     {
                         string databaseColName = col.ColumnName.ToLower().Replace(' ', '_');
-                        modifiedRoute.Add(databaseColName, row[col] as string);
+                        modifiedHoliday.Add(databaseColName, row[col].ToString());
                         Console.Write(databaseColName + ": " + row[col] + ", ");
                     }
-                    //modifiedRoute.Add("start_date", ((DateTime) updateDatePicker.SelectedDate).ToString("yyyy-MM-dd")); 
                     if ((bool)row["Delete?"])
                     {
-                        deletedRoutes.Add(modifiedRoute);
+                        deletedHolidays.Add(modifiedHoliday);
                     }
                     else
                     {
-                        modifiedRoutes.Add(modifiedRoute);
+                        modifiedHolidays.Add(modifiedHoliday);
                     }
                     Console.WriteLine();
                 }
                 else if (row.RowState == DataRowState.Added)
                 {
                     Console.Write("Added: ");
-                    var addedRoute = new Dictionary<string, string>();
+                    var addedHoliday = new Dictionary<string, string>();
                     foreach (DataColumn col in dataTable.Columns)
                     {
                         string databaseColName = col.ColumnName.ToLower().Replace(' ', '_');
-                        addedRoute.Add(databaseColName, row[col] as string);
+                        addedHoliday.Add(databaseColName, row[col].ToString());
                         Console.Write(databaseColName + ": " + row[col] + ", ");
                     }
-                    addedRoutes.Add(addedRoute);
+                    addedHolidays.Add(addedHoliday);
                     Console.WriteLine();
                 }
                 row.AcceptChanges();
             }
-            foreach (var route in modifiedRoutes)
+            foreach (var holiday in modifiedHolidays)
             {
-                databaseManager.UpdateRoute(route);
+                try
+                {
+                    holiday["date"] = DateTime.Parse(holiday["date"]).ToString("yyyy-MM-dd");
+                    Console.WriteLine(holiday["holiday_id"]);
+                    string holiday_id_str = holiday["holiday_id"];
+                    if (!holiday_id_str.Equals("-1"))
+                    {
+                        databaseManager.UpdateHoliday(holiday);
+                        Console.WriteLine("Modified holiday");
+                    }
+                    else
+                    {
+                        databaseManager.AddHoliday(holiday);
+                        Console.WriteLine("Added a modified holiday");
+                    }
+                }
+                catch (Exception) { }
             }
-            foreach (var route in addedRoutes)
+            foreach (var holiday in addedHolidays)
             {
-                route.Remove("path_id");
-                route.Remove("db_route_id");
-                databaseManager.InsertPath(route);
+                try
+                {
+                    holiday["date"] = DateTime.Parse(holiday["date"]).ToString("yyyy-MM-dd");
+                    databaseManager.AddHoliday(holiday);
+                }
+                catch (Exception) { }
             }
-            foreach (var route in deletedRoutes)
+            foreach (var holiday in deletedHolidays)
             {
-                databaseManager.DeleteRoute(route);
-            }
+                try
+                {
+                    holiday["date"] = DateTime.Parse(holiday["date"]).ToString("yyyy-MM-dd");
+                    databaseManager.DeleteHoliday(holiday);
+                }
+                catch (Exception) { }
+        }
             PopulateDataGrid();
         }
 
@@ -234,8 +287,7 @@ namespace KTReports
                 dataGrid.DataContext = dataTable.DefaultView;
                 dataGrid.ItemsSource = dataTable.DefaultView;
                 dataGrid.Items.Refresh();
-                dataGrid.Columns[1].Visibility = Visibility.Collapsed;
-                dataGrid.Columns[2].Visibility = Visibility.Collapsed;
+                dataGrid.Columns[4].Visibility = Visibility.Collapsed;
                 Console.WriteLine("Redo Complete");
             }
             else
@@ -249,16 +301,11 @@ namespace KTReports
             if (undoStack.Count() > 0)
             {
                 redoStack.Push(dataTable.Copy());
-                /*dataTable.Clear();
-                foreach (DataRow dataRow in undoStack.Pop().Rows)
-                {
-                    Console.WriteLine(dataRow.ItemArray);
-                    dataTable.Rows.Add(dataRow.ItemArray);
-                }*/
                 dataTable = undoStack.Pop();
                 dataGrid.DataContext = dataTable.DefaultView;
                 dataGrid.ItemsSource = dataTable.DefaultView;
                 dataGrid.Items.Refresh();
+                dataGrid.Columns[4].Visibility = Visibility.Collapsed;
                 Console.WriteLine("Undo Complete");
             }
             else

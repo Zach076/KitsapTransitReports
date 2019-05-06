@@ -42,7 +42,7 @@
                 AlternationCount="2"
                 Style="{StaticResource KTDataGridStyle}" />
             <!--<TextBox Name="ImportedFileInfo" DockPanel.Dock="Top" HorizontalAlignment="Center" FontSize="15" TextWrapping="Wrap" IsReadOnly="True" Padding="10"/>-->
-            <Button DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="130" Name="DeleteImportButton" Margin="0,0,10,10" Click="DeleteImportedFile">Delete Imported Data</Button>
+            <Button DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="145" Name="DeleteImportButton" Margin="0,0,10,10" Click="DeleteImportedFile">Delete Imported Data</Button>
         </DockPanel>
     </Grid>
 </Page>
