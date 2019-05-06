@@ -33,16 +33,14 @@ namespace KTReports
             InitializeComponent();
 
             DatabaseManager dbManager = DatabaseManager.GetDBManager();
-            string[] routes = dbManager.getRoutes().ToArray();
-            int[] sortedRoutes = Array.ConvertAll(routes, s => int.Parse(s));
+            int[] sortedRoutes = dbManager.getRoutes().ToArray();
             Array.Sort(sortedRoutes);
             int[] boardings = new int[sortedRoutes.Length];
             var range = dbManager.getRange();
 
             for (int i =0; i < sortedRoutes.Length; i++)
             {
-                int x = Int32.Parse(routes[i]);
-                boardings[i] = dbManager.getBoardings(x); 
+                boardings[i] = dbManager.getBoardings(sortedRoutes[i]); 
             }
 
             SeriesCollection = new LiveCharts.SeriesCollection

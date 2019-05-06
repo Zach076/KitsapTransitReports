@@ -172,6 +172,7 @@ namespace KTReports
 
                 string holidays = @"CREATE TABLE IF NOT EXISTS Holidays (
 	                holiday_id integer PRIMARY KEY AUTOINCREMENT,
+                    name text,
                     date text,
                     service_type int
                 )";
@@ -495,6 +496,75 @@ namespace KTReports
             return true;
         }
 
+
+        public bool UpdateHoliday(Dictionary<string, string> keyValuePairs)
+        {
+            try
+            {
+                string updateSQL =
+                    @"UPDATE Holidays 
+                        SET name = @name,  date = @date, service_type = @service_type 
+                        WHERE holiday_id = @holiday_id";
+                using (SQLiteCommand command = new SQLiteCommand(updateSQL, sqliteConnection))
+                {
+                    command.Parameters.Add(new SQLiteParameter("@holiday_id", keyValuePairs["holiday_id"]));
+                    command.Parameters.Add(new SQLiteParameter("@name", keyValuePairs["name"]));
+                    command.Parameters.Add(new SQLiteParameter("@date", keyValuePairs["date"]));
+                    command.Parameters.Add(new SQLiteParameter("@service_type", keyValuePairs["service_type"]));
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
+
+
+        public bool AddHoliday(Dictionary<string, string> keyValuePairs)
+        {
+            try
+            {
+                string insertSQL =
+                    @"INSERT INTO Holidays 
+                        (name, date, service_type) 
+                    VALUES (@name, @date, @service_type)";
+                using (SQLiteCommand command = new SQLiteCommand(insertSQL, sqliteConnection))
+                {
+                    command.Parameters.Add(new SQLiteParameter("@name", keyValuePairs["name"]));
+                    command.Parameters.Add(new SQLiteParameter("@date", keyValuePairs["date"]));
+                    command.Parameters.Add(new SQLiteParameter("@service_type", keyValuePairs["service_type"]));
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (SQLiteException sqle)
+            {
+                Console.WriteLine(sqle.StackTrace);
+                return false;
+            }
+            return true;
+        }
+
+        
+        public bool DeleteHoliday(Dictionary<string, string> keyValuePairs)
+        {
+            try
+            {
+                string deleteFromFiles = $"DELETE FROM Holidays WHERE holiday_id == @holiday_id";
+                using (var command = new SQLiteCommand(deleteFromFiles, sqliteConnection))
+                {
+                    command.Parameters.Add(new SQLiteParameter("@holiday_id", keyValuePairs["holiday_id"]));
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (SQLiteException sqliteEx)
+            {
+                return false;
+            }
+            return true;
+        }
+
         // Insert a route (either new or a change to a route using an existing path)
         public bool InsertRoute(Dictionary<string, string> keyValuePairs)
         {
@@ -591,9 +661,6 @@ namespace KTReports
             }
             // Use the new master route id when inserting a route into the Routes table
             long path_id = sqliteConnection.LastInsertRowId;
-            Console.WriteLine();
-            Console.WriteLine(path_id);
-            Console.WriteLine();
             keyValuePairs.Add("path_id", path_id.ToString());
             InsertRoute(keyValuePairs);
             return path_id;
@@ -633,7 +700,7 @@ namespace KTReports
         public List<NameValueCollection> GetHolidaysInRange(List<DateTime> range)
         {
             var results = new List<NameValueCollection>();
-            string query = @"SELECT date, service_type 
+            string query = @"SELECT * 
                                 FROM Holidays 
                                 WHERE @startDate <= Holidays.date AND @endDate >= Holidays.date";
             using (SQLiteCommand command = new SQLiteCommand(query, sqliteConnection))
@@ -940,7 +1007,6 @@ namespace KTReports
 
 
                 string updateSQL = "UPDATE Routes SET " + option + " = " + "'" + newTry + "'" + " WHERE assigned_route_id = " + "'" + routeName + "'";
-                Console.WriteLine(updateSQL);
                 using (SQLiteCommand command = new SQLiteCommand(updateSQL, sqliteConnection))
                 {
                     command.ExecuteNonQuery();
@@ -978,28 +1044,22 @@ namespace KTReports
         }
 
 
-        public List<String> getRoutes()
+        public List<int> getRoutes()
         {
             var results = dbManagerInstance.Query(new string[] {"assigned_route_id"}, new string[] { "Routes" },
                            "1 = 1");
-            var resultStrs = new List<string>();
+            var routeIds = new List<int>();
             foreach (var row in results)
             {
-                string rowStr = "";
-                foreach (string colName in row.AllKeys)
+                string routeId = row["assigned_route_id"];
+                bool isParsed = Int32.TryParse(routeId, out int id);
+                if (isParsed)
                 {
-                    if (rowStr.Length != 0)
-                    {
-                        
-                    }
-                    rowStr += row[colName].ToString();
+                    routeIds.Add(id);
                 }
-                resultStrs.Add(rowStr);
-                //Console.WriteLine(rowStr);
+
             }
-            //List<String> distinct = resultStrs.Distinct().ToList();
-            //distinct.Sort();
-            return resultStrs;
+            return routeIds;
         }
 
         public List<String> getRange()
@@ -1041,6 +1101,10 @@ namespace KTReports
                     rowStr += row[colName].ToString();
                 }
                 resultStrs.Add(rowStr);
+            }
+            if (resultStrs.Count() == 0)
+            {
+                return 0;
             }
             int x = Int32.Parse(resultStrs.First());
             return x;
@@ -1282,30 +1346,26 @@ namespace KTReports
         {
             var results = dbManagerInstance.Query(new string[] { "assigned_route_id" }, new string[] { "FareCardData" },
                            "fc_id > 0");
-            var resultStrs = new List<string>();
+            var routeIds = new HashSet<int>();
             foreach (var row in results)
             {
-                string rowStr = "";
-                foreach (string colName in row.AllKeys)
+                string routeId = row["assigned_route_id"];
+                bool isParsed = Int32.TryParse(routeId, out int id);
+                if (isParsed)
                 {
-                    if (rowStr.Length != 0)
-                    {
-                        rowStr += "";
-                    }
-                    rowStr += row[colName].ToString();
+                    routeIds.Add(id);
                 }
-                resultStrs.Add(rowStr);
             }
-            List<String> distinct = resultStrs.Distinct().ToList();
+            List<int> distinct = routeIds.ToList();
             String empty = "";
-            foreach (String all in distinct)
+            foreach (int all in distinct)
             {
                 var stored = getRoutes();
                 if (!stored.Contains(all))
                 {
                     var newRoute = new Dictionary<string, string>
                     {
-                    { "path_id", all },
+                    { "path_id", all.ToString() },
                     { "route_id", empty },
                     { "start_date", empty },
                     { "route_name", "(NO NAME)" },
@@ -1371,30 +1431,26 @@ namespace KTReports
         {
             var results = dbManagerInstance.Query(new string[] { "assigned_route_id" }, new string[] { "NonFareCardData" },
                            "nfc_id >= 0");
-            var resultStrs = new List<string>();
+            var routeIds = new HashSet<int>();
             foreach (var row in results)
             {
-                string rowStr = "";
-                foreach (string colName in row.AllKeys)
+                string routeId = row["assigned_route_id"];
+                bool isParsed = Int32.TryParse(routeId, out int id);
+                if (isParsed)
                 {
-                    if (rowStr.Length != 0)
-                    {
-                        rowStr += "";
-                    }
-                    rowStr += row[colName].ToString();
+                    routeIds.Add(id);
                 }
-                resultStrs.Add(rowStr);
             }
-            List<String> distinct = resultStrs.Distinct().ToList();
+            List<int> distinct = routeIds.ToList();
             String empty = "";
-            foreach (String all in distinct)
+            foreach (int all in distinct)
             {
                 var stored = getRoutes();
                 if (!stored.Contains(all))
                 {
                     var newRoute = new Dictionary<string, string>
                     {
-                    { "path_id", all },
+                    { "path_id", all.ToString() },
                     { "route_id", empty },
                     { "start_date", empty },
                     { "route_name", "(NO NAME)" },

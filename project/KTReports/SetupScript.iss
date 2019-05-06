@@ -53,12 +53,17 @@ Source: "KTReports\bin\Release\DocumentFormat.OpenXml.xml"; DestDir: "{app}"; Fl
 Source: "KTReports\bin\Release\ExcelNumberFormat.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "KTReports\bin\Release\FastMember.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "KTReports\bin\Release\System.Windows.Interactivity.dll"; DestDir: "{app}"; Flags: ignoreversion
+
+
+Source: "KTReports\bin\Release\*"; DestDir: "{app}"; Flags: ignoreversion
+
+Source: "KTReports\logo_kitsap_transit.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "routes.json"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ktdatabase.sqlite3"; DestDir: "{userappdata}"; Flags: onlyifdoesntexist;
+Source: "ktdatabase.sqlite3"; DestDir: "{userappdata}"; Flags: ignoreversion;
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{commonprograms}\Kitsap Transit Reports"; Filename: "{app}\KTReports.exe"
+Name: "{commonprograms}\Kitsap Transit Reports"; Filename: "{app}\KTReports.exe";
 Name: "{commondesktop}\Kitsap Transit Reports"; Filename: "{app}\KTReports.exe"; Tasks: desktopicon
 
 [Run]
