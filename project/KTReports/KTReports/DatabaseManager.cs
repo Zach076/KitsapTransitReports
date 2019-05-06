@@ -978,28 +978,22 @@ namespace KTReports
         }
 
 
-        public List<String> getRoutes()
+        public List<int> getRoutes()
         {
             var results = dbManagerInstance.Query(new string[] {"assigned_route_id"}, new string[] { "Routes" },
                            "1 = 1");
-            var resultStrs = new List<string>();
+            var routeIds = new List<int>();
             foreach (var row in results)
             {
-                string rowStr = "";
-                foreach (string colName in row.AllKeys)
+                string routeId = row["assigned_route_id"];
+                bool isParsed = Int32.TryParse(routeId, out int id);
+                if (isParsed)
                 {
-                    if (rowStr.Length != 0)
-                    {
-                        
-                    }
-                    rowStr += row[colName].ToString();
+                    routeIds.Add(id);
                 }
-                resultStrs.Add(rowStr);
-                //Console.WriteLine(rowStr);
+
             }
-            //List<String> distinct = resultStrs.Distinct().ToList();
-            //distinct.Sort();
-            return resultStrs;
+            return routeIds;
         }
 
         public List<String> getRange()
@@ -1286,30 +1280,26 @@ namespace KTReports
         {
             var results = dbManagerInstance.Query(new string[] { "assigned_route_id" }, new string[] { "FareCardData" },
                            "fc_id > 0");
-            var resultStrs = new List<string>();
+            var routeIds = new HashSet<int>();
             foreach (var row in results)
             {
-                string rowStr = "";
-                foreach (string colName in row.AllKeys)
+                string routeId = row["assigned_route_id"];
+                bool isParsed = Int32.TryParse(routeId, out int id);
+                if (isParsed)
                 {
-                    if (rowStr.Length != 0)
-                    {
-                        rowStr += "";
-                    }
-                    rowStr += row[colName].ToString();
+                    routeIds.Add(id);
                 }
-                resultStrs.Add(rowStr);
             }
-            List<String> distinct = resultStrs.Distinct().ToList();
+            List<int> distinct = routeIds.ToList();
             String empty = "";
-            foreach (String all in distinct)
+            foreach (int all in distinct)
             {
                 var stored = getRoutes();
                 if (!stored.Contains(all))
                 {
                     var newRoute = new Dictionary<string, string>
                     {
-                    { "path_id", all },
+                    { "path_id", all.ToString() },
                     { "route_id", empty },
                     { "start_date", empty },
                     { "route_name", "(NO NAME)" },
@@ -1375,30 +1365,26 @@ namespace KTReports
         {
             var results = dbManagerInstance.Query(new string[] { "assigned_route_id" }, new string[] { "NonFareCardData" },
                            "nfc_id >= 0");
-            var resultStrs = new List<string>();
+            var routeIds = new HashSet<int>();
             foreach (var row in results)
             {
-                string rowStr = "";
-                foreach (string colName in row.AllKeys)
+                string routeId = row["assigned_route_id"];
+                bool isParsed = Int32.TryParse(routeId, out int id);
+                if (isParsed)
                 {
-                    if (rowStr.Length != 0)
-                    {
-                        rowStr += "";
-                    }
-                    rowStr += row[colName].ToString();
+                    routeIds.Add(id);
                 }
-                resultStrs.Add(rowStr);
             }
-            List<String> distinct = resultStrs.Distinct().ToList();
+            List<int> distinct = routeIds.ToList();
             String empty = "";
-            foreach (String all in distinct)
+            foreach (int all in distinct)
             {
                 var stored = getRoutes();
                 if (!stored.Contains(all))
                 {
                     var newRoute = new Dictionary<string, string>
                     {
-                    { "path_id", all },
+                    { "path_id", all.ToString() },
                     { "route_id", empty },
                     { "start_date", empty },
                     { "route_name", "(NO NAME)" },
