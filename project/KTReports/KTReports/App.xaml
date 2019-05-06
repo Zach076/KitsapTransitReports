@@ -17,17 +17,17 @@
                 <Setter Property="FontSize" Value="14" />
             </Style>
 
-            <Color x:Key="HighlightColor">#1e4061</Color>
+            <Color x:Key="HighlightColor">#f27024</Color>
 
-            <Color x:Key="AccentBaseColor">#1e4061</Color>
+            <Color x:Key="AccentBaseColor">#017c8e</Color>
             <!--  80%  -->
-            <Color x:Key="AccentColor">#1e4061</Color>
+            <Color x:Key="AccentColor">#017c8e</Color>
             <!--  60%  -->
-            <Color x:Key="AccentColor2">#1e4061</Color>
+            <Color x:Key="AccentColor2">#017c8e</Color>
             <!--  40%  -->
-            <Color x:Key="AccentColor3">#1e4061</Color>
+            <Color x:Key="AccentColor3">#017c8e</Color>
             <!--  20%  -->
-            <Color x:Key="AccentColor4">#1e4061</Color>
+            <Color x:Key="AccentColor4">#017c8e</Color>
 
             <Style TargetType="{x:Type Button}" BasedOn="{StaticResource BaseStyle}"/>
             <Style TargetType="{x:Type Label}" BasedOn="{StaticResource BaseStyle}"/>
@@ -39,13 +39,13 @@
                 <Setter Property="FontSize" Value="14" />
             </Style>
             <LinearGradientBrush x:Key="BlueGradient" StartPoint="0.5,0" EndPoint="0.5,1">
-                <GradientStop Color="#1e4061" Offset="0"/>
-                <GradientStop Color="#3470ab" Offset="1"/>
+                <GradientStop Color="#005865" Offset="0"/>
+                <GradientStop Color="#017c8e" Offset="1"/>
             </LinearGradientBrush>
             
             <LinearGradientBrush x:Key="HeaderBrush" StartPoint="0.5,0" EndPoint="0.5,1">
-                <GradientStop Color="#003880" Offset="0"/>
-                <GradientStop Color="#0062c0" Offset="1"/>
+                <GradientStop Color="#005865" Offset="0"/>
+                <GradientStop Color="#017c8e" Offset="1"/>
             </LinearGradientBrush>
 
             <Style x:Key="DataGridHeaderStyle" TargetType="DataGridColumnHeader">
@@ -74,10 +74,10 @@
                 <Setter Property="FontWeight" Value="Normal"/>
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Background" Value="#5bb200"/>
+                        <Setter Property="Background" Value="#f27024"/>
                     </Trigger>
                     <Trigger Property="IsSelected" Value="True">
-                        <Setter Property="Background" Value="#5bb200"/>
+                        <Setter Property="Background" Value="#f27024"/>
                     </Trigger>
                 </Style.Triggers>
             </Style>
