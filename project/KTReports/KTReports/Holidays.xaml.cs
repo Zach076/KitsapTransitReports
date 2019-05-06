@@ -144,7 +144,7 @@ namespace KTReports
             {
                 var dataRow = dataTable.NewRow();
                 dataRow[1] = holiday["name"];
-                var date = holiday["date"];
+                var date = DateTime.Parse(holiday["date"]).ToShortDateString();
                 dataRow[2] = date;
                 dataRow[3] = holiday["service_type"];
                 dataRow[4] = holiday["holiday_id"];
