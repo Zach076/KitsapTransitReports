@@ -590,7 +590,10 @@ namespace KTReports
                 masterCommand.ExecuteNonQuery();
             }
             // Use the new master route id when inserting a route into the Routes table
-            long path_id = sqliteConnection.LastInsertRowId;    
+            long path_id = sqliteConnection.LastInsertRowId;
+            Console.WriteLine();
+            Console.WriteLine(path_id);
+            Console.WriteLine();
             keyValuePairs.Add("path_id", path_id.ToString());
             InsertRoute(keyValuePairs);
             return path_id;
@@ -865,6 +868,14 @@ namespace KTReports
                     }
                 }
             }
+            for(int i = 0; i < columnNames.Count(); i++)
+            {
+                if (columnNames[i].Equals("file_id") || columnNames[i].Equals("path_id") || columnNames[i].Equals("fc_id") ||
+                    columnNames[i].Equals("assigned_stop_id"))
+                {
+                    columnNames.RemoveAt(i);
+                }
+            }
             return columnNames;
         }
 
@@ -989,6 +1000,54 @@ namespace KTReports
             //List<String> distinct = resultStrs.Distinct().ToList();
             //distinct.Sort();
             return resultStrs;
+        }
+
+        public List<String> getRange()
+        {
+            var results = dbManagerInstance.Query(new string[] { "start_date" }, new string[] { "Routes" },
+                           "1 = 1");
+            var resultStrs = new List<string>();
+            foreach (var row in results)
+            {
+                string rowStr = "";
+                foreach (string colName in row.AllKeys)
+                {
+                    if (rowStr.Length != 0)
+                    {
+
+                    }
+                    rowStr += row[colName].ToString();
+                }
+                resultStrs.Add(rowStr);
+            }
+            List<String> distinct = resultStrs.Distinct().ToList();
+            return resultStrs;
+        }
+
+        public int getBoardings(int route)
+        {
+            var results = dbManagerInstance.Query(new string[] { "boardings" }, new string[] { "FareCardData" },
+                           "assigned_route_id = " + "'" + route +"'");
+            var resultStrs = new List<string>();
+            foreach (var row in results)
+            {
+                string rowStr = "";
+                foreach (string colName in row.AllKeys)
+                {
+                    if (rowStr.Length != 0)
+                    {
+
+                    }
+                    rowStr += row[colName].ToString();
+                }
+                resultStrs.Add(rowStr);
+            }
+            if (resultStrs.Count() == 0)
+            {
+                return 0;
+            }
+            int x = Int32.Parse(resultStrs.First());
+            return x;
         }
 
         public void AddRoute(String routeID, String start, String name, String district, String distance_week, String distance_sat, String tripsWeek,
@@ -1292,6 +1351,25 @@ namespace KTReports
             }
             Console.WriteLine();
         }
+        public List<NameValueCollection> GetRoutesRange()
+        {
+            var results = new List<NameValueCollection>();
+            string query = @"SELECT DISTINCT start_date
+                                FROM Routes";
+            using (SQLiteCommand command = new SQLiteCommand(query, sqliteConnection))
+            {
+                using (SQLiteDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        NameValueCollection row = reader.GetValues();
+                        results.Add(row);
+                    }
+                }
+            }
+            return results;
+        }
+
 
         public void getNFCRoutes()
         {
@@ -1339,4 +1417,5 @@ namespace KTReports
         }
     }
 }
+
 
