@@ -68,6 +68,11 @@ namespace KTReports
             Main.Content = new UpdateRoutes();
         }
 
+        private void OpenHolidays(object sender, RoutedEventArgs e)
+        {
+            Main.Content = new Holidays();
+        }
+
         private void updateStop(object sender, RoutedEventArgs e)
         {
             Main.Content = new updateStop();
@@ -109,16 +114,18 @@ namespace KTReports
 
         private void ImportFile(object sender, RoutedEventArgs e)
         {
-            string fileName = "";
             OpenFileDialog fileDia = new OpenFileDialog();
+            fileDia.Multiselect = true;
             fileDia.Filter = "Excel/CSV Files|*.xls;*.xlsx;*.xlsm;*.csv";
             fileDia.Title = "Select a file to import";
             fileDia.FilterIndex = 2;
             fileDia.ShowDialog();
             //fileDia.RestoreDirectory = true;
-            fileName = fileDia.FileName;
-            var thread = new System.Threading.Thread(()=>ThreadParseData(fileName));
-            thread.Start();
+            foreach (var fileName in fileDia.FileNames)
+            {
+                var thread = new System.Threading.Thread(() => ThreadParseData(fileName));
+                thread.Start();
+            }
         }
 
         private void ThreadParseData(string fileName) 

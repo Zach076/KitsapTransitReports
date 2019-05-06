@@ -4,17 +4,17 @@
                     xmlns:options="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
                     xmlns:local="clr-namespace:KTReports"
                     mc:Ignorable="options">
-    <Color x:Key="HighlightColor">#3470ab</Color>
+    <Color x:Key="HighlightColor">#f27024</Color>
 
-    <Color x:Key="AccentBaseColor">#3470ab</Color>
+    <Color x:Key="AccentBaseColor">#017c8e</Color>
     <!--  80%  -->
-    <Color x:Key="AccentColor">#3470ab</Color>
+    <Color x:Key="AccentColor">#017c8e</Color>
     <!--  60%  -->
-    <Color x:Key="AccentColor2">#3470ab</Color>
+    <Color x:Key="AccentColor2">#017c8e</Color>
     <!--  40%  -->
-    <Color x:Key="AccentColor3">#2f85da</Color>
+    <Color x:Key="AccentColor3">#f27024</Color>
     <!--  20%  -->
-    <Color x:Key="AccentColor4">#2f85da</Color>
+    <Color x:Key="AccentColor4">#f27024</Color>
 
     <!--  re-set brushes too  -->
     <SolidColorBrush x:Key="HighlightBrush" Color="{StaticResource HighlightColor}" options:Freeze="True" />

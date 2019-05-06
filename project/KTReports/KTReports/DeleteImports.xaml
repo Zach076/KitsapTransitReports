@@ -14,7 +14,15 @@
             <ColumnDefinition Name="FileInfo" Width="3*"/>
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="0" VerticalAlignment="Stretch">
-            <TextBlock HorizontalAlignment="Center" Margin="5" FontSize="18">Imported Files:</TextBlock>
+            <TextBlock Padding="5" 
+                       Margin="0, 0, 0, 5" 
+                       FontSize="18" 
+                       Foreground="White" 
+                       TextAlignment="Center" 
+                       HorizontalAlignment="Stretch" 
+                       Background="{StaticResource BlueGradient}">
+                Imported Files:
+            </TextBlock>
             <ListBox Name="ListOfImports" Margin="5"/>
         </StackPanel>
         <DockPanel Grid.Column="1">
@@ -34,7 +42,7 @@
                 AlternationCount="2"
                 Style="{StaticResource KTDataGridStyle}" />
             <!--<TextBox Name="ImportedFileInfo" DockPanel.Dock="Top" HorizontalAlignment="Center" FontSize="15" TextWrapping="Wrap" IsReadOnly="True" Padding="10"/>-->
-            <Button DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="130" Name="DeleteImportButton" Margin="0,0,10,10" Click="DeleteImportedFile">Delete Imported Data</Button>
+            <Button DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="145" Name="DeleteImportButton" Margin="0,0,10,10" Click="DeleteImportedFile">Delete Imported Data</Button>
         </DockPanel>
     </Grid>
 </Page>
