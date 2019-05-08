@@ -1064,7 +1064,7 @@ namespace KTReports
 
         public List<String> getRange()
         {
-            var results = dbManagerInstance.Query(new string[] { "start_date" }, new string[] { "Routes" },
+            var results = dbManagerInstance.Query(new string[] { " DISTINCT start_date" }, new string[] { "Routes" },
                            "1 = 1");
             var resultStrs = new List<string>();
             foreach (var row in results)

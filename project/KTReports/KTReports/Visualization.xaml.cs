@@ -38,31 +38,63 @@ namespace KTReports
             int[] boardings = new int[sortedRoutes.Length];
             var range = dbManager.getRange();
 
-            for (int i =0; i < sortedRoutes.Length; i++)
-            {
-                boardings[i] = dbManager.getBoardings(sortedRoutes[i]); 
-            }
+            SeriesCollection = new LiveCharts.SeriesCollection{};
 
-            SeriesCollection = new LiveCharts.SeriesCollection
+            for (int y = 0; y < range.Count-1; y++)
             {
-                new ColumnSeries
+                var reportRange = range[y];
+                int month = (((int) reportRange[5] - 48) * 10) + ((int)reportRange[6] - 48);
+                var endDate = reportRange.Remove(8,2);
+                switch(month)
                 {
-                    Title = range[0],
-                    Values = new ChartValues<int> { } //Boardings
+                    case 2:
+                        endDate = endDate + "28";
+                        break;
+                    case 4:
+                        endDate = endDate + "30";
+                        break;
+                    case 6:
+                        endDate = endDate + "30";
+                        break;
+                    case 9:
+                        endDate = endDate + "30";
+                        break;
+                    case 11:
+                        endDate = endDate + "30";
+                        break;
+                    default:
+                        endDate = endDate + "31";
+                        break;
                 }
-            };
-            int numRoutes = sortedRoutes.Length;
-            int j = 0;
-            while(numRoutes != 0)
-            {
-                SeriesCollection[0].Values.Add(boardings[j]);
-                j++;
-                numRoutes--;
-            }
 
-            string[] backString = sortedRoutes.Select(x => x.ToString()).ToArray();
-            Labels = backString;
-            Formatter = value => value.ToString("N");
+                List<DateTime> newRange = new List<DateTime>();
+                newRange.Add(DateTime.ParseExact(reportRange, "yyyy-MM-dd", null));
+                newRange.Add(DateTime.ParseExact(endDate, "yyyy-MM-dd", null));
+
+                for (int i = 0; i < sortedRoutes.Length; i++)
+                {
+                    boardings[i] = dbManager.GetRouteRidership(sortedRoutes[i], newRange, true)["total"] + dbManager.GetRouteRidership(sortedRoutes[i], newRange, false)["total"];
+                }
+
+                SeriesCollection.Add(new StackedColumnSeries
+                {
+                    Title = range[y],
+                    Values = new ChartValues<int> { } //Boardings
+                });
+
+                int numRoutes = sortedRoutes.Length;
+                int j = 0;
+                while (numRoutes != 0)
+                {
+                    SeriesCollection[y].Values.Add(boardings[j]);
+                    j++;
+                    numRoutes--;
+                }
+
+                string[] backString = sortedRoutes.Select(x => x.ToString()).ToArray();
+                Labels = backString;
+                Formatter = value => value.ToString("N");
+            }
 
             DataContext = this;
         }
