@@ -30,6 +30,7 @@ namespace KTReports
         private static Visualization visualizationInstance = null;
         private DatabaseManager databaseManager = DatabaseManager.GetDBManager();
         private int numVisualizations = 0;
+        private Brush brush = null;
 
         private Visualization()
         {
@@ -37,6 +38,8 @@ namespace KTReports
             SeriesCollection = new LiveCharts.SeriesCollection();
             DataContext = this;
             monthYearPicker.Value = DateTime.Now;
+            var converter = new System.Windows.Media.BrushConverter();
+            brush = (Brush)converter.ConvertFromString("#f27024");
         }
 
         public static Visualization GetVisualizationInstance()
@@ -83,7 +86,8 @@ namespace KTReports
             SeriesCollection.Add(new StackedColumnSeries
             {
                 Title = $"{month}, {range[0].Year}",
-                Values = new ChartValues<int>() //Boardings
+                Values = new ChartValues<int>(), //Boardings
+                Fill = brush
             });
             var labels = new List<string>();
             foreach (var boardingCount in boardings)
