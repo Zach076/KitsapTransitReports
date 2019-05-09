@@ -21,82 +21,86 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using LiveCharts;
 using LiveCharts.Wpf;
-
+using System.Globalization;
 
 namespace KTReports
 {
     public partial class Visualization : Page
     {
+        private static Visualization visualizationInstance = null;
+        private DatabaseManager databaseManager = DatabaseManager.GetDBManager();
+        private int numVisualizations = 0;
 
-        public Visualization()
+        private Visualization()
         {
             InitializeComponent();
+            SeriesCollection = new LiveCharts.SeriesCollection();
+            DataContext = this;
+            monthYearPicker.Value = DateTime.Now;
+        }
 
-            DatabaseManager dbManager = DatabaseManager.GetDBManager();
-            int[] sortedRoutes = dbManager.getRoutes().ToArray();
-            Array.Sort(sortedRoutes);
-            int[] boardings = new int[sortedRoutes.Length];
-            var range = dbManager.getRange();
-
-            SeriesCollection = new LiveCharts.SeriesCollection{};
-
-            for (int y = 0; y < range.Count-1; y++)
+        public static Visualization GetVisualizationInstance()
+        {
+            if (visualizationInstance == null)
             {
-                var reportRange = range[y];
-                int month = (((int) reportRange[5] - 48) * 10) + ((int)reportRange[6] - 48);
-                var endDate = reportRange.Remove(8,2);
-                switch(month)
-                {
-                    case 2:
-                        endDate = endDate + "28";
-                        break;
-                    case 4:
-                        endDate = endDate + "30";
-                        break;
-                    case 6:
-                        endDate = endDate + "30";
-                        break;
-                    case 9:
-                        endDate = endDate + "30";
-                        break;
-                    case 11:
-                        endDate = endDate + "30";
-                        break;
-                    default:
-                        endDate = endDate + "31";
-                        break;
-                }
+                visualizationInstance = new Visualization();
+            }
+            return visualizationInstance;
+        }
 
-                List<DateTime> newRange = new List<DateTime>();
-                newRange.Add(DateTime.ParseExact(reportRange, "yyyy-MM-dd", null));
-                newRange.Add(DateTime.ParseExact(endDate, "yyyy-MM-dd", null));
+        public void RefreshVisualization()
+        {
+            OnDateChange(null, null);
+        } 
 
-                for (int i = 0; i < sortedRoutes.Length; i++)
-                {
-                    boardings[i] = dbManager.GetRouteRidership(sortedRoutes[i], newRange, true)["total"] + dbManager.GetRouteRidership(sortedRoutes[i], newRange, false)["total"];
-                }
+        private void OnDateChange(object sender, RoutedEventArgs e)
+        {
+            Interlocked.Increment(ref numVisualizations);
+            MainWindow.progressBar.IsIndeterminate = true;
+            MainWindow.statusTextBlock.Text = "Generating Visualization...";
+            if (SeriesCollection != null) {
+                SeriesCollection.Clear();
+            }
+            var date = (DateTime)monthYearPicker.Value;
+            if (date == null)
+            {
+                return;
+            }
+            var startDate = new DateTime(date.Year, date.Month, 1);
+            var endDate = new DateTime(date.Year, date.Month, DateTime.DaysInMonth(date.Year, date.Month));
+            var range = new List<DateTime>() { startDate, endDate };
+            List<NameValueCollection> sortedRoutes = databaseManager.GetRoutesInRange(range);
 
-                SeriesCollection.Add(new StackedColumnSeries
-                {
-                    Title = range[y],
-                    Values = new ChartValues<int> { } //Boardings
-                });
+            var boardings = new int[sortedRoutes.Count];
 
-                int numRoutes = sortedRoutes.Length;
-                int j = 0;
-                while (numRoutes != 0)
-                {
-                    SeriesCollection[y].Values.Add(boardings[j]);
-                    j++;
-                    numRoutes--;
-                }
-
-                string[] backString = sortedRoutes.Select(x => x.ToString()).ToArray();
-                Labels = backString;
-                Formatter = value => value.ToString("N");
+            for (int i = 0; i < sortedRoutes.Count; i++)
+            {
+                int routeId = int.Parse(sortedRoutes[i]["assigned_route_id"]);
+                boardings[i] = databaseManager.GetRouteRidership(routeId, range, true)["total"] + databaseManager.GetRouteRidership(routeId, range, false)["total"];
+            }
+            CultureInfo cultureInfo = new CultureInfo("en-US");
+            var month = range[0].ToString("MMM", cultureInfo);
+            SeriesCollection.Add(new StackedColumnSeries
+            {
+                Title = $"{month}, {range[0].Year}",
+                Values = new ChartValues<int>() //Boardings
+            });
+            var labels = new List<string>();
+            foreach (var boardingCount in boardings)
+            {
+                SeriesCollection[0].Values.Add(boardingCount);
             }
 
-            DataContext = this;
+            string[] backString = sortedRoutes.Select(x => x["assigned_route_id"].ToString()).ToArray();
+            Labels = backString;
+            Formatter = value => value.ToString("N");
+
+            Interlocked.Decrement(ref numVisualizations);
+            if (numVisualizations == 0)
+            {
+                MainWindow.progressBar.IsIndeterminate = false;
+                MainWindow.statusTextBlock.Text = string.Empty;
+            }
         }
 
         public LiveCharts.SeriesCollection SeriesCollection { get; set; }

@@ -23,40 +23,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "KTReports\bin\Release\KTReports.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\EntityFramework.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\EntityFramework.SqlServer.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\EntityFramework.SqlServer.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\EntityFramework.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\KTReports.pdb"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\MahApps.Metro.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\MahApps.Metro.pdb"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\MahApps.Metro.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\System.Data.SQLite.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\System.Data.SQLite.dll.config"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\System.Data.SQLite.EF6.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\System.Data.SQLite.Linq.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\System.Data.SQLite.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\KTReports.exe.config"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\x64\SQLite.Interop.dll"; DestDir: "{app}\x64"; Flags: ignoreversion
-Source: "KTReports\bin\Release\x86\SQLite.Interop.dll"; DestDir: "{app}\x86"; Flags: ignoreversion
-Source: "KTReports\bin\Release\System.Windows.Controls.DataVisualization.Toolkit.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\System.Windows.Controls.DataVisualization.Toolkit.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\ControlzEx.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\ControlzEx.pdb"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\System.Windows.Interactivity.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\ClosedXML.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\ClosedXML.pdb"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\ClosedXML.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\DocumentFormat.OpenXml.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\DocumentFormat.OpenXml.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\ExcelNumberFormat.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\FastMember.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "KTReports\bin\Release\System.Windows.Interactivity.dll"; DestDir: "{app}"; Flags: ignoreversion
-
-
 Source: "KTReports\bin\Release\*"; DestDir: "{app}"; Flags: ignoreversion
-
 Source: "KTReports\logo_kitsap_transit.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "routes.json"; DestDir: "{app}"; Flags: ignoreversion
 Source: "ktdatabase.sqlite3"; DestDir: "{userappdata}"; Flags: ignoreversion;

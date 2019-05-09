@@ -33,8 +33,7 @@
                 <MenuItem Header="Create Report"
                           Click="OpenReportsPage"/>
                 <MenuItem Header="Visualize Data" Margin="0,0,0,0"
-                          Click="visualizeData"/>
-                <!--<MenuItem Header="Visualize Data" Margin="0,5,0,5"/>-->
+                          Click="VisualizeData"/>
                 <MenuItem Header="Modify Routes">
                     <MenuItem Header="Import Routes File"
                           Margin="0,5,0,5"
@@ -42,15 +41,6 @@
                     <MenuItem Header="Update Routes (Manual)"
                           Margin="0,5,0,5"
                           Click="OpenUpdateRoutes"/>
-                    <!--<MenuItem Header="Update Route Info" 
-                          Margin="0,5,0,5"
-                          Click="editPage"/>
-                    <MenuItem Header="Delete Routes" Margin="0,5,0,5"
-                          Click="deleteRoute"/>
-                    <MenuItem Header="Update Stops" Margin="0,5,0,5"
-                          Click="updateStop"/>
-                    <MenuItem Header="Add Route Stops" Margin="0,5,0,5"
-                          Click="addStop"/>-->
                 </MenuItem>
                 <MenuItem Header="Help"/>
             </Menu>

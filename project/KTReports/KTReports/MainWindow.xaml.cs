@@ -32,6 +32,7 @@ namespace KTReports
         private int numFilesImporting = 0;
         public static ProgressBar progressBar = null;
         public static TextBlock statusTextBlock = null;
+        public static Frame mainFrame = null;
         public MainWindow()
         {
             InitializeComponent();
@@ -39,6 +40,7 @@ namespace KTReports
             Main.Content = DeleteImports.GetDeleteImports();
             progressBar = KTProgressBar;
             statusTextBlock = StatusBarText;
+            mainFrame = Main;
         }
 
         private void CloseClicked(object sender, RoutedEventArgs e)
@@ -72,19 +74,10 @@ namespace KTReports
         {
             Main.Content = new Holidays();
         }
-
-        private void updateStop(object sender, RoutedEventArgs e)
+        
+        private void VisualizeData(object sender, RoutedEventArgs e)
         {
-            Main.Content = new updateStop();
-        }
-
-        private void addStop(object sender, RoutedEventArgs e)
-        {
-            Main.Content = new AddStop();
-        }
-        private void visualizeData(object sender, RoutedEventArgs e)
-        {
-            Main.Content = new Visualization();
+            Main.Content = Visualization.GetVisualizationInstance();
         }
 
         private void OnSizeChanged(object sender, RoutedEventArgs e)
@@ -96,19 +89,6 @@ namespace KTReports
             }
         }
 
-        private void ImportKnownRoutes()
-        {
-            DatabaseManager databaseManager = DatabaseManager.GetDBManager();
-            databaseManager.viewFCD();
-            databaseManager.getFCDRoutes();
-        }
-
-        private void ImportKnownRoutesNFC()
-        {
-            DatabaseManager databaseManager = DatabaseManager.GetDBManager();
-            databaseManager.viewNFC();
-            databaseManager.getNFCRoutes();
-        }
 
         [STAThread]
 
@@ -143,8 +123,16 @@ namespace KTReports
             {
                 if (ParseFileData(fileName))
                 {
-                    DeleteImports deleteImports = DeleteImports.GetDeleteImports();
-                    deleteImports.SetupPage();
+                    Dispatcher.Invoke(() =>
+                    {
+                        DeleteImports deleteImports = DeleteImports.GetDeleteImports();
+                        deleteImports.SetupPage();
+                        if (Main.Content is Visualization)
+                        {
+                            Visualization viz = Visualization.GetVisualizationInstance();
+                            viz.RefreshVisualization();
+                        }
+                    });
                 }
             }
             catch (Exception e)
@@ -324,12 +312,10 @@ namespace KTReports
             if (isORCA)
             {
                 databaseManager.InsertBulkFCD(bulkData);
-                ImportKnownRoutes();
             }
             else
             {
                 databaseManager.InsertBulkNFC(bulkData);
-                ImportKnownRoutesNFC();
             }
             //cleanup workbook
             //close and release

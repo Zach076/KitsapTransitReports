@@ -1,4 +1,4 @@
-﻿using PublicHoliday;
+﻿using Nager.Date;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -6,17 +6,9 @@ using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Media;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using static KTReports.DatabaseManager;
 
 namespace KTReports
@@ -103,7 +95,7 @@ namespace KTReports
             //dataGrid.Columns[1].Visibility = Visibility.Collapsed;
             dataTable.Clear();
             int year = ((DateTime)yearPicker.Value).Year;
-            IDictionary<DateTime, string> holidays = new USAPublicHoliday().PublicHolidayNames(year);
+            var publicHolidays = DateSystem.GetPublicHoliday("US", year);
             var yearStartAndEnd = new List<DateTime>() {
                 new DateTime(year, 1, 1),
                 new DateTime(year, 12, 31)
@@ -116,10 +108,10 @@ namespace KTReports
                 Console.WriteLine(DateTime.Parse(holiday["date"]).ToShortDateString());
             }
 
-            foreach (var holiday in holidays.Keys)
+            foreach (var holiday in publicHolidays)
             {
                 var dataRow = dataTable.NewRow();
-                var date = holiday.ToShortDateString();
+                var date = holiday.Date.ToShortDateString();
                 dataRow[2] = date;
                 if (dbDates.ContainsKey(date))
                 {
@@ -131,13 +123,13 @@ namespace KTReports
                 }
                 else
                 {
-                    dataRow[1] = holidays[holiday];
+                    dataRow[1] = holiday.Name;
                     dataRow[3] = 0;
                     dataRow[4] = -1;
                 }
                 dataTable.Rows.Add(dataRow);
                 dataRow.AcceptChanges();
-                Console.WriteLine(holiday + " " + holidays[holiday]);
+                Console.WriteLine(holiday + " " + holiday.Name);
                 
             }
             foreach (var holiday in dbDates.Values)
