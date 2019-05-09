@@ -993,122 +993,29 @@ namespace KTReports
         }
 
 
-        public void modifyRoute(string routeName, string option, string newTry)
+        public List<NameValueCollection> GetRoutesInRange(List<DateTime> range)
         {
-            option = option.Replace(" of", string.Empty)
-                        .Replace(" per", string.Empty)
-                        .Replace("number", "num")
-                        .Replace("weekday", "week")
-                        .Replace("saturday", "sat")
-                        .Replace("holiday", "hol")
-                        .Replace(' ', '_');
-            try
+            string query = @"SELECT * 
+                                FROM Routes 
+                                WHERE start_date <= @start_date AND NOT start_date > @end_date 
+                                ORDER BY assigned_route_id";
+            var results = new List<NameValueCollection>();
+            using (var command = new SQLiteCommand(query, sqliteConnection))
             {
-
-
-                string updateSQL = "UPDATE Routes SET " + option + " = " + "'" + newTry + "'" + " WHERE assigned_route_id = " + "'" + routeName + "'";
-                using (SQLiteCommand command = new SQLiteCommand(updateSQL, sqliteConnection))
+                command.Parameters.Add(new SQLiteParameter("@start_date", range[0]));
+                command.Parameters.Add(new SQLiteParameter("@end_date", range[1]));
+                using (SQLiteDataReader reader = command.ExecuteReader())
                 {
-                    command.ExecuteNonQuery();
-                }
-            }
-            catch (SQLiteException sqle)
-            {
-                Console.WriteLine(sqle.StackTrace);
-            }
-        }
-
-        public void viewRoutes()
-        {
-            Console.WriteLine();
-            Console.WriteLine("ALL Routes and associated data");
-            var results = dbManagerInstance.Query(new string[] { "db_route_id", "path_id", "start_date", "route_name", "district", "distance_week", "distance_sat", "num_trips_week", "num_trips_sat",
-                "num_trips_hol", "weekday_hours", "saturday_hours", "holiday_hours", "assigned_route_id" }, new string[] { "Routes" },
-                "1 = 1");
-            var resultStrs = new List<string>();
-            foreach (var row in results)
-            {
-                string rowStr = "";
-                foreach (string colName in row.AllKeys)
-                {
-                    if (rowStr.Length != 0)
+                    while (reader.Read())
                     {
-                        rowStr += ", ";
+                        NameValueCollection row = reader.GetValues();
+                        results.Add(row);
                     }
-                    rowStr += colName.ToString() + ": " + row[colName].ToString();
                 }
-                resultStrs.Add(rowStr);
-                Console.WriteLine(rowStr);
             }
-            Console.WriteLine();
+            return results;
         }
-
-
-        public List<int> getRoutes()
-        {
-            var results = dbManagerInstance.Query(new string[] {"assigned_route_id"}, new string[] { "Routes" },
-                           "1 = 1");
-            var routeIds = new List<int>();
-            foreach (var row in results)
-            {
-                string routeId = row["assigned_route_id"];
-                bool isParsed = Int32.TryParse(routeId, out int id);
-                if (isParsed)
-                {
-                    routeIds.Add(id);
-                }
-
-            }
-            return routeIds;
-        }
-
-        public List<String> getRange()
-        {
-            var results = dbManagerInstance.Query(new string[] { " DISTINCT start_date" }, new string[] { "Routes" },
-                           "1 = 1");
-            var resultStrs = new List<string>();
-            foreach (var row in results)
-            {
-                string rowStr = "";
-                foreach (string colName in row.AllKeys)
-                {
-                    if (rowStr.Length != 0)
-                    {
-
-                    }
-                    rowStr += row[colName].ToString();
-                }
-                resultStrs.Add(rowStr);
-            }
-            List<String> distinct = resultStrs.Distinct().ToList();
-            return resultStrs;
-        }
-
-        public int getBoardings(int route)
-        {
-            var results = dbManagerInstance.Query(new string[] { "boardings" }, new string[] { "FareCardData" },
-                           "assigned_route_id = " + "'" + route +"'");
-            var resultStrs = new List<string>();
-            foreach (var row in results)
-            {
-                string rowStr = "";
-                foreach (string colName in row.AllKeys)
-                {
-                    if (rowStr.Length != 0)
-                    {
-
-                    }
-                    rowStr += row[colName].ToString();
-                }
-                resultStrs.Add(rowStr);
-            }
-            if (resultStrs.Count() == 0)
-            {
-                return 0;
-            }
-            int x = Int32.Parse(resultStrs.First());
-            return x;
-        }
+        
 
         public void AddRoute(String routeID, String start, String name, String district, String distance_week, String distance_sat, String tripsWeek,
                 String tripsSat, String tripsHol, String weekdayHours, String satHours, String holHours)
@@ -1132,27 +1039,6 @@ namespace KTReports
             InsertPath(newRoute);
         }
 
-        public void addRouteinfo(String routeID, String start, String name, String district, String distance_week, String distance_sat, String tripsWeek,
-                String tripsSat, String tripsHol, String weekdayHours, String satHours, String holHours)
-        {
-
-            var newRoute = new Dictionary<string, string>
-                {
-                    { "route_id", routeID },
-                    { "start_date", start },
-                    { "route_name", name },
-                    { "district", district },
-                    { "distance_week", distance_week },
-                    { "distance_sat", distance_sat },
-                    { "num_trips_week", tripsWeek },
-                    { "num_trips_sat", tripsSat },
-                    { "num_trips_hol", tripsHol },
-                    { "weekday_hours", weekdayHours },
-                    { "saturday_hours", satHours },
-                    { "holiday_hours", holHours }
-                };
-            InsertPath(newRoute);
-        }
 
         public void DeleteRoute(Dictionary<string, string> keyValuePairs)
         {
@@ -1166,247 +1052,7 @@ namespace KTReports
           
         }
 
-        public void deleteAllRouteinfo()
-        {
-            try
-            {
-                
-                string updateSQL = "DELETE FROM Routes WHERE assigned_route_id >= 0";
-                using (SQLiteCommand command = new SQLiteCommand(updateSQL, sqliteConnection))
-                {
-                    command.ExecuteNonQuery();
-                }
-            }
-            catch (SQLiteException sqle)
-            {
-                Console.WriteLine(sqle.StackTrace);
-            }
 
-            try
-            {
-
-                string updateSQL = "DELETE FROM Paths WHERE path_id >= 0";
-                using (SQLiteCommand command = new SQLiteCommand(updateSQL, sqliteConnection))
-                {
-                    command.ExecuteNonQuery();
-                }
-            }
-            catch (SQLiteException sqle)
-            {
-                Console.WriteLine(sqle.StackTrace);
-            }
-
-            try
-            {
-
-                string updateSQL = "DELETE FROM FareCardData WHERE path_id >= 0";
-                using (SQLiteCommand command = new SQLiteCommand(updateSQL, sqliteConnection))
-                {
-                    command.ExecuteNonQuery();
-                }
-            }
-            catch (SQLiteException sqle)
-            {
-                Console.WriteLine(sqle.StackTrace);
-            }
-        }
-
-        public void addStop(String stopName, String locationName, String locationId, String stopId, String pathId, String startDate, String minusDoor1, String minusDoor2,
-                String door1, String door2)
-        {
-            var stop1 = new Dictionary<string, string>
-                {
-                    { "sd_id", stopId },
-                    { "location_id", locationId },
-                    { "assigned_stop_id", stopId },
-                    { "minus_door_1_person", minusDoor1 },
-                    { "minus_door_2_person", minusDoor2 },
-                    { "door_1_person", door1 },
-                    { "door_2_person", door2 },
-                    { "file_id", 2.ToString() }
-                };
-            InsertRSD(stop1);
-
-            var stops1 = new Dictionary<string, string>
-                {
-                    { "location_id", locationId },
-                    { "location_name", locationName }
-                };
-            //InsertStopLocation(stops1);
-
-            var stop2 = new Dictionary<string, string>
-                {
-                    { "stop_id", stopId },
-                    { "location_id", locationId },
-                    { "path_id", pathId },
-                    { "start_date", startDate },
-                    { "stop_name", stopName },
-                    { "assigned_stop_id", stopId }
-                };
-            //InsertStop(stop2);
-
-        }
-
-        public void viewRouteStops()
-        {
-            Console.WriteLine();
-            Console.WriteLine("ALL Stops and associated data");
-            var results = dbManagerInstance.Query(new string[] { "sd_id", "location_id", "assigned_stop_id", "minus_door_1_person", "minus_door_2_person", "door_1_person", "door_2_person", "file_id"
-                 }, new string[] { "routeStopData" },
-                "sd_id >= 0");
-            var resultStrs = new List<string>();
-            foreach (var row in results)
-            {
-                string rowStr = "";
-                foreach (string colName in row.AllKeys)
-                {
-                    if (rowStr.Length != 0)
-                    {
-                        rowStr += ", ";
-                    }
-                    rowStr += colName.ToString() + ": " + row[colName].ToString();
-                }
-                resultStrs.Add(rowStr);
-                Console.WriteLine(rowStr);
-            }
-            Console.WriteLine();
-        }
-
-        public void modifyStop(string routeStop, string option, string newTry)
-        {
-
-            option = option.Replace("(-)", string.Empty)
-                        .Replace(' ', '_');
-
-            try
-            {
-
-
-                string updateSQL = "UPDATE RouteStopData SET " + option + " = " + "'" + newTry + "'" + " WHERE location_id = " + "'" + routeStop + "'";
-                Console.WriteLine(updateSQL);
-                using (SQLiteCommand command = new SQLiteCommand(updateSQL, sqliteConnection))
-                {
-                    command.ExecuteNonQuery();
-                }
-            }
-            catch (SQLiteException sqle)
-            {
-                Console.WriteLine(sqle.StackTrace);
-            }
-        }
-
-        public List<String> getStops()
-        {
-            var results = dbManagerInstance.Query(new string[] { "location_id" }, new string[] { "routeStopData" },
-                           "location_id > 0");
-            var resultStrs = new List<string>();
-            foreach (var row in results)
-            {
-                string rowStr = "";
-                foreach (string colName in row.AllKeys)
-                {
-                    if (rowStr.Length != 0)
-                    {
-                        rowStr += "";
-                    }
-                    rowStr += row[colName].ToString();
-                }
-                resultStrs.Add(rowStr);
-            }
-            List<String> distinct = resultStrs.Distinct().ToList();
-            return distinct;
-        }
-
-        public void viewFCD()
-        {
-            Console.WriteLine();
-            Console.WriteLine("FCD Stuff");
-            var results = dbManagerInstance.Query(new string[] { "fc_id", "path_id", "assigned_route_id", "route_direction", "boardings", "file_id"
-                 }, new string[] { "FareCardData" },
-                "fc_id > 0");
-            var resultStrs = new List<string>();
-            foreach (var row in results)
-            {
-                string rowStr = "";
-                foreach (string colName in row.AllKeys)
-                {
-                    if (rowStr.Length != 0)
-                    {
-                        rowStr += ", ";
-                    }
-                    rowStr += colName.ToString() + ": " + row[colName].ToString();
-                }
-                resultStrs.Add(rowStr);
-                Console.WriteLine(rowStr);
-            }
-            Console.WriteLine();
-        }
-
-        public void getFCDRoutes()
-        {
-            var results = dbManagerInstance.Query(new string[] { "assigned_route_id" }, new string[] { "FareCardData" },
-                           "fc_id > 0");
-            var routeIds = new HashSet<int>();
-            foreach (var row in results)
-            {
-                string routeId = row["assigned_route_id"];
-                bool isParsed = Int32.TryParse(routeId, out int id);
-                if (isParsed)
-                {
-                    routeIds.Add(id);
-                }
-            }
-            List<int> distinct = routeIds.ToList();
-            String empty = "";
-            foreach (int all in distinct)
-            {
-                var stored = getRoutes();
-                if (!stored.Contains(all))
-                {
-                    var newRoute = new Dictionary<string, string>
-                    {
-                    { "path_id", all.ToString() },
-                    { "route_id", empty },
-                    { "start_date", empty },
-                    { "route_name", "(NO NAME)" },
-                    { "district", empty },
-                    { "distance", empty },
-                    { "num_trips_week", empty },
-                    { "num_trips_sat", empty },
-                    { "num_trips_hol", empty },
-                    { "weekday_hours", empty },
-                    { "saturday_hours", empty },
-                    { "holiday_hours", empty }
-                };
-                    InsertRoute(newRoute);
-                }
-            }
-        }
-
-        public void viewNFC()
-        {
-            Console.WriteLine();
-            Console.WriteLine("NFC Stuff");
-            var results = dbManagerInstance.Query(new string[] { "nfc_id", "path_id", "assigned_route_id", "route_direction", "ferry_passenger_headcount", "file_id"
-                 }, new string[] { "NonFareCardData" },
-                "nfc_id > 0");
-            var resultStrs = new List<string>();
-            foreach (var row in results)
-            {
-                string rowStr = "";
-                foreach (string colName in row.AllKeys)
-                {
-                    if (rowStr.Length != 0)
-                    {
-                        rowStr += ", ";
-                    }
-                    rowStr += colName.ToString() + ": " + row[colName].ToString();
-                }
-                resultStrs.Add(rowStr);
-                Console.WriteLine(rowStr);
-            }
-            Console.WriteLine();
-        }
         public List<NameValueCollection> GetRoutesRange()
         {
             var results = new List<NameValueCollection>();
@@ -1425,49 +1071,5 @@ namespace KTReports
             }
             return results;
         }
-
-
-        public void getNFCRoutes()
-        {
-            var results = dbManagerInstance.Query(new string[] { "assigned_route_id" }, new string[] { "NonFareCardData" },
-                           "nfc_id >= 0");
-            var routeIds = new HashSet<int>();
-            foreach (var row in results)
-            {
-                string routeId = row["assigned_route_id"];
-                bool isParsed = Int32.TryParse(routeId, out int id);
-                if (isParsed)
-                {
-                    routeIds.Add(id);
-                }
-            }
-            List<int> distinct = routeIds.ToList();
-            String empty = "";
-            foreach (int all in distinct)
-            {
-                var stored = getRoutes();
-                if (!stored.Contains(all))
-                {
-                    var newRoute = new Dictionary<string, string>
-                    {
-                    { "path_id", all.ToString() },
-                    { "route_id", empty },
-                    { "start_date", empty },
-                    { "route_name", "(NO NAME)" },
-                    { "district", empty },
-                    { "distance", empty },
-                    { "num_trips_week", empty },
-                    { "num_trips_sat", empty },
-                    { "num_trips_hol", empty },
-                    { "weekday_hours", empty },
-                    { "saturday_hours", empty },
-                    { "holiday_hours", empty }
-                };
-                    InsertRoute(newRoute);
-                }
-            }
-        }
     }
 }
-
-

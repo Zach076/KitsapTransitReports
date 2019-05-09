@@ -80,8 +80,8 @@
     <Reference Include="MahApps.Metro, Version=1.6.5.1, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.1.6.5\lib\net46\MahApps.Metro.dll</HintPath>
     </Reference>
-    <Reference Include="PublicHoliday, Version=2.0.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PublicHoliday.2.0.3\lib\net46\PublicHoliday.dll</HintPath>
+    <Reference Include="Nager.Date, Version=1.24.9.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nager.Date.1.24.9\lib\net461\Nager.Date.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -150,10 +150,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="AddStop.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Holidays.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -166,17 +162,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UpdateStop.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="AddStop.xaml.cs">
-      <DependentUpon>AddStop.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Holidays.xaml.cs">
       <DependentUpon>Holidays.xaml</DependentUpon>
     </Compile>
@@ -185,9 +174,6 @@
     </Compile>
     <Compile Include="UpdateRoutes.xaml.cs">
       <DependentUpon>UpdateRoutes.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UpdateStop.xaml.cs">
-      <DependentUpon>UpdateStop.xaml</DependentUpon>
     </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
@@ -269,6 +255,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="kitsap_transit_logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="question_mark_icon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.109.2\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.109.2\build\net46\System.Data.SQLite.Core.targets')" />

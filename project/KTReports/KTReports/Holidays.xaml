@@ -53,6 +53,10 @@
                 Style="{StaticResource KTDataGridStyle}">
             </DataGrid>
             <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Right" Orientation="Horizontal">
+                <Image Source="question_mark_icon.png" 
+                       MaxHeight="20" 
+                       Margin="0,0,10,10" 
+                       ToolTip="Service Types:&#10;0: Regular service&#10;1: Holiday service&#10;2: No service&#10;Holidays which occur on the weekend are accounted for"/>
                 <Button Click="CancelChanges" Width="110" Name="CancelChangesButton" Margin="0,0,10,10">Cancel</Button>
                 <Button Click="SaveChanges" Width="110" Name="SaveChangesButton" Margin="0,0,10,10">Save Changes</Button>
             </StackPanel>
