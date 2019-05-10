@@ -41,11 +41,11 @@
             <GroupBox Name="DistrictBox"  DockPanel.Dock="Top">
                 <StackPanel Name="DistrictCheckBoxes">
                     <TextBlock Margin="0, 5, 0, 5">Select the districts to include:</TextBlock>
-                    <CheckBox Name="SelectAllDistricts" IsChecked="True" Click="OnDistictClick">Select All</CheckBox>
-                    <CheckBox IsChecked="True" Click="OnDistictClick">Bremerton</CheckBox>
-                    <CheckBox IsChecked="True" Click="OnDistictClick">Central Kitsap</CheckBox>
-                    <CheckBox IsChecked="True" Click="OnDistictClick">South Kitsap</CheckBox>
-                    <CheckBox IsChecked="True" Click="OnDistictClick">North Kitsap</CheckBox>
+                    <CheckBox Name="SelectAllDistricts" IsChecked="True" Click="OnDistrictClick">Select All</CheckBox>
+                    <CheckBox IsChecked="True" Click="OnDistrictClick">Bremerton</CheckBox>
+                    <CheckBox IsChecked="True" Click="OnDistrictClick">Central Kitsap</CheckBox>
+                    <CheckBox IsChecked="True" Click="OnDistrictClick">South Kitsap</CheckBox>
+                    <CheckBox IsChecked="True" Click="OnDistrictClick">North Kitsap</CheckBox>
                 </StackPanel>
             </GroupBox>
             <TextBlock  DockPanel.Dock="Top" Margin="0,5,0,2" HorizontalAlignment="Center">Select a start date:</TextBlock>

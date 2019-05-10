@@ -722,9 +722,25 @@ namespace KTReports
         // Given a district and a date range, return a list of all route's associated with that district
         public List<NameValueCollection> GetDistrictRoutes(string district, List<DateTime> reportRange)
         {
-            string query = @"SELECT * 
-                                FROM Routes 
-                                WHERE district == @district AND start_date <= @report_start AND NOT start_date > @report_end";
+            string query = string.Empty;
+            if (district.Equals("Other"))
+            {
+                query = @"SELECT * 
+                            FROM Routes 
+                            WHERE start_date <= @report_start AND NOT start_date > @report_end
+                                AND district IS NULL 
+                            GROUP BY assigned_route_id
+                            ORDER BY assigned_route_id";
+            } else
+            {
+                query = @"SELECT * 
+                            FROM Routes 
+                            WHERE district == @district 
+                                AND start_date <= @report_start 
+                                AND NOT start_date > @report_end 
+                            GROUP BY assigned_route_id
+                            ORDER BY assigned_route_id";
+            }
             var results = new List<NameValueCollection>();
             using (var command = new SQLiteCommand(query, sqliteConnection))
             {
@@ -998,6 +1014,7 @@ namespace KTReports
             string query = @"SELECT * 
                                 FROM Routes 
                                 WHERE start_date <= @start_date AND NOT start_date > @end_date 
+                                GROUP BY assigned_route_id
                                 ORDER BY assigned_route_id";
             var results = new List<NameValueCollection>();
             using (var command = new SQLiteCommand(query, sqliteConnection))
