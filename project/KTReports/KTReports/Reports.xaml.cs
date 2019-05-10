@@ -65,7 +65,7 @@ namespace KTReports
             }
         }
 
-        public void OnDistictClick(object sender, RoutedEventArgs e)
+        public void OnDistrictClick(object sender, RoutedEventArgs e)
         {
             CheckBox senderCheckBox = (CheckBox) sender;
             if (senderCheckBox == SelectAllDistricts && senderCheckBox.IsChecked == true)
@@ -262,7 +262,6 @@ namespace KTReports
             var satRoutes = new Dictionary<int, Dictionary<string, int>>();
             foreach (var district in districts)
             {
-                Console.WriteLine("START");
                 // Need to distinguish between weekday and non-weekday routes
                 List<NameValueCollection> routes = databaseManager.GetDistrictRoutes(district, reportRange);
                 districtToRoutes.Add(district, routes);
@@ -295,7 +294,6 @@ namespace KTReports
                     xlWeeksheet.Cell(rowWeek, i + 1).Style.Font.Bold = true;
                     xlWeeksheet.Cell(rowWeek, i + 1).Style.Alignment.WrapText = false;
                 }
-                Console.WriteLine("END");
                 rowSat++;
                 rowWeek++;
                 int rowSatStart = rowSat;

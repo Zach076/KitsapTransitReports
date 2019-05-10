@@ -29,17 +29,17 @@ namespace KTReports
     {
         private static Visualization visualizationInstance = null;
         private DatabaseManager databaseManager = DatabaseManager.GetDBManager();
-        private int numVisualizations = 0;
         private Brush brush = null;
 
         private Visualization()
         {
             InitializeComponent();
             SeriesCollection = new LiveCharts.SeriesCollection();
+            PieChartCollection = new LiveCharts.SeriesCollection();
             DataContext = this;
-            monthYearPicker.Value = DateTime.Now;
             var converter = new System.Windows.Media.BrushConverter();
             brush = (Brush)converter.ConvertFromString("#f27024");
+            monthYearPicker.Value = DateTime.Now;
         }
 
         public static Visualization GetVisualizationInstance()
@@ -53,16 +53,32 @@ namespace KTReports
 
         public void RefreshVisualization()
         {
-            OnDateChange(null, null);
-        } 
+            InitializeChart(null, null);
+        }
 
-        private void OnDateChange(object sender, RoutedEventArgs e)
+        private string GetVisType()
         {
-            Interlocked.Increment(ref numVisualizations);
-            MainWindow.progressBar.IsIndeterminate = true;
-            MainWindow.statusTextBlock.Text = "Generating Visualization...";
-            if (SeriesCollection != null) {
+            return (VisualizationType.SelectedItem as ComboBoxItem).Content.ToString().ToLower();
+        }
+
+
+
+        private void InitializeChart(object sender, RoutedEventArgs e)
+        {
+            if (SeriesCollection != null)
+            {
+                LVBarGraph.Visibility = Visibility.Collapsed;
                 SeriesCollection.Clear();
+            }
+            if (PieChartCollection != null)
+            {
+                LVPieChart.Visibility = Visibility.Collapsed;
+                PieChartCollection.Clear();
+            }
+
+            if (monthYearPicker.Value == null)
+            {
+                return;
             }
             var date = (DateTime)monthYearPicker.Value;
             if (date == null)
@@ -72,15 +88,112 @@ namespace KTReports
             var startDate = new DateTime(date.Year, date.Month, 1);
             var endDate = new DateTime(date.Year, date.Month, DateTime.DaysInMonth(date.Year, date.Month));
             var range = new List<DateTime>() { startDate, endDate };
-            List<NameValueCollection> sortedRoutes = databaseManager.GetRoutesInRange(range);
+            // Get a list of districts to include
+            List<string> districts = GetSelectedDistricts();
+            if (districts.Count == 0)
+            {
+                MessageBox.Show("Must select at least one district.", "Report Generation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
+            var sortedRoutes = new List<int>();
+            foreach (var district in districts)
+            {
+                List<NameValueCollection> routes = databaseManager.GetDistrictRoutes(district, range);
+                foreach (var route in routes)
+                {
+                    sortedRoutes.Add(int.Parse(route["assigned_route_id"]));
+                }
+            }
+            sortedRoutes = sortedRoutes.Distinct().ToList();
+            sortedRoutes.Sort();
             var boardings = new int[sortedRoutes.Count];
 
             for (int i = 0; i < sortedRoutes.Count; i++)
             {
-                int routeId = int.Parse(sortedRoutes[i]["assigned_route_id"]);
+                int routeId = sortedRoutes[i];
                 boardings[i] = databaseManager.GetRouteRidership(routeId, range, true)["total"] + databaseManager.GetRouteRidership(routeId, range, false)["total"];
             }
+
+            string visType = GetVisType();
+            switch (visType)
+            {
+                case "bar graph":
+                    SetBarGraph(range, boardings, sortedRoutes);
+                    break;
+                case "pie chart":
+                    SetPieChart(range, boardings, sortedRoutes);
+                    break;
+                default:
+                    SetBarGraph(range, boardings, sortedRoutes);
+                    break;
+            }
+        }
+
+        public void OnDistrictClick(object sender, RoutedEventArgs e)
+        {
+            CheckBox senderCheckBox = (CheckBox)sender;
+            if (senderCheckBox == SelectAllDistricts && senderCheckBox.IsChecked == true)
+            {
+                // Enable all checkboxes for data points
+                foreach (var uiElem in DistrictCheckBoxes.Children)
+                {
+                    if (uiElem.GetType() != typeof(CheckBox)) continue;
+                    CheckBox c = (CheckBox)uiElem;
+                    c.IsChecked = true;
+                }
+            }
+            else if (senderCheckBox.IsChecked == false)
+            {
+                // A checkbox was unchecked
+                SelectAllDistricts.IsChecked = false;
+            }
+            InitializeChart(null, null);
+        }
+
+        private List<string> GetSelectedDistricts()
+        {
+            // Iterate through each of the District checkboxes and return the selected districts
+            var districts = new List<string>();
+            foreach (var uiElem in DistrictCheckBoxes.Children)
+            {
+                if (uiElem.GetType() != typeof(CheckBox)) continue;
+                CheckBox c = (CheckBox)uiElem;
+                if (c != SelectAllDistricts && c.IsChecked == true)
+                {
+                    districts.Add(c.Content.ToString());
+                }
+            }
+            return districts;
+        }
+
+        public Func<LiveCharts.ChartPoint, string> PointLabel { get; set; }
+
+        private void SetPieChart(List<DateTime> range, int[] boardings, List<int> sortedRoutes)
+        {
+            LVPieChart.Visibility = Visibility.Visible;
+            CultureInfo cultureInfo = new CultureInfo("en-US");
+            var month = range[0].ToString("MMM", cultureInfo);
+            PointLabel = chartPoint =>
+                string.Format("{0} ({1:P})", Title, chartPoint.Participation);
+            for (int i = 0; i < boardings.Length; i++)
+            {
+                var boardingCount = boardings[i];
+                string label = sortedRoutes[i].ToString();
+                PieChartCollection.Add(new PieSeries
+                {
+                    Values = new ChartValues<int> { boardingCount },
+                    Title = label,
+                    LabelPoint = chartPoint =>
+                string.Format("{0} ({1:P})", label, chartPoint.Participation),
+                    DataLabels = true
+                });
+            }
+        }
+
+        private void SetBarGraph(List<DateTime> range, int[] boardings, List<int> sortedRoutes)
+        {
+            LVBarGraph.Visibility = Visibility.Visible;
             CultureInfo cultureInfo = new CultureInfo("en-US");
             var month = range[0].ToString("MMM", cultureInfo);
             SeriesCollection.Add(new StackedColumnSeries
@@ -95,19 +208,13 @@ namespace KTReports
                 SeriesCollection[0].Values.Add(boardingCount);
             }
 
-            string[] backString = sortedRoutes.Select(x => x["assigned_route_id"].ToString()).ToArray();
+            string[] backString = sortedRoutes.Select(x => x.ToString()).ToArray();
             Labels = backString;
             Formatter = value => value.ToString("N");
-
-            Interlocked.Decrement(ref numVisualizations);
-            if (numVisualizations == 0)
-            {
-                MainWindow.progressBar.IsIndeterminate = false;
-                MainWindow.statusTextBlock.Text = string.Empty;
-            }
         }
 
         public LiveCharts.SeriesCollection SeriesCollection { get; set; }
+        public LiveCharts.SeriesCollection PieChartCollection { get; set; }
         public string[] Labels { get; set; }
         public Func<double, string> Formatter { get; set; }
 

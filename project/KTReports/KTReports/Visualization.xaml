@@ -23,7 +23,23 @@
                        FontSize="20"
                        Background="{StaticResource BlueGradient}">Options</TextBlock>
             <TextBlock DockPanel.Dock="Top" Margin="0,5,0,2" HorizontalAlignment="Center">Select a month and year:</TextBlock>
-            <xctk:DateTimePicker DockPanel.Dock="Top" VerticalAlignment="Top" Name="monthYearPicker" ValueChanged="OnDateChange" Margin="2,0,0,0" Format="Custom" FormatString="MM-yyyy"></xctk:DateTimePicker>
+            <xctk:DateTimePicker DockPanel.Dock="Top" VerticalAlignment="Top" Name="monthYearPicker" ValueChanged="InitializeChart" Margin="2,0,0,0" Format="Custom" FormatString="MM-yyyy"></xctk:DateTimePicker>
+            <GroupBox Name="DistrictBox"  DockPanel.Dock="Top" Margin="1, 10, 0, 0">
+                <StackPanel Name="DistrictCheckBoxes" DockPanel.Dock="Top">
+                    <TextBlock Margin="0, 5, 0, 5">Select the districts to include:</TextBlock>
+                    <CheckBox Name="SelectAllDistricts" IsChecked="True" Click="OnDistrictClick">Select All</CheckBox>
+                    <CheckBox IsChecked="True" Click="OnDistrictClick">Bremerton</CheckBox>
+                    <CheckBox IsChecked="True" Click="OnDistrictClick">Central Kitsap</CheckBox>
+                    <CheckBox IsChecked="True" Click="OnDistrictClick">South Kitsap</CheckBox>
+                    <CheckBox IsChecked="True" Click="OnDistrictClick">North Kitsap</CheckBox>
+                    <CheckBox IsChecked="True" Click="OnDistrictClick">Other</CheckBox>
+                </StackPanel>
+            </GroupBox>
+            <TextBlock  DockPanel.Dock="Top" Margin="0,5,0,2" HorizontalAlignment="Center">Visualization type:</TextBlock>
+            <ComboBox Name="VisualizationType" SelectionChanged="InitializeChart" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" SelectedIndex="0" Margin="0,2,0,2" Padding="20,5,20,5">
+                <ComboBoxItem Name="BarGraph">Bar Graph</ComboBoxItem>
+                <ComboBoxItem Name="PieChart">Pie Chart</ComboBoxItem>
+            </ComboBox>
         </DockPanel>
 
         <DockPanel Grid.Column="1">
@@ -37,14 +53,19 @@
                        Background="{StaticResource BlueGradient}">Route Ridership
             </TextBlock>
             <Rectangle VerticalAlignment="Stretch" Width="1" Stroke="Gray" Margin="3"/>
-            <lvc:CartesianChart Series="{Binding SeriesCollection}" LegendLocation="Left">
-                <lvc:CartesianChart.AxisX>
-                    <lvc:Axis Title="Route" Labels="{Binding Labels}"></lvc:Axis>
-                </lvc:CartesianChart.AxisX>
-                <lvc:CartesianChart.AxisY>
-                    <lvc:Axis Title="Boardings" LabelFormatter="{Binding Formatter}"></lvc:Axis>
-                </lvc:CartesianChart.AxisY>
-            </lvc:CartesianChart>
+            <Grid>
+                <lvc:PieChart LegendLocation="None" Series="{Binding PieChartCollection}" Name="LVPieChart" Hoverable="True">
+                </lvc:PieChart>
+
+                <lvc:CartesianChart Series="{Binding SeriesCollection}" LegendLocation="Left" Name="LVBarGraph">
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Title="Route" Labels="{Binding Labels}"></lvc:Axis>
+                    </lvc:CartesianChart.AxisX>
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="Boardings" LabelFormatter="{Binding Formatter}"></lvc:Axis>
+                    </lvc:CartesianChart.AxisY>
+                </lvc:CartesianChart>
+            </Grid>
         </DockPanel>
     </Grid>
 </Page>
