@@ -90,11 +90,6 @@ namespace KTReports
             var range = new List<DateTime>() { startDate, endDate };
             // Get a list of districts to include
             List<string> districts = GetSelectedDistricts();
-            if (districts.Count == 0)
-            {
-                MessageBox.Show("Must select at least one district.", "Report Generation Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
 
             var sortedRoutes = new List<int>();
             foreach (var district in districts)
