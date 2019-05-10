@@ -30,13 +30,13 @@ namespace KTReports
         private static Visualization visualizationInstance = null;
         private DatabaseManager databaseManager = DatabaseManager.GetDBManager();
         private Brush brush = null;
+        string[] labelStrs = new string[1000];
 
         private Visualization()
         {
             InitializeComponent();
             SeriesCollection = new LiveCharts.SeriesCollection();
             PieChartCollection = new LiveCharts.SeriesCollection();
-            DataContext = this;
             var converter = new System.Windows.Media.BrushConverter();
             brush = (Brush)converter.ConvertFromString("#f27024");
             monthYearPicker.Value = DateTime.Now;
@@ -197,15 +197,23 @@ namespace KTReports
                 Values = new ChartValues<int>(), //Boardings
                 Fill = brush
             });
-            var labels = new List<string>();
+            //v//ar labels = new List<string>();
             foreach (var boardingCount in boardings)
             {
                 SeriesCollection[0].Values.Add(boardingCount);
             }
-
-            string[] backString = sortedRoutes.Select(x => x.ToString()).ToArray();
-            Labels = backString;
+            for (int i = 0; i < sortedRoutes.Count; i++)
+            {
+                labelStrs[i] = sortedRoutes[i].ToString();
+            }
+            //labelStrs = sortedRoutes.Select(x => x.ToString()).ToArray();
+            foreach (var str in labelStrs)
+            {
+                Console.WriteLine(str);
+            }
+            Labels = labelStrs; 
             Formatter = value => value.ToString("N");
+            DataContext = this;
         }
 
         public LiveCharts.SeriesCollection SeriesCollection { get; set; }
