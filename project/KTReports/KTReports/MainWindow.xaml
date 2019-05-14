@@ -14,12 +14,9 @@
         <DockPanel DockPanel.Dock="Top">
             <Menu>
                 <MenuItem Header="_File" >
-                    <MenuItem Header="Import Data File" 
+                    <MenuItem Header="Import Data Files" 
                               Margin="0,5,0,5"
                               Click="ImportFile"/>
-                    <MenuItem Header="View Imported Files"
-                              Margin="0,5,0,5"
-                              Click="OpenDeleteFiles"/>
                     <MenuItem Header="Add Data (Manual)"
                               Margin="0,5,0,5"
                               Click="OpenManualAddData"/>
@@ -42,6 +39,8 @@
                           Margin="0,5,0,5"
                           Click="OpenUpdateRoutes"/>
                 </MenuItem>
+                <MenuItem Header="View Imported Files"
+                              Click="OpenDeleteFiles"/>
                 <MenuItem Header="Help"/>
             </Menu>
         </DockPanel>

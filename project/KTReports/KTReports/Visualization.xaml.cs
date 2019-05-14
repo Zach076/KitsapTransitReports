@@ -197,7 +197,6 @@ namespace KTReports
                 Values = new ChartValues<int>(), //Boardings
                 Fill = brush
             });
-            //v//ar labels = new List<string>();
             foreach (var boardingCount in boardings)
             {
                 SeriesCollection[0].Values.Add(boardingCount);

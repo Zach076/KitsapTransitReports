@@ -34,6 +34,7 @@ namespace KTReports
         private NameValueCollection selectedReport = null;
         private Button lastButtonClicked = null;
         private int numReportsGenerating = 0;
+        Stopwatch stopWatch = new Stopwatch();
 
         public Reports()
         {
@@ -127,6 +128,7 @@ namespace KTReports
             {
                 return;
             }
+            stopWatch.Start();
 
             // Insert new report information into database
             DateTime dateTime = DateTime.Now;
@@ -158,6 +160,12 @@ namespace KTReports
             }
             finally
             {
+                stopWatch.Stop();
+                // Get the elapsed time as a TimeSpan value.
+                TimeSpan ts = stopWatch.Elapsed;
+                // Format and display the TimeSpan value.
+                string elapsedTime = String.Format("{0} seconds, {1} milliseconds", ts.Seconds, ts.Milliseconds);
+                Console.WriteLine("RunTime " + elapsedTime);
                 // Refresh the report history panel on the UI thread
                 Dispatcher.Invoke(() =>
                 {
@@ -181,8 +189,8 @@ namespace KTReports
 
             //creating excel file
             var workbook = new XLWorkbook();
-            var xlWeeksheet = workbook.Worksheets.Add("FR WEEK");
             var xlWEndsheet = workbook.Worksheets.Add("FR SAT");
+            var xlWeeksheet = workbook.Worksheets.Add("FR WEEK");
             int rowSat = 1;
             int rowWeek = 1;
 
@@ -527,6 +535,16 @@ namespace KTReports
                 stackPanel.Children.Add(description);
                 stackPanel.Children.Add(dateCreated);
                 PastReportsList.Items.Add(stackPanel);
+            }
+        }
+
+        private void OnStartDateChanged(object sender, RoutedEventArgs e)
+        {
+            if (EndDatePicker.SelectedDate == null)
+            {
+                var startDate = (DateTime) StartDatePicker.SelectedDate;
+
+                EndDatePicker.SelectedDate = new DateTime(startDate.Year, startDate.Month, DateTime.DaysInMonth(startDate.Year, startDate.Month));
             }
         }
 
